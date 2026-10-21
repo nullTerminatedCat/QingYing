@@ -873,5 +873,249 @@ Actual: %2</translation>
         <source>（未找到）</source>
         <translation>(not found)</translation>
     </message>
+    <message>
+        <source>%1 已被其他程序占用，请换一个组合</source>
+        <translation>%1 is in use by another app; try a different combination</translation>
+    </message>
+    <message>
+        <source>Interface language</source>
+        <translation>界面语言</translation>
+    </message>
+    <message>
+        <source>PNG 无损清晰；JPG 体积更小</source>
+        <translation>PNG is lossless; JPG is smaller</translation>
+    </message>
+    <message>
+        <source>{} 内为日期时间格式，如 {yyyyMMdd_HHmmss}；留空使用默认</source>
+        <translation>Text in {} is a date/time format, e.g. {yyyyMMdd_HHmmss}; leave empty for default</translation>
+    </message>
+    <message>
+        <source>上传截图到图床，并把链接复制到剪贴板</source>
+        <translation>Upload screenshots to an image host and copy the link</translation>
+    </message>
+    <message>
+        <source>上次检查：%1</source>
+        <translation>Last checked: %1</translation>
+    </message>
+    <message>
+        <source>主题</source>
+        <translation>Theme</translation>
+    </message>
+    <message>
+        <source>使用 Windows DPAPI 加密保存，仅当前用户可解密</source>
+        <translation>Encrypted with Windows DPAPI; only your account can decrypt it</translation>
+    </message>
+    <message>
+        <source>保存位置、文件名与截图完成后的动作</source>
+        <translation>Save location, file name and what happens after a capture</translation>
+    </message>
+    <message>
+        <source>保留数量</source>
+        <translation>Keep</translation>
+    </message>
+    <message>
+        <source>修改后立即生效，无需重启</source>
+        <translation>Changes apply immediately, no restart needed</translation>
+    </message>
+    <message>
+        <source>关于与更新</source>
+        <translation>About &amp; Updates</translation>
+    </message>
+    <message>
+        <source>减少渐变色带，文件稍大</source>
+        <translation>Reduces color banding; slightly larger files</translation>
+    </message>
+    <message>
+        <source>凭据</source>
+        <translation>Credentials</translation>
+    </message>
+    <message>
+        <source>反馈问题时可附上日志与崩溃转储</source>
+        <translation>Attach logs and crash dumps when reporting issues</translation>
+    </message>
+    <message>
+        <source>取色器按 C 复制颜色时使用</source>
+        <translation>Used when the color picker copies with C</translation>
+    </message>
+    <message>
+        <source>可选；以 DPAPI 加密保存</source>
+        <translation>Optional; stored encrypted with DPAPI</translation>
+    </message>
+    <message>
+        <source>启动</source>
+        <translation>Startup</translation>
+    </message>
+    <message>
+        <source>启动时检查，每天最多一次</source>
+        <translation>Check at startup, at most once a day</translation>
+    </message>
+    <message>
+        <source>启用上传</source>
+        <translation>Enable upload</translation>
+    </message>
+    <message>
+        <source>在画面中绘制鼠标指针</source>
+        <translation>Draw the mouse pointer into the video</translation>
+    </message>
+    <message>
+        <source>外观与语言</source>
+        <translation>Appearance &amp; Language</translation>
+    </message>
+    <message>
+        <source>尚未检查</source>
+        <translation>Never checked</translation>
+    </message>
+    <message>
+        <source>已生效：%1</source>
+        <translation>Active: %1</translation>
+    </message>
+    <message>
+        <source>帧率越高越流畅，文件也越大</source>
+        <translation>Higher is smoother but makes larger files</translation>
+    </message>
+    <message>
+        <source>开机自动启动</source>
+        <translation>Launch at sign-in</translation>
+    </message>
+    <message>
+        <source>录制 MP4 / GIF 时的画面设置</source>
+        <translation>Video settings for MP4 / GIF recording</translation>
+    </message>
+    <message>
+        <source>快捷键、启动与历史记录</source>
+        <translation>Hotkey, startup and history</translation>
+    </message>
+    <message>
+        <source>截图工具条与钉图菜单中出现“上传”</source>
+        <translation>Adds "Upload" to the capture toolbar and pin menu</translation>
+    </message>
+    <message>
+        <source>打开 GitHub</source>
+        <translation>Open GitHub</translation>
+    </message>
+    <message>
+        <source>打开日志文件夹</source>
+        <translation>Open log folder</translation>
+    </message>
+    <message>
+        <source>抖动</source>
+        <translation>Dithering</translation>
+    </message>
+    <message>
+        <source>接收 multipart/form-data POST 的地址</source>
+        <translation>Endpoint that accepts a multipart/form-data POST</translation>
+    </message>
+    <message>
+        <source>无法使用该文件夹，请选择一个可写入的完整路径</source>
+        <translation>Cannot use this folder; choose a full, writable path</translation>
+    </message>
+    <message>
+        <source>日志</source>
+        <translation>Logs</translation>
+    </message>
+    <message>
+        <source>更多</source>
+        <translation>More</translation>
+    </message>
+    <message>
+        <source>更新</source>
+        <translation>Updates</translation>
+    </message>
+    <message>
+        <source>最近的截图可在“历史记录”中重新复制、钉图或编辑</source>
+        <translation>Recent captures can be copied, pinned or edited again from History</translation>
+    </message>
+    <message>
+        <source>未设置</source>
+        <translation>Not set</translation>
+    </message>
+    <message>
+        <source>标注</source>
+        <translation>Annotate</translation>
+    </message>
+    <message>
+        <source>点击“保存”或按 Ctrl+S 时写入这里</source>
+        <translation>Used by Save and Ctrl+S</translation>
+    </message>
+    <message>
+        <source>点击后按下新的组合键，Esc 取消</source>
+        <translation>Click, then press a new combination; Esc cancels</translation>
+    </message>
+    <message>
+        <source>版本 %1 · 简洁好看的 Windows 截图工具</source>
+        <translation>Version %1 · A simple, beautiful screenshot tool for Windows</translation>
+    </message>
+    <message>
+        <source>版本信息、更新与诊断</source>
+        <translation>Version, updates and diagnostics</translation>
+    </message>
+    <message>
+        <source>画面</source>
+        <translation>Video</translation>
+    </message>
+    <message>
+        <source>界面语言</source>
+        <translation>Interface language</translation>
+    </message>
+    <message>
+        <source>登录 Windows 后在托盘中待命</source>
+        <translation>Wait in the tray after you sign in to Windows</translation>
+    </message>
+    <message>
+        <source>矩形、箭头、画笔等标注的初始颜色</source>
+        <translation>Initial color for rectangles, arrows, pen and more</translation>
+    </message>
+    <message>
+        <source>自动检查更新</source>
+        <translation>Check for updates automatically</translation>
+    </message>
+    <message>
+        <source>表单中图片文件的字段名</source>
+        <translation>Form field name for the image file</translation>
+    </message>
+    <message>
+        <source>请按下组合键…（Esc 取消）</source>
+        <translation>Press a combination… (Esc to cancel)</translation>
+    </message>
+    <message>
+        <source>请输入以 http:// 或 https:// 开头的完整地址</source>
+        <translation>Enter a full URL starting with http:// or https://</translation>
+    </message>
+    <message>
+        <source>跟随系统时随 Windows 深浅色自动切换</source>
+        <translation>Follows Windows light/dark mode when set to System</translation>
+    </message>
+    <message>
+        <source>进入截图编辑时预先选中的工具与颜色</source>
+        <translation>Tool and color selected when the editor opens</translation>
+    </message>
+    <message>
+        <source>选择“无”时先调整选区，再手动选工具</source>
+        <translation>With "None" you adjust the selection first, then pick a tool</translation>
+    </message>
+    <message>
+        <source>选择图床；下方只显示该服务需要的参数</source>
+        <translation>Pick a host; only its fields are shown below</translation>
+    </message>
+    <message>
+        <source>青影 QingYing</source>
+        <translation>QingYing</translation>
+    </message>
+    <message>
+        <source>项目主页</source>
+        <translation>Homepage</translation>
+    </message>
+    <message>
+        <source>预览：%1</source>
+        <translation>Preview: %1</translation>
+    </message>
+    <message>
+        <source>默认值</source>
+        <translation>Defaults</translation>
+    </message>
+    <message>
+        <source>默认颜色</source>
+        <translation>Default color</translation>
+    </message>
 </context>
 </TS>

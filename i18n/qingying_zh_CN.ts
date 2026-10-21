@@ -868,5 +868,249 @@
         <source>（未找到）</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>%1 已被其他程序占用，请换一个组合</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Interface language</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>PNG 无损清晰；JPG 体积更小</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>{} 内为日期时间格式，如 {yyyyMMdd_HHmmss}；留空使用默认</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>上传截图到图床，并把链接复制到剪贴板</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>上次检查：%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>主题</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>使用 Windows DPAPI 加密保存，仅当前用户可解密</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>保存位置、文件名与截图完成后的动作</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>保留数量</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>修改后立即生效，无需重启</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>关于与更新</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>减少渐变色带，文件稍大</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>凭据</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>反馈问题时可附上日志与崩溃转储</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>取色器按 C 复制颜色时使用</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>可选；以 DPAPI 加密保存</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>启动</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>启动时检查，每天最多一次</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>启用上传</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>在画面中绘制鼠标指针</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>外观与语言</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>尚未检查</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>已生效：%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>帧率越高越流畅，文件也越大</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>开机自动启动</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>录制 MP4 / GIF 时的画面设置</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>快捷键、启动与历史记录</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>截图工具条与钉图菜单中出现“上传”</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>打开 GitHub</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>打开日志文件夹</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>抖动</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>接收 multipart/form-data POST 的地址</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>无法使用该文件夹，请选择一个可写入的完整路径</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>日志</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>更多</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>更新</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>最近的截图可在“历史记录”中重新复制、钉图或编辑</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>未设置</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>标注</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>点击“保存”或按 Ctrl+S 时写入这里</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>点击后按下新的组合键，Esc 取消</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>版本 %1 · 简洁好看的 Windows 截图工具</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>版本信息、更新与诊断</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>画面</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>界面语言</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>登录 Windows 后在托盘中待命</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>矩形、箭头、画笔等标注的初始颜色</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>自动检查更新</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>表单中图片文件的字段名</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>请按下组合键…（Esc 取消）</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>请输入以 http:// 或 https:// 开头的完整地址</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>跟随系统时随 Windows 深浅色自动切换</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>进入截图编辑时预先选中的工具与颜色</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>选择“无”时先调整选区，再手动选工具</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>选择图床；下方只显示该服务需要的参数</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>青影 QingYing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>项目主页</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>预览：%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>默认值</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>默认颜色</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 </TS>

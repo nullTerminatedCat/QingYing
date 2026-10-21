@@ -24,6 +24,7 @@
 #include "ScreenGrabber.h"
 #include "Settings.h"
 #include "SettingsDialog.h"
+#include <QPointer>
 
 #include <QApplication>
 #include <QClipboard>
@@ -289,9 +290,21 @@ void App::writeSmokeReport()
     if (qEnvironmentVariableIsSet("QINGYING_SMOKE_SHOTS")) {
         const QString dir = qEnvironmentVariable("QINGYING_SMOKE_SHOTS");
         QDir().mkpath(dir);
-        SettingsDialog sd([](const QKeySequence&) { return true; });
-        sd.adjustSize();
-        sd.grab().save(dir + QStringLiteral("/settings.png"));
+        {
+            SettingsDialog sd([](const QKeySequence&) { return true; });
+            sd.resize(780, 560);
+            sd.show();
+            for (int i = 0; i < sd.pageCount(); ++i) {
+                sd.setPage(i);
+                QCoreApplication::processEvents();
+                sd.grab().save(dir + QStringLiteral("/settings-%1.png").arg(i + 1));
+            }
+            sd.resize(sd.minimumSize());
+            sd.setPage(0);
+            QCoreApplication::processEvents();
+            sd.grab().save(dir + QStringLiteral("/settings-min.png"));
+            sd.hide();
+        }
         HistoryWindow hw;
         hw.grab().save(dir + QStringLiteral("/history.png"));
         QMessageBox mb(QMessageBox::Question, QStringLiteral("QingYing"), QStringLiteral("Qt dialog buttons"),
@@ -651,10 +664,22 @@ void App::openSettings()
     }
     m_settings = new SettingsDialog([this](const QKeySequence& k) { return applyHotkey(k); });
     m_settings->setAttribute(Qt::WA_DeleteOnClose);
-    connect(m_settings, &QDialog::finished, this, [this, lang = Language::current()] {
-        if (Language::current() != lang) retranslate();
-        updateMenu();
-        History::prune();
+    m_settings->setCheckUpdate([this] { m_updater->check(true); });
+    connect(m_settings, &SettingsDialog::changed, this, &App::updateMenu);
+    connect(m_settings, &QDialog::finished, this, [] { History::prune(); });
+    connect(m_settings, &SettingsDialog::languageChanged, this, [this] {
+        // 即时切换语言：托盘菜单重建，设置窗口在同一位置、同一页重新打开
+        const QPointer<SettingsDialog> old = m_settings;
+        const int page = old->page();
+        const QRect geo = old->geometry();
+        QTimer::singleShot(0, this, [this, old, page, geo] {
+            if (old) old->close();
+            m_settings = nullptr;
+            retranslate();
+            openSettings();
+            m_settings->setGeometry(geo);
+            m_settings->setPage(page);
+        });
     });
     m_settings->show();
     m_settings->raise();

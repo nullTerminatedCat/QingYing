@@ -42,6 +42,7 @@ qt_add_executable(QingYing WIN32
     src/CaptureOverlay.cpp src/CaptureOverlay.h
     src/PinWindow.cpp src/PinWindow.h
     src/SettingsDialog.cpp src/SettingsDialog.h
+    src/SettingsWidgets.cpp src/SettingsWidgets.h
     src/History.cpp src/History.h
     src/HistoryWindow.cpp src/HistoryWindow.h
     src/ScrollCapture.cpp src/ScrollCapture.h
