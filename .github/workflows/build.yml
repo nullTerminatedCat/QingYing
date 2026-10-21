@@ -10,7 +10,7 @@ jobs:
   windows-x64:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
@@ -44,7 +44,7 @@ jobs:
           }
           Copy-Item LICENSE, README.md, THIRD_PARTY_NOTICES.md $out
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: QingYing-windows-x64
           path: dist/QingYing-windows-x64
