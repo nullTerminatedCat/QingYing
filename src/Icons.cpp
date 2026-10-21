@@ -146,6 +146,19 @@ void paintIcon(QPainter& p, Icon icon, const QRectF& r, const QColor& color)
         path.moveTo(8, 8.5); path.lineTo(12, 4.5); path.lineTo(16, 8.5);
         path.moveTo(5, 14); path.lineTo(5, 19); path.lineTo(19, 19); path.lineTo(19, 14);
         break;
+    case Icon::Palette: // 外观：半月
+        path.addEllipse(QPointF(12, 12), 8, 8);
+        path.moveTo(12, 4); path.arcTo(QRectF(8, 4, 8, 16), 90, 180);
+        break;
+    case Icon::Info:
+        path.addEllipse(QPointF(12, 12), 8, 8);
+        path.moveTo(12, 11); path.lineTo(12, 16);
+        path.moveTo(12, 8); path.lineTo(12, 8.2);
+        break;
+    case Icon::Folder:
+        path.moveTo(4, 7); path.lineTo(4, 18); path.lineTo(20, 18); path.lineTo(20, 9);
+        path.lineTo(11.5, 9); path.lineTo(9.5, 6.5); path.lineTo(4.5, 6.5);
+        break;
     case Icon::Settings:
         path.addEllipse(QPointF(12, 12), 3, 3);
         path.addEllipse(QPointF(12, 12), 8, 8);

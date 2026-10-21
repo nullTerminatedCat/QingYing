@@ -74,7 +74,9 @@ void setSheet(QWidget* w, const QString& sheet)
 
 void apply()
 {
-    const QString mode = Settings::theme();
+    // QINGYING_THEME 仅用于测试截图（light / dark），覆盖设置
+    const QString forced = qEnvironmentVariable("QINGYING_THEME");
+    const QString mode = (forced == QLatin1String("light") || forced == QLatin1String("dark")) ? forced : Settings::theme();
     auto* hints = QGuiApplication::styleHints();
     g_dark = mode == QLatin1String("dark") || (mode == QLatin1String("system") && systemIsDark());
 #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
