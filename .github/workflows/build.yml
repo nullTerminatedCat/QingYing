@@ -39,7 +39,7 @@ jobs:
           foreach ($d in 'platforms','styles','imageformats','iconengines','generic','tls','networkinformation') {
             if (Test-Path "build/$d") { Copy-Item "build/$d" $out -Recurse }
           }
-          Copy-Item LICENSE, README.md $out
+          Copy-Item LICENSE, README.md, THIRD_PARTY_NOTICES.md $out
 
       - uses: actions/upload-artifact@v4
         with:
