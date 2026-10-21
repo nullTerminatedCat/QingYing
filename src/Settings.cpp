@@ -107,6 +107,8 @@ void setUploadConfig(const Uploads::Config& c)
 
 bool autoUpdate() { return store().value("autoUpdate", true).toBool(); }
 void setAutoUpdate(bool on) { store().setValue("autoUpdate", on); }
+bool welcomed() { return store().value("welcomed", false).toBool(); }
+void setWelcomed(bool on) { store().setValue("welcomed", on); }
 QDateTime lastUpdateCheck() { return store().value("lastUpdateCheck").toDateTime(); }
 void setLastUpdateCheck(const QDateTime& t) { store().setValue("lastUpdateCheck", t); }
 

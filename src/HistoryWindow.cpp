@@ -50,6 +50,11 @@ HistoryWindow::HistoryWindow(QWidget* parent) : QDialog(parent)
     m_list->setMovement(QListView::Static);
     m_list->setSpacing(4);
     root->addWidget(m_list, 1);
+    m_empty = new QLabel(QCoreApplication::translate("QingYing", "还没有截图记录\n按截图快捷键或单击托盘图标截一张试试"), this);
+    m_empty->setAlignment(Qt::AlignCenter);
+    m_empty->setObjectName(QStringLiteral("empty"));
+    m_empty->setStyleSheet(QStringLiteral("color: #8E8E93; font-size: 14px;"));
+    root->addWidget(m_empty, 1);
     auto* row = new QHBoxLayout;
     auto* folder = new QPushButton(QCoreApplication::translate("QingYing", "打开文件夹"), this);
     auto* clear = new QPushButton(QCoreApplication::translate("QingYing", "清空"), this);
@@ -64,6 +69,7 @@ HistoryWindow::HistoryWindow(QWidget* parent) : QDialog(parent)
     row->addWidget(copy);
     row->addWidget(pin);
     root->addLayout(row);
+    m_needItem = {clear, edit, copy, pin};
 
     connect(folder, &QPushButton::clicked, this, [] {
         QDir().mkpath(History::dir());
@@ -120,4 +126,8 @@ void HistoryWindow::reload()
         it->setToolTip(QDir::toNativeSeparators(path));
     }
     if (m_list->count()) m_list->setCurrentRow(0);
+    const bool any = m_list->count() > 0;
+    m_list->setVisible(any);
+    m_empty->setVisible(!any);
+    for (QPushButton* b : m_needItem) b->setEnabled(any);
 }

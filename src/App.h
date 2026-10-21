@@ -59,6 +59,7 @@ private:
     Updater* m_updater = nullptr;
     bool m_recordGif = false;
     QString m_lastRecording;
+    bool m_welcomePending = false;
     struct Edit {
         bool pending = false;
         QImage image;

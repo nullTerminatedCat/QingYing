@@ -41,6 +41,8 @@ void setDefaultColor(int i);
 QString language(); // system / zh_CN / en_US
 void setLanguage(const QString& l);
 QString effectiveLanguage(); // zh_CN 或 en_US
+bool welcomed(); // 是否已显示首次运行提示
+void setWelcomed(bool on);
 bool autoUpdate();
 void setAutoUpdate(bool on);
 QDateTime lastUpdateCheck();

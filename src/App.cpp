@@ -90,6 +90,11 @@ App::App()
         QTimer::singleShot(8000, m_updater, &Updater::maybeAutoCheck);
 
     connect(m_tray, &QSystemTrayIcon::messageClicked, this, [this] {
+        if (m_welcomePending) {
+            m_welcomePending = false;
+            openSettings();
+            return;
+        }
         if (m_lastRecording.isEmpty()) return;
         QProcess::startDetached(QStringLiteral("explorer.exe"), {QStringLiteral("/select,"), QDir::toNativeSeparators(m_lastRecording)});
         m_lastRecording.clear();
@@ -99,7 +104,14 @@ App::App()
     const bool ok = m_hotkey.setHotkey(hk);
     updateMenu();
     const QString hkText = hk.toString(QKeySequence::NativeText);
-    if (ok)
+    const bool firstRun = !Settings::welcomed() && !qEnvironmentVariableIsSet("QINGYING_SMOKE_REPORT");
+    if (ok && firstRun) {
+        Settings::setWelcomed(true);
+        m_welcomePending = true;
+        m_tray->showMessage(QCoreApplication::translate("QingYing", "欢迎使用青影"),
+                            QCoreApplication::translate("QingYing", "按 %1 或单击托盘图标开始截图；右键托盘图标可录屏、钉图、查看历史。点击此提示打开设置。").arg(hkText),
+                            appIcon(), 10000);
+    } else if (ok)
         m_tray->showMessage(QCoreApplication::translate("QingYing", "青影已在后台运行"), QCoreApplication::translate("QingYing", "按 %1 开始截图").arg(hkText),
                             appIcon(), 3000);
     else
@@ -665,6 +677,10 @@ void App::openSettings()
     m_settings = new SettingsDialog([this](const QKeySequence& k) { return applyHotkey(k); });
     m_settings->setAttribute(Qt::WA_DeleteOnClose);
     m_settings->setCheckUpdate([this] { m_updater->check(true); });
+    m_settings->setSuspendHotkey([this](bool on) {
+        if (on) m_hotkey.unregister();
+        else if (!m_hotkey.isRegistered()) m_hotkey.setHotkey(Settings::hotkey());
+    });
     connect(m_settings, &SettingsDialog::changed, this, &App::updateMenu);
     connect(m_settings, &QDialog::finished, this, [] { History::prune(); });
     connect(m_settings, &SettingsDialog::languageChanged, this, [this] {
