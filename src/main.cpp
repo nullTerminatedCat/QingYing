@@ -8,6 +8,7 @@
 #include <QTranslator>
 #include "Settings.h"
 #include "Diagnostics.h"
+#include "Language.h"
 #include <windows.h>
 
 int main(int argc, char* argv[])
@@ -26,15 +27,7 @@ int main(int argc, char* argv[])
     QApplication a(argc, argv);
     QApplication::setApplicationName(QStringLiteral("QingYing"));
     QApplication::setOrganizationName(QStringLiteral("QingYing"));
-    // 源码文字为简体中文；其他语言加载内置 .qm（语言切换需重启生效）
-    QTranslator translator;
-    const QString lang = Settings::effectiveLanguage();
-    if (lang != QLatin1String("zh_CN") && translator.load(QStringLiteral(":/i18n/qingying_%1.qm").arg(lang)))
-        QApplication::installTranslator(&translator);
-    // Qt 自带对话框（按钮、文件选择框等）的翻译；英文为 Qt 默认文字，无需加载
-    QTranslator qtTranslator;
-    if (lang != QLatin1String("en_US") && qtTranslator.load(QStringLiteral(":/i18n/qtbase_%1.qm").arg(lang)))
-        QApplication::installTranslator(&qtTranslator);
+    Language::apply(Settings::effectiveLanguage());
     QApplication::setApplicationDisplayName(QCoreApplication::translate("QingYing", "青影"));
     QApplication::setOrganizationName(QStringLiteral("QingYing"));
     QApplication::setApplicationVersion(QStringLiteral(QINGYING_VERSION));

@@ -54,6 +54,10 @@ Click to open the containing folder</translation>
         <translation>C Copy</translation>
     </message>
     <message>
+        <source>GIF 抖动（减少渐变色带，文件稍大）</source>
+        <translation>GIF dithering (less banding, slightly larger files)</translation>
+    </message>
+    <message>
         <source>H.264 编码器不支持该尺寸（0x%1）</source>
         <translation>The H.264 encoder does not support this size (0x%1)</translation>
     </message>
@@ -712,10 +716,6 @@ Actual: %2</translation>
     <message>
         <source>语言</source>
         <translation>Language</translation>
-    </message>
-    <message>
-        <source>语言设置将在重启青影后生效。</source>
-        <translation>The language change takes effect after restarting QingYing.</translation>
     </message>
     <message>
         <source>请先在设置 → 上传中启用并配置</source>

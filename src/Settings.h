@@ -32,6 +32,8 @@ bool recordCursor();
 void setRecordCursor(bool on);
 QString theme(); // system / light / dark
 void setTheme(const QString& t);
+bool gifDither();
+void setGifDither(bool on);
 int defaultTool(); // 0 无，1-7 对应 Tool 枚举
 void setDefaultTool(int t);
 int defaultColor(); // 调色板下标

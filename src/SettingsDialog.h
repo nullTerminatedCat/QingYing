@@ -36,6 +36,7 @@ private:
     QCheckBox* m_recCursor;
     QButtonGroup* m_theme;
     QComboBox* m_lang;
+    QCheckBox* m_gifDither;
     QComboBox* m_defTool;
     QComboBox* m_defColor;
     QCheckBox* m_autoUpdate;

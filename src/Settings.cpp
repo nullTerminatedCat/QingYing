@@ -117,6 +117,8 @@ QString theme()
 }
 void setTheme(const QString& t) { store().setValue("theme", t); }
 
+bool gifDither() { return store().value("gifDither", false).toBool(); }
+void setGifDither(bool on) { store().setValue("gifDither", on); }
 int defaultTool() { return qBound(0, store().value("defaultTool", 0).toInt(), 7); }
 void setDefaultTool(int t) { store().setValue("defaultTool", t); }
 int defaultColor() { return qMax(0, store().value("defaultColor", 0).toInt()); }

@@ -53,6 +53,10 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>GIF 抖动（减少渐变色带，文件稍大）</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>H.264 编码器不支持该尺寸（0x%1）</source>
         <translation type="unfinished"></translation>
     </message>
@@ -706,10 +710,6 @@
     </message>
     <message>
         <source>语言</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>语言设置将在重启青影后生效。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

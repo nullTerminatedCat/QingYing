@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QCoreApplication>
 #include "Theme.h"
+#include "Language.h"
 #include "SettingsDialog.h"
 #include "HotkeyManager.h"
 #include "Icons.h"
@@ -79,7 +80,15 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, Q
         QPushButton#seg:checked { background: #4F6BFF; color: white; border: 1px solid #4F6BFF; }
         QComboBox { background: #FFFFFF; border: 1px solid rgba(0,0,0,30); border-radius: 8px; padding: 4px 8px; min-width: 160px; }
         QPlainTextEdit { background: #FFFFFF; border: 1px solid rgba(0,0,0,30); border-radius: 8px; padding: 4px; }
-        QSpinBox { background: #FFFFFF; border: 1px solid rgba(0,0,0,30); border-radius: 8px; padding: 4px 8px; min-width: 90px; }
+        QComboBox::drop-down { subcontrol-origin: padding; subcontrol-position: center right; width: 22px; border: none; }
+        QComboBox::down-arrow { image: url(:/ui/chevron-down.png); width: 12px; height: 12px; }
+        QSpinBox { background: #FFFFFF; border: 1px solid rgba(0,0,0,30); border-radius: 8px; padding: 4px 26px 4px 8px; min-width: 90px; }
+        QSpinBox::up-button, QSpinBox::down-button { subcontrol-origin: border; width: 22px; border: none; background: transparent; }
+        QSpinBox::up-button { subcontrol-position: top right; border-top-right-radius: 8px; }
+        QSpinBox::down-button { subcontrol-position: bottom right; border-bottom-right-radius: 8px; }
+        QSpinBox::up-button:hover, QSpinBox::down-button:hover { background: rgba(79,107,255,25); }
+        QSpinBox::up-arrow { image: url(:/ui/chevron-up.png); width: 10px; height: 10px; }
+        QSpinBox::down-arrow { image: url(:/ui/chevron-down.png); width: 10px; height: 10px; }
         QCheckBox { font-size: 13px; spacing: 8px; }
         QCheckBox::indicator { width: 34px; height: 20px; border-radius: 10px; background: #D5D7DE; }
         QCheckBox::indicator:checked { background: #4F6BFF; }
@@ -224,6 +233,9 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, Q
     m_recCursor = new QCheckBox(QCoreApplication::translate("QingYing", "录制鼠标指针"), this);
     m_recCursor->setChecked(Settings::recordCursor());
     b->addWidget(m_recCursor);
+    m_gifDither = new QCheckBox(QCoreApplication::translate("QingYing", "GIF 抖动（减少渐变色带，文件稍大）"), this);
+    m_gifDither->setChecked(Settings::gifDither());
+    b->addWidget(m_gifDither);
 
     root->addWidget(card(this, QCoreApplication::translate("QingYing", "上传"), b));
     const Uploads::Config up = Settings::uploadConfig();
@@ -376,14 +388,13 @@ void SettingsDialog::save()
     if (newLang != Settings::language()) {
         const QString before = Settings::effectiveLanguage();
         Settings::setLanguage(newLang);
-        if (Settings::effectiveLanguage() != before)
-            QMessageBox::information(this, QCoreApplication::translate("QingYing", "青影 设置"),
-                                     QCoreApplication::translate("QingYing", "语言设置将在重启青影后生效。"));
+        if (Settings::effectiveLanguage() != before) Language::apply(Settings::effectiveLanguage()); // 立即生效，托盘菜单由 App 重建
     }
     Settings::setColorFormat(m_colorFmt->currentData().toString());
     Settings::setDefaultTool(m_defTool->currentIndex());
     Settings::setDefaultColor(m_defColor->currentIndex());
     Settings::setRecordFps(m_fps->checkedId() > 0 ? m_fps->checkedId() : 15);
     Settings::setRecordCursor(m_recCursor->isChecked());
+    Settings::setGifDither(m_gifDither->isChecked());
     accept();
 }
