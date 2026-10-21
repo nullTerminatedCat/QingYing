@@ -1,5 +1,6 @@
 #include "ToolBars.h"
 #include "Style.h"
+#include "Settings.h"
 
 #include <QMouseEvent>
 #include <QPainter>
@@ -33,8 +34,16 @@ ToolBar::ToolBar(QWidget* parent) : QWidget(parent)
         {Cancel, Icon::Close, QStringLiteral("取消  Esc"), {}, false},
         {Confirm, Icon::Confirm, QStringLiteral("完成  Enter（默认动作见设置）"), {}, false},
     };
+    QList<Item> all = defs;
+    if (Settings::uploadEnabled()) {
+        for (int i = 0; i < all.size(); ++i)
+            if (all[i].id == Pin) {
+                all.insert(i, {UploadBtn, Icon::Upload, QStringLiteral("上传并复制链接  U"), {}, false});
+                break;
+            }
+    }
     int x = Margin + kPad;
-    for (Item it : defs) {
+    for (Item it : all) {
         const int w = it.separator ? kSep : kBtn;
         it.rect = QRect(x, Margin + kPad, w, kBtn);
         x += w + kGap;

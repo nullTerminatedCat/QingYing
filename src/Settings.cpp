@@ -4,6 +4,8 @@
 #include <QDateTime>
 #include <QDir>
 #include <QFileInfo>
+#include "Secret.h"
+
 #include <QColor>
 #include <QImage>
 #include <QRegularExpression>
@@ -79,6 +81,27 @@ int recordFps()
 void setRecordFps(int fps) { store().setValue("recordFps", fps); }
 bool recordCursor() { return store().value("recordCursor", true).toBool(); }
 void setRecordCursor(bool on) { store().setValue("recordCursor", on); }
+
+bool uploadEnabled() { return store().value("upload/enabled", false).toBool(); }
+void setUploadEnabled(bool on) { store().setValue("upload/enabled", on); }
+Uploads::Config uploadConfig()
+{
+    Uploads::Config c;
+    c.provider = store().value("upload/provider", c.provider).toString();
+    c.url = store().value("upload/url").toString();
+    c.field = store().value("upload/field", c.field).toString();
+    c.jsonPath = store().value("upload/jsonPath", c.jsonPath).toString();
+    c.secret = Secret::unprotect(store().value("upload/secret").toString());
+    return c;
+}
+void setUploadConfig(const Uploads::Config& c)
+{
+    store().setValue("upload/provider", c.provider);
+    store().setValue("upload/url", c.url);
+    store().setValue("upload/field", c.field);
+    store().setValue("upload/jsonPath", c.jsonPath);
+    store().setValue("upload/secret", Secret::protect(c.secret));
+}
 
 bool autoUpdate() { return store().value("autoUpdate", true).toBool(); }
 void setAutoUpdate(bool on) { store().setValue("autoUpdate", on); }

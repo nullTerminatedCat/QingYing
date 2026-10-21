@@ -1,6 +1,7 @@
 #pragma once
 #include <QKeySequence>
 #include <QString>
+#include "Uploader.h"
 
 class QImage;
 class QColor;
@@ -35,6 +36,10 @@ bool autoUpdate();
 void setAutoUpdate(bool on);
 QDateTime lastUpdateCheck();
 void setLastUpdateCheck(const QDateTime& t);
+bool uploadEnabled();
+void setUploadEnabled(bool on);
+Uploads::Config uploadConfig(); // 密钥经 DPAPI 解密
+void setUploadConfig(const Uploads::Config& c); // 密钥经 DPAPI 加密后保存
 QString expandPattern(const QString& pattern);
 QString defaultFilePath();
 bool saveImage(const QImage& img, const QString& path);

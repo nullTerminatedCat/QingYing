@@ -76,6 +76,7 @@ private:
     void doDefault();
     void doLongShot();
     void doRecognize(bool qr);
+    void doUpload();
 public:
     void setMode(CaptureMode m) { m_mode = m; }
 private:

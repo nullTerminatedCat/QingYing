@@ -139,6 +139,11 @@ void paintIcon(QPainter& p, Icon icon, const QRectF& r, const QColor& color)
         p.setPen(pen);
         p.setBrush(Qt::NoBrush);
         break;
+    case Icon::Upload:
+        path.moveTo(12, 15.5); path.lineTo(12, 4.5);
+        path.moveTo(8, 8.5); path.lineTo(12, 4.5); path.lineTo(16, 8.5);
+        path.moveTo(5, 14); path.lineTo(5, 19); path.lineTo(19, 19); path.lineTo(19, 14);
+        break;
     case Icon::Settings:
         path.addEllipse(QPointF(12, 12), 3, 3);
         path.addEllipse(QPointF(12, 12), 8, 8);

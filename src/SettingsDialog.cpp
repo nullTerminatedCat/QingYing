@@ -17,6 +17,7 @@
 #include <QPushButton>
 #include <QSpinBox>
 #include <QComboBox>
+#include <QPlainTextEdit>
 #include <QStyle>
 #include <QVBoxLayout>
 
@@ -72,6 +73,7 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, Q
         QPushButton#seg { border-radius: 8px; padding: 5px 18px; }
         QPushButton#seg:checked { background: #4F6BFF; color: white; border: 1px solid #4F6BFF; }
         QComboBox { background: #FFFFFF; border: 1px solid rgba(0,0,0,30); border-radius: 8px; padding: 4px 8px; min-width: 160px; }
+        QPlainTextEdit { background: #FFFFFF; border: 1px solid rgba(0,0,0,30); border-radius: 8px; padding: 4px; }
         QSpinBox { background: #FFFFFF; border: 1px solid rgba(0,0,0,30); border-radius: 8px; padding: 4px 8px; min-width: 90px; }
         QCheckBox { font-size: 13px; spacing: 8px; }
         QCheckBox::indicator { width: 34px; height: 20px; border-radius: 10px; background: #D5D7DE; }
@@ -191,6 +193,55 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, Q
     m_recCursor->setChecked(Settings::recordCursor());
     b->addWidget(m_recCursor);
 
+    root->addWidget(card(this, QStringLiteral("上传"), b));
+    const Uploads::Config up = Settings::uploadConfig();
+    m_upEnabled = new QCheckBox(QStringLiteral("启用上传（截图工具条与钉图菜单出现“上传”）"), this);
+    m_upEnabled->setChecked(Settings::uploadEnabled());
+    b->addWidget(m_upEnabled);
+    h = row(b, QStringLiteral("服务"));
+    m_upProvider = new QComboBox(this);
+    m_upProvider->addItem(QStringLiteral("自定义 HTTP（multipart POST）"), QStringLiteral("custom"));
+    m_upProvider->addItem(QStringLiteral("SM.MS"), QStringLiteral("smms"));
+    m_upProvider->addItem(QStringLiteral("Imgur"), QStringLiteral("imgur"));
+    m_upProvider->setCurrentIndex(qMax(0, m_upProvider->findData(up.provider)));
+    h->addWidget(m_upProvider, 1);
+    m_upCustom = new QWidget(this);
+    auto* cl = new QVBoxLayout(m_upCustom);
+    cl->setContentsMargins(0, 0, 0, 0);
+    cl->setSpacing(10);
+    auto* cr = row(cl, QStringLiteral("上传地址"));
+    m_upUrl = new QLineEdit(up.url, this);
+    m_upUrl->setPlaceholderText(QStringLiteral("https://example.com/upload"));
+    cr->addWidget(m_upUrl, 1);
+    cr = row(cl, QStringLiteral("文件字段"));
+    m_upField = new QLineEdit(up.field, this);
+    cr->addWidget(m_upField, 1);
+    cr = row(cl, QStringLiteral("链接路径"));
+    m_upPath = new QLineEdit(up.jsonPath, this);
+    m_upPath->setPlaceholderText(QStringLiteral("返回 JSON 中链接的位置，如 data.url"));
+    cr->addWidget(m_upPath, 1);
+    cr = row(cl, QStringLiteral("请求头"));
+    m_upHeaders = new QPlainTextEdit(this);
+    m_upHeaders->setPlaceholderText(QStringLiteral("每行一个，如 Authorization: Bearer xxx"));
+    m_upHeaders->setFixedHeight(64);
+    cr->addWidget(m_upHeaders, 1);
+    b->addWidget(m_upCustom);
+    m_upPreset = new QWidget(this);
+    auto* pl = new QVBoxLayout(m_upPreset);
+    pl->setContentsMargins(0, 0, 0, 0);
+    auto* pr = row(pl, QStringLiteral("Token"));
+    m_upToken = new QLineEdit(this);
+    m_upToken->setEchoMode(QLineEdit::Password);
+    pr->addWidget(m_upToken, 1);
+    b->addWidget(m_upPreset);
+    if (up.provider == QLatin1String("custom")) m_upHeaders->setPlainText(up.secret);
+    else m_upToken->setText(up.secret);
+    auto* secretHint = new QLabel(QStringLiteral("密钥使用 Windows DPAPI 加密保存，仅当前用户可解密"), this);
+    secretHint->setObjectName(QStringLiteral("hint"));
+    b->addWidget(secretHint);
+    connect(m_upProvider, &QComboBox::currentIndexChanged, this, &SettingsDialog::updateUploadUi);
+    updateUploadUi();
+
     root->addWidget(card(this, QStringLiteral("常规"), b));
     h = row(b, QStringLiteral("外观"));
     m_theme = new QButtonGroup(this);
@@ -227,6 +278,14 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, Q
     updatePreview();
 }
 
+void SettingsDialog::updateUploadUi()
+{
+    const bool custom = m_upProvider->currentData().toString() == QLatin1String("custom");
+    m_upCustom->setVisible(custom);
+    m_upPreset->setVisible(!custom);
+    m_upToken->setPlaceholderText(Uploads::create({m_upProvider->currentData().toString()})->secretHint());
+}
+
 void SettingsDialog::updatePreview()
 {
     const QString ext = m_jpg->isChecked() ? QStringLiteral(".jpg") : QStringLiteral(".png");
@@ -256,6 +315,14 @@ void SettingsDialog::save()
     Settings::setFormat(m_jpg->isChecked() ? QStringLiteral("jpg") : QStringLiteral("png"));
     Settings::setAutostart(m_autostart->isChecked());
     Settings::setAutoUpdate(m_autoUpdate->isChecked());
+    Settings::setUploadEnabled(m_upEnabled->isChecked());
+    Uploads::Config up;
+    up.provider = m_upProvider->currentData().toString();
+    up.url = m_upUrl->text().trimmed();
+    up.field = m_upField->text().trimmed();
+    up.jsonPath = m_upPath->text().trimmed();
+    up.secret = up.provider == QLatin1String("custom") ? m_upHeaders->toPlainText() : m_upToken->text();
+    Settings::setUploadConfig(up);
     static const char* keys[3] = {"copy", "save", "pin"};
     Settings::setDefaultAction(QString::fromLatin1(keys[qBound(0, m_action->checkedId(), 2)]));
     Settings::setHistorySize(m_history->value());

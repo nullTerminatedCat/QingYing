@@ -35,4 +35,14 @@ private:
     QCheckBox* m_recCursor;
     QButtonGroup* m_theme;
     QCheckBox* m_autoUpdate;
+    QCheckBox* m_upEnabled;
+    class QComboBox* m_upProvider;
+    QLineEdit* m_upUrl;
+    QLineEdit* m_upField;
+    QLineEdit* m_upPath;
+    QLineEdit* m_upToken;
+    class QPlainTextEdit* m_upHeaders;
+    QWidget* m_upCustom;
+    QWidget* m_upPreset;
+    void updateUploadUi();
 };

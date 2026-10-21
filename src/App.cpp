@@ -6,6 +6,8 @@
 #include "Icons.h"
 #include "Notify.h"
 #include "Updater.h"
+#include "Secret.h"
+#include "Uploader.h"
 #include "Ocr.h"
 #include "QrDecoder.h"
 #include "PinWindow.h"
@@ -194,6 +196,27 @@ void App::writeSmokeReport()
                     .arg(rep->errorString()).arg(parsed).arg(rel.tag, rel.setupName)
                     .arg(!rel.sumsUrl.isEmpty()).arg(Updater::isPortable()).toUtf8());
         rep->deleteLater();
+    }
+    {
+        const QString enc = Secret::protect(QStringLiteral("Authorization: Bearer 测试"));
+        f.write(QStringLiteral("dpapi_roundtrip=%1 plaintext_in_cipher=%2\n")
+                    .arg(Secret::unprotect(enc) == QStringLiteral("Authorization: Bearer 测试"))
+                    .arg(enc.contains(QLatin1String("Bearer"))).toUtf8());
+    }
+    if (qEnvironmentVariableIsSet("QINGYING_SMOKE_UPLOAD")) {
+        Uploads::Config c;
+        c.url = QStringLiteral("https://httpbin.org/post");
+        c.field = QStringLiteral("file");
+        c.jsonPath = QStringLiteral("url");
+        c.secret = QStringLiteral("X-Test: qingying");
+        QImage img(64, 64, QImage::Format_RGB32);
+        img.fill(Qt::blue);
+        QString url, err;
+        QEventLoop loop;
+        Uploads::upload(img, c, [&](const QString& u, const QString& e) { url = u; err = e; loop.quit(); });
+        QTimer::singleShot(30000, &loop, &QEventLoop::quit);
+        loop.exec();
+        f.write(QStringLiteral("upload_url=%1 err=%2\n").arg(url, err).toUtf8());
     }
     f.write(QStringLiteral("theme=%1 dark=%2 system_dark=%3\n").arg(Settings::theme()).arg(Theme::isDark()).arg(Theme::systemIsDark()).toUtf8());
     const QString qrPath = qEnvironmentVariable("QINGYING_SMOKE_QR");
