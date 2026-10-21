@@ -60,6 +60,10 @@
 - 录屏使用 GDI 抓帧（未使用 Desktop Duplication），高分辨率 / 30 fps 下 CPU 占用较高；GIF 编码较慢、文件较大，适合短小片段；暂不录音。
 - 长截图依赖目标程序响应鼠标滚轮；带固定底栏、动画或视差效果的页面可能拼接不准。
 
+## 下载
+
+前往 [Releases](https://github.com/nullTerminatedCat/QingYing/releases) 下载安装包（setup.exe）或免安装版（portable.zip）。
+
 ## 构建
 
 依赖：Visual Studio 2022（MSVC x64，含 Windows 10/11 SDK 与 C++/WinRT 头文件）、Qt 6.7+（开发时使用 Qt 6.9.1 msvc2022_64）、CMake 3.21+、Ninja。
@@ -74,6 +78,8 @@ powershell -ExecutionPolicy Bypass -File scripts/build.ps1 -QtDir C:/Qt/6.9.1/ms
 GitHub Actions 会在每次推送时于 windows-latest 构建并上传 `QingYing-windows-x64` 产物。
 
 首次配置时 CMake 会通过 FetchContent 从 GitHub 下载 ZXing-cpp v2.2.1。
+
+打包（需要 Inno Setup 6）：`powershell -ExecutionPolicy Bypass -File scripts/package.ps1`，产物在 `dist/`。推送 `v*` 标签时 GitHub Actions 会自动构建并发布 Release。
 
 产物：`build/QingYing.exe`（构建后自动运行 windeployqt 部署 Qt 运行库）。
 

@@ -1,4 +1,4 @@
-# 青影 Release x64 构建脚本
+﻿# 青影 Release x64 构建脚本
 param(
     [string]$QtDir = 'F:/Qt/6.9.1/msvc2022_64',
     [string]$BuildDir = 'build'
