@@ -14,6 +14,7 @@
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QSpinBox>
 #include <QStyle>
 #include <QVBoxLayout>
 
@@ -68,6 +69,7 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, Q
         QPushButton#primary:hover { background: #3D57E8; }
         QPushButton#seg { border-radius: 8px; padding: 5px 18px; }
         QPushButton#seg:checked { background: #4F6BFF; color: white; border: 1px solid #4F6BFF; }
+        QSpinBox { background: #FFFFFF; border: 1px solid rgba(0,0,0,30); border-radius: 8px; padding: 4px 8px; min-width: 90px; }
         QCheckBox { font-size: 13px; spacing: 8px; }
         QCheckBox::indicator { width: 34px; height: 20px; border-radius: 10px; background: #D5D7DE; }
         QCheckBox::indicator:checked { background: #4F6BFF; }
@@ -135,6 +137,32 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, Q
     connect(m_pattern, &QLineEdit::textChanged, this, &SettingsDialog::updatePreview);
     connect(grp, &QButtonGroup::buttonToggled, this, &SettingsDialog::updatePreview);
 
+    root->addWidget(card(this, QStringLiteral("截图完成"), b));
+    h = row(b, QStringLiteral("默认动作"));
+    m_action = new QButtonGroup(this);
+    const QStringList keys = {QStringLiteral("copy"), QStringLiteral("save"), QStringLiteral("pin")};
+    const QStringList names = {QStringLiteral("复制"), QStringLiteral("保存"), QStringLiteral("钉图")};
+    for (int i = 0; i < 3; ++i) {
+        auto* s = new QPushButton(names[i], this);
+        s->setObjectName(QStringLiteral("seg"));
+        s->setCheckable(true);
+        s->setChecked(Settings::defaultAction() == keys[i]);
+        m_action->addButton(s, i);
+        h->addWidget(s);
+    }
+    h->addStretch();
+    auto* actHint = new QLabel(QStringLiteral("按 Enter、双击选区或点击 ✓ 时执行"), this);
+    actHint->setObjectName(QStringLiteral("hint"));
+    b->addWidget(actHint);
+    h = row(b, QStringLiteral("历史记录"));
+    m_history = new QSpinBox(this);
+    m_history->setRange(0, 500);
+    m_history->setValue(Settings::historySize());
+    m_history->setSuffix(QStringLiteral(" 张"));
+    m_history->setSpecialValueText(QStringLiteral("不保留"));
+    h->addWidget(m_history);
+    h->addStretch();
+
     root->addWidget(card(this, QStringLiteral("常规"), b));
     m_autostart = new QCheckBox(QStringLiteral("开机时自动启动青影"), this);
     m_autostart->setChecked(Settings::autostart());
@@ -183,5 +211,8 @@ void SettingsDialog::save()
                                                                     : m_pattern->text().trimmed());
     Settings::setFormat(m_jpg->isChecked() ? QStringLiteral("jpg") : QStringLiteral("png"));
     Settings::setAutostart(m_autostart->isChecked());
+    static const char* keys[3] = {"copy", "save", "pin"};
+    Settings::setDefaultAction(QString::fromLatin1(keys[qBound(0, m_action->checkedId(), 2)]));
+    Settings::setHistorySize(m_history->value());
     accept();
 }

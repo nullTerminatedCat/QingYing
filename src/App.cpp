@@ -1,11 +1,20 @@
 #include "App.h"
 #include "CaptureOverlay.h"
+#include "History.h"
+#include "HistoryWindow.h"
 #include "Icons.h"
+#include "PinWindow.h"
+#include "ScrollCapture.h"
 #include "ScreenGrabber.h"
 #include "Settings.h"
 #include "SettingsDialog.h"
 
 #include <QApplication>
+#include <QClipboard>
+#include <QDesktopServices>
+#include <QFileInfo>
+#include <QImageReader>
+#include <QUrl>
 #include <QCursor>
 #include <QDir>
 #include <QFile>
@@ -25,7 +34,20 @@ App::App()
         "QMenu::separator{height:1px;background:rgba(0,0,0,15);margin:5px 8px;}"
         "QMenu::icon{padding-left:8px;}"));
     m_captureAct = m_menu->addAction(menuIcon(Icon::Capture), QStringLiteral("截图"));
-    connect(m_captureAct, &QAction::triggered, this, [this] { QTimer::singleShot(180, this, &App::startCapture); });
+    connect(m_captureAct, &QAction::triggered, this, [this] { QTimer::singleShot(180, this, [this] { startCapture(); }); });
+    QMenu* delay = m_menu->addMenu(menuIcon(Icon::Clock), QStringLiteral("延时截图"));
+    for (int s : {3, 5, 10})
+        delay->addAction(QStringLiteral("%1 秒后").arg(s), this, [this, s] { startDelayedCapture(s); });
+    m_menu->addAction(menuIcon(Icon::Scroll), QStringLiteral("长截图（滚动）"), this,
+                      [this] { QTimer::singleShot(180, this, [this] { startCapture(true); }); });
+    m_menu->addSeparator();
+    m_pinMenu = m_menu->addMenu(menuIcon(Icon::Pin), QStringLiteral("钉图"));
+    m_pinMenu->addAction(QStringLiteral("全部显示"), this, [] { PinWindow::showAll(); });
+    m_pinMenu->addAction(QStringLiteral("全部隐藏"), this, [] { PinWindow::hideAll(); });
+    m_pinMenu->addAction(QStringLiteral("全部关闭"), this, [] { PinWindow::closeAll(); });
+    m_recentMenu = m_menu->addMenu(menuIcon(Icon::History), QStringLiteral("最近截图"));
+    connect(m_recentMenu, &QMenu::aboutToShow, this, &App::rebuildRecentMenu);
+    m_menu->addSeparator();
     m_menu->addAction(menuIcon(Icon::Settings), QStringLiteral("设置…"), this, &App::openSettings);
     m_autoAct = m_menu->addAction(QStringLiteral("开机自启"));
     m_autoAct->setCheckable(true);
@@ -38,11 +60,11 @@ App::App()
     m_tray = new QSystemTrayIcon(appIcon(), this);
     m_tray->setContextMenu(m_menu);
     connect(m_tray, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason r) {
-        if (r == QSystemTrayIcon::Trigger) QTimer::singleShot(120, this, &App::startCapture);
+        if (r == QSystemTrayIcon::Trigger) QTimer::singleShot(120, this, [this] { startCapture(); });
     });
     m_tray->show();
 
-    connect(&m_hotkey, &HotkeyManager::activated, this, &App::startCapture);
+    connect(&m_hotkey, &HotkeyManager::activated, this, [this] { startCapture(); });
     const QKeySequence hk = Settings::hotkey();
     const bool ok = m_hotkey.setHotkey(hk);
     updateMenu();
@@ -76,11 +98,21 @@ void App::writeSmokeReport()
                     .arg(m_hotkey.isRegistered())
                     .arg(QGuiApplication::screens().size())
                     .toUtf8());
+    // 长截图拼接自检：构造一张随机纹理，平移 37 像素后应能找回位移
+    QImage tall(300, 900, QImage::Format_RGB32);
+    for (int y = 0; y < tall.height(); ++y)
+        for (int x = 0; x < tall.width(); ++x) tall.setPixel(x, y, qRgb((x * 7 + y * 13) % 251, (y * y) % 253, (x ^ y) & 255));
+    const QImage a = tall.copy(0, 0, 300, 400), b = tall.copy(0, 37, 300, 400);
+    f.write(QStringLiteral("stitch_shift=%1 (expect 37)\nstitch_same=%2 (expect 0)\n")
+                .arg(ScrollCapture::findShift(a, b)).arg(ScrollCapture::findShift(a, a)).toUtf8());
 }
 
 void App::updateMenu()
 {
     m_captureAct->setText(QStringLiteral("截图\t%1").arg(Settings::hotkey().toString(QKeySequence::NativeText)));
+    const int pins = PinWindow::all().size();
+    m_pinMenu->setTitle(pins ? QStringLiteral("钉图（%1）").arg(pins) : QStringLiteral("钉图"));
+    m_pinMenu->setEnabled(pins > 0);
     const QSignalBlocker b(m_autoAct);
     m_autoAct->setChecked(Settings::autostart());
     m_tray->setToolTip(QStringLiteral("青影 截图 · %1").arg(Settings::hotkey().toString(QKeySequence::NativeText)));
@@ -98,9 +130,71 @@ bool App::applyHotkey(const QKeySequence& seq)
     return false;
 }
 
-void App::startCapture()
+void App::startDelayedCapture(int seconds)
 {
-    if (!m_overlays.isEmpty()) return;
+    m_tray->showMessage(QStringLiteral("延时截图"), QStringLiteral("%1 秒后开始截图").arg(seconds), appIcon(), 1500);
+    QTimer::singleShot(seconds * 1000, this, [this] { startCapture(); });
+}
+
+void App::startLongShot(const QRect& region)
+{
+    if (m_busy) return;
+    m_busy = true;
+    auto* sc = new ScrollCapture(region);
+    connect(sc, &ScrollCapture::delivered, this, &App::onDelivered);
+    connect(sc, &QObject::destroyed, this, [this] { m_busy = false; });
+    sc->start();
+}
+
+void App::onDelivered(const QImage& image, const QString& path)
+{
+    History::add(image);
+    if (!path.isEmpty())
+        m_tray->showMessage(QStringLiteral("截图已保存"), QDir::toNativeSeparators(path), appIcon(), 2500);
+    if (m_history) m_history->reload();
+}
+
+void App::rebuildRecentMenu()
+{
+    m_recentMenu->clear();
+    const QStringList list = History::entries();
+    for (int i = 0; i < qMin<qsizetype>(8, list.size()); ++i) {
+        const QString path = list[i];
+        QImageReader r(path);
+        const QSize full = r.size();
+        r.setScaledSize(full.scaled(QSize(48, 32), Qt::KeepAspectRatio));
+        const QString stamp = QFileInfo(path).baseName();
+        auto* act = m_recentMenu->addAction(QIcon(QPixmap::fromImage(r.read())),
+                                            QStringLiteral("%1:%2:%3  %4×%5  复制")
+                                                .arg(stamp.mid(9, 2), stamp.mid(11, 2), stamp.mid(13, 2))
+                                                .arg(full.width()).arg(full.height()));
+        connect(act, &QAction::triggered, this, [path] { QGuiApplication::clipboard()->setImage(QImage(path)); });
+    }
+    if (list.isEmpty()) m_recentMenu->addAction(QStringLiteral("暂无记录"))->setEnabled(false);
+    m_recentMenu->addSeparator();
+    m_recentMenu->addAction(QStringLiteral("历史记录…"), this, &App::openHistory);
+    m_recentMenu->addAction(QStringLiteral("打开保存文件夹"), this, [] {
+        QDir().mkpath(Settings::saveDir());
+        QDesktopServices::openUrl(QUrl::fromLocalFile(Settings::saveDir()));
+    });
+}
+
+void App::openHistory()
+{
+    if (!m_history) {
+        m_history = new HistoryWindow;
+        m_history->setAttribute(Qt::WA_DeleteOnClose);
+    } else {
+        m_history->reload();
+    }
+    m_history->show();
+    m_history->raise();
+    m_history->activateWindow();
+}
+
+void App::startCapture(bool longShot)
+{
+    if (!m_overlays.isEmpty() || m_busy) return;
     if (m_settings && m_settings->isVisible()) return;
     m_detector.snapshot();
 
@@ -122,9 +216,10 @@ void App::startCapture()
     for (const Shot& sh : shots) {
         auto* o = new CaptureOverlay(sh.screen, sh.image, sh.monitor, &m_detector);
         connect(o, &CaptureOverlay::finished, this, &App::endCapture, Qt::QueuedConnection);
-        connect(o, &CaptureOverlay::delivered, this, [this](const QImage&, const QString& path) {
-            if (!path.isEmpty())
-                m_tray->showMessage(QStringLiteral("截图已保存"), QDir::toNativeSeparators(path), appIcon(), 2500);
+        o->setLongShotMode(longShot);
+        connect(o, &CaptureOverlay::delivered, this, &App::onDelivered);
+        connect(o, &CaptureOverlay::longShotRequested, this, [this](const QRect& r) {
+            QTimer::singleShot(250, this, [this, r] { startLongShot(r); });
         });
         connect(o, &CaptureOverlay::selectionStarted, this, [this](CaptureOverlay* self) {
             for (auto& other : m_overlays)
@@ -162,7 +257,10 @@ void App::openSettings()
     }
     m_settings = new SettingsDialog([this](const QKeySequence& k) { return applyHotkey(k); });
     m_settings->setAttribute(Qt::WA_DeleteOnClose);
-    connect(m_settings, &QDialog::finished, this, &App::updateMenu);
+    connect(m_settings, &QDialog::finished, this, [this] {
+        updateMenu();
+        History::prune();
+    });
     m_settings->show();
     m_settings->raise();
     m_settings->activateWindow();

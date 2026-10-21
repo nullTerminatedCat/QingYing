@@ -25,10 +25,11 @@ ToolBar::ToolBar(QWidget* parent) : QWidget(parent)
         {Undo, Icon::Undo, QStringLiteral("撤销  Ctrl+Z"), {}, false},
         {Redo, Icon::Redo, QStringLiteral("重做  Ctrl+Y"), {}, false},
         {-1, Icon::Rect, {}, {}, true},
+        {LongShot, Icon::Scroll, QStringLiteral("长截图（滚动）  L"), {}, false},
         {Pin, Icon::Pin, QStringLiteral("钉在桌面  F3"), {}, false},
         {Save, Icon::Save, QStringLiteral("快速保存  Ctrl+S（另存为 Ctrl+Shift+S）"), {}, false},
         {Cancel, Icon::Close, QStringLiteral("取消  Esc"), {}, false},
-        {Confirm, Icon::Confirm, QStringLiteral("复制到剪贴板  Enter"), {}, false},
+        {Confirm, Icon::Confirm, QStringLiteral("完成  Enter（默认动作见设置）"), {}, false},
     };
     int x = Margin + kPad;
     for (Item it : defs) {

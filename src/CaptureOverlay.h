@@ -24,6 +24,8 @@ signals:
     void selectionStarted(CaptureOverlay* self);
     void selectionCleared(CaptureOverlay* self);
     void finished();
+    // 请求对选区（全局物理像素）进行滚动长截图
+    void longShotRequested(const QRect& physicalGlobal);
     // 截图已产出（复制/保存/钉图），savedPath 非空表示已写入文件
     void delivered(const QImage& image, const QString& savedPath);
 
@@ -67,6 +69,12 @@ private:
     void resizeEditor();
     QString editorStyle() const;
     void doPin();
+    void doDefault();
+    void doLongShot();
+public:
+    void setLongShotMode(bool on) { m_longShotMode = on; }
+private:
+    bool m_longShotMode = false;
     void copyHex();
     void paintMagnifier(QPainter& p);
     bool magnifierVisible() const;

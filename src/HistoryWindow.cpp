@@ -1,0 +1,112 @@
+#include "HistoryWindow.h"
+#include "History.h"
+#include "Icons.h"
+#include "PinWindow.h"
+
+#include <QClipboard>
+#include <QDesktopServices>
+#include <QDir>
+#include <QFileInfo>
+#include <QGuiApplication>
+#include <QHBoxLayout>
+#include <QImageReader>
+#include <QLabel>
+#include <QListWidget>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QUrl>
+#include <QVBoxLayout>
+
+HistoryWindow::HistoryWindow(QWidget* parent) : QDialog(parent)
+{
+    setWindowTitle(QStringLiteral("青影 截图历史"));
+    setWindowIcon(appIcon());
+    setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+    resize(760, 520);
+    setStyleSheet(QStringLiteral(R"(
+        QDialog { background: #F6F7FB; }
+        QLabel#title { font-size: 20px; font-weight: 600; color: #1C1C1E; }
+        QListWidget { background: #FFFFFF; border: 1px solid rgba(0,0,0,15); border-radius: 10px; padding: 8px; }
+        QListWidget::item { border-radius: 8px; padding: 6px; color: #6E6E73; }
+        QListWidget::item:selected { background: rgba(79,107,255,31); color: #1C1C1E; }
+        QPushButton { background: #FFFFFF; border: 1px solid rgba(0,0,0,30); border-radius: 10px; padding: 6px 16px; }
+        QPushButton:hover { background: #F0F2FA; }
+        QPushButton#primary { background: #4F6BFF; border: none; color: white; font-weight: 600; }
+    )"));
+    auto* root = new QVBoxLayout(this);
+    root->setContentsMargins(24, 20, 24, 20);
+    root->setSpacing(12);
+    auto* title = new QLabel(QStringLiteral("截图历史"), this);
+    title->setObjectName(QStringLiteral("title"));
+    root->addWidget(title);
+    m_list = new QListWidget(this);
+    m_list->setViewMode(QListView::IconMode);
+    m_list->setIconSize(QSize(200, 130));
+    m_list->setGridSize(QSize(220, 170));
+    m_list->setResizeMode(QListView::Adjust);
+    m_list->setMovement(QListView::Static);
+    m_list->setSpacing(4);
+    root->addWidget(m_list, 1);
+    auto* row = new QHBoxLayout;
+    auto* folder = new QPushButton(QStringLiteral("打开文件夹"), this);
+    auto* clear = new QPushButton(QStringLiteral("清空"), this);
+    auto* copy = new QPushButton(QStringLiteral("复制"), this);
+    auto* pin = new QPushButton(QStringLiteral("钉在桌面"), this);
+    pin->setObjectName(QStringLiteral("primary"));
+    row->addWidget(folder);
+    row->addWidget(clear);
+    row->addStretch();
+    row->addWidget(copy);
+    row->addWidget(pin);
+    root->addLayout(row);
+
+    connect(folder, &QPushButton::clicked, this, [] {
+        QDir().mkpath(History::dir());
+        QDesktopServices::openUrl(QUrl::fromLocalFile(History::dir()));
+    });
+    connect(clear, &QPushButton::clicked, this, [this] {
+        if (QMessageBox::question(this, QStringLiteral("清空历史"), QStringLiteral("确定删除全部截图历史？")) == QMessageBox::Yes) {
+            History::clear();
+            reload();
+        }
+    });
+    connect(copy, &QPushButton::clicked, this, [this] {
+        const QString p = currentPath();
+        if (!p.isEmpty()) QGuiApplication::clipboard()->setImage(QImage(p));
+    });
+    auto doPin = [this] {
+        const QString p = currentPath();
+        if (p.isEmpty()) return;
+        auto* w = new PinWindow(QImage(p));
+        w->move(QCursor::pos() - QPoint(40, 40));
+        w->show();
+    };
+    connect(pin, &QPushButton::clicked, this, doPin);
+    connect(m_list, &QListWidget::itemDoubleClicked, this, doPin);
+    reload();
+}
+
+QString HistoryWindow::currentPath() const
+{
+    auto* it = m_list->currentItem();
+    return it ? it->data(Qt::UserRole).toString() : QString();
+}
+
+void HistoryWindow::reload()
+{
+    m_list->clear();
+    for (const QString& path : History::entries()) {
+        QImageReader r(path);
+        const QSize full = r.size();
+        r.setScaledSize(full.scaled(QSize(200, 130), Qt::KeepAspectRatio));
+        const QImage thumb = r.read();
+        const QString stamp = QFileInfo(path).baseName().left(15);
+        const QString label = QStringLiteral("%1-%2 %3:%4  %5×%6")
+                                  .arg(stamp.mid(4, 2), stamp.mid(6, 2), stamp.mid(9, 2), stamp.mid(11, 2))
+                                  .arg(full.width()).arg(full.height());
+        auto* it = new QListWidgetItem(QIcon(QPixmap::fromImage(thumb)), label, m_list);
+        it->setData(Qt::UserRole, path);
+        it->setToolTip(QDir::toNativeSeparators(path));
+    }
+    if (m_list->count()) m_list->setCurrentRow(0);
+}

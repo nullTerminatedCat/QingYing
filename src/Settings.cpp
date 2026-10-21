@@ -61,6 +61,15 @@ void setAutostart(bool on)
         run.remove(QStringLiteral("QingYing"));
 }
 
+int historySize() { return qBound(0, store().value("historySize", 20).toInt(), 500); }
+void setHistorySize(int n) { store().setValue("historySize", n); }
+QString defaultAction()
+{
+    const QString a = store().value("defaultAction", QStringLiteral("copy")).toString();
+    return (a == QLatin1String("save") || a == QLatin1String("pin")) ? a : QStringLiteral("copy");
+}
+void setDefaultAction(const QString& a) { store().setValue("defaultAction", a); }
+
 QString expandPattern(const QString& pattern)
 {
     const QDateTime now = QDateTime::currentDateTime();

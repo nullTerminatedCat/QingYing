@@ -7,6 +7,8 @@ class QKeySequenceEdit;
 class QLabel;
 class QLineEdit;
 class QPushButton;
+class QSpinBox;
+class QButtonGroup;
 
 class SettingsDialog : public QDialog {
     Q_OBJECT
@@ -26,4 +28,6 @@ private:
     QPushButton* m_png;
     QPushButton* m_jpg;
     QCheckBox* m_autostart;
+    QSpinBox* m_history;
+    QButtonGroup* m_action;
 };

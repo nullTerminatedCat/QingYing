@@ -3,7 +3,13 @@
 #include <QCoreApplication>
 #include <windows.h>
 
-HotkeyManager::HotkeyManager(QObject* parent) : QObject(parent)
+int HotkeyManager::nextId()
+{
+    static int id = 0x5100;
+    return ++id;
+}
+
+HotkeyManager::HotkeyManager(QObject* parent) : QObject(parent), kId(nextId())
 {
     QCoreApplication::instance()->installNativeEventFilter(this);
 }
@@ -31,6 +37,7 @@ bool HotkeyManager::toNative(const QKeySequence& seq, unsigned& mods, unsigned& 
     else {
         switch (k) {
         case Qt::Key_Print: vk = VK_SNAPSHOT; break;
+        case Qt::Key_Escape: vk = VK_ESCAPE; break;
         case Qt::Key_Space: vk = VK_SPACE; break;
         case Qt::Key_Insert: vk = VK_INSERT; break;
         case Qt::Key_Delete: vk = VK_DELETE; break;

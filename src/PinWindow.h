@@ -7,7 +7,16 @@ class PinWindow : public QWidget {
     Q_OBJECT
 public:
     explicit PinWindow(const QImage& image);
+    ~PinWindow() override;
     void placeImageAt(const QPoint& globalTopLeft);
+    void rotate(int degrees);
+    void flip();
+
+    // 钉图管理
+    static QList<PinWindow*> all();
+    static void hideAll();
+    static void showAll();
+    static void closeAll();
 
 protected:
     void paintEvent(QPaintEvent*) override;

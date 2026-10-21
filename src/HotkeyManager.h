@@ -22,7 +22,8 @@ signals:
     void activated();
 
 private:
-    static constexpr int kId = 0x5159;
+    static int nextId();
+    const int kId;
     bool m_registered = false;
     QKeySequence m_seq;
 };

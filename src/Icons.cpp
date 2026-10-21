@@ -94,6 +94,20 @@ void paintIcon(QPainter& p, Icon icon, const QRectF& r, const QColor& color)
         path.moveTo(20, 15); path.lineTo(20, 20); path.lineTo(15, 20);
         path.moveTo(9, 20); path.lineTo(4, 20); path.lineTo(4, 15);
         break;
+    case Icon::Scroll:
+        path.addRoundedRect(6, 3.5, 12, 11, 2, 2);
+        path.moveTo(12, 8); path.lineTo(12, 20.5);
+        path.moveTo(8.5, 17); path.lineTo(12, 20.5); path.lineTo(15.5, 17);
+        break;
+    case Icon::History:
+    case Icon::Clock:
+        path.addEllipse(QPointF(12, 12), 8, 8);
+        path.moveTo(12, 7.5); path.lineTo(12, 12); path.lineTo(15, 14);
+        break;
+    case Icon::Rotate:
+        path.moveTo(19, 12); path.arcTo(QRectF(5, 5, 14, 14), 0, 270);
+        path.moveTo(19, 7.5); path.lineTo(19, 12); path.lineTo(14.5, 12);
+        break;
     case Icon::Settings:
         path.addEllipse(QPointF(12, 12), 3, 3);
         path.addEllipse(QPointF(12, 12), 8, 8);

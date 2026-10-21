@@ -12,6 +12,15 @@
 #include <QMessageBox>
 #include <QPainter>
 #include <QPainterPath>
+#include <QTransform>
+
+namespace {
+QList<PinWindow*>& registry()
+{
+    static QList<PinWindow*> list;
+    return list;
+}
+}
 
 PinWindow::PinWindow(const QImage& image)
     : QWidget(nullptr, Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Tool), m_img(image)
@@ -22,6 +31,46 @@ PinWindow::PinWindow(const QImage& image)
     setWindowTitle(QStringLiteral("青影 钉图"));
     m_base = QSizeF(m_img.width() / m_img.devicePixelRatio(), m_img.height() / m_img.devicePixelRatio());
     updateSize();
+    registry().append(this);
+}
+
+PinWindow::~PinWindow() { registry().removeAll(this); }
+
+QList<PinWindow*> PinWindow::all() { return registry(); }
+
+void PinWindow::hideAll()
+{
+    for (PinWindow* w : registry()) w->hide();
+}
+
+void PinWindow::showAll()
+{
+    for (PinWindow* w : registry()) w->show();
+}
+
+void PinWindow::closeAll()
+{
+    const auto list = registry();
+    for (PinWindow* w : list) w->close();
+}
+
+void PinWindow::rotate(int degrees)
+{
+    const qreal dpr = m_img.devicePixelRatio();
+    const QPoint c = geometry().center();
+    m_img = m_img.transformed(QTransform().rotate(degrees));
+    m_img.setDevicePixelRatio(dpr);
+    if (qAbs(degrees) % 180 == 90) m_base = m_base.transposed();
+    updateSize();
+    move(c - rect().center());
+}
+
+void PinWindow::flip()
+{
+    const qreal dpr = m_img.devicePixelRatio();
+    m_img = m_img.flipped(Qt::Horizontal);
+    m_img.setDevicePixelRatio(dpr);
+    update();
 }
 
 void PinWindow::placeImageAt(const QPoint& g) { move(g - QPoint(M, M)); }
@@ -146,6 +195,8 @@ void PinWindow::keyPressEvent(QKeyEvent* e)
     if (e->key() == Qt::Key_Escape) close();
     else if (e->matches(QKeySequence::Copy)) copy();
     else if (e->matches(QKeySequence::Save)) save();
+    else if (e->key() == Qt::Key_R) rotate((e->modifiers() & Qt::ShiftModifier) ? -90 : 90);
+    else if (e->key() == Qt::Key_H) flip();
 }
 
 void PinWindow::enterEvent(QEnterEvent*)
@@ -166,6 +217,9 @@ void PinWindow::contextMenuEvent(QContextMenuEvent* e)
     QMenu menu(this);
     menu.addAction(menuIcon(Icon::Copy), QStringLiteral("复制"), this, &PinWindow::copy);
     menu.addAction(menuIcon(Icon::Save), QStringLiteral("另存为…"), this, &PinWindow::save);
+    menu.addAction(menuIcon(Icon::Rotate), QStringLiteral("顺时针旋转 90°\tR"), this, [this] { rotate(90); });
+    menu.addAction(QStringLiteral("逆时针旋转 90°\tShift+R"), this, [this] { rotate(-90); });
+    menu.addAction(QStringLiteral("水平翻转\tH"), this, &PinWindow::flip);
     menu.addAction(QStringLiteral("原始大小"), this, [this] {
         m_scale = 1;
         updateSize();

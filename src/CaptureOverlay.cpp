@@ -66,7 +66,8 @@ CaptureOverlay::CaptureOverlay(QScreen* screen, const QImage& shot, const QRect&
         case ToolBar::Pin: doPin(); break;
         case ToolBar::Save: doSave(false); break;
         case ToolBar::Cancel: emit finished(); break;
-        case ToolBar::Confirm: doCopy(); break;
+        case ToolBar::Confirm: doDefault(); break;
+        case ToolBar::LongShot: doLongShot(); break;
         }
         setFocus();
     });
@@ -429,6 +430,27 @@ void CaptureOverlay::doPin()
     emit finished();
 }
 
+void CaptureOverlay::doDefault()
+{
+    if (m_longShotMode) return doLongShot();
+    const QString a = Settings::defaultAction();
+    if (a == QLatin1String("save")) doSave(false);
+    else if (a == QLatin1String("pin")) doPin();
+    else doCopy();
+}
+
+void CaptureOverlay::doLongShot()
+{
+    if (m_state != State::Selected) return;
+    const QRect phys = physicalSelection().translated(m_monitor.topLeft());
+    if (phys.height() < 60 || phys.width() < 60) {
+        QMessageBox::information(this, QStringLiteral("长截图"), QStringLiteral("选区太小，请至少选择 60×60 像素。"));
+        return;
+    }
+    emit longShotRequested(phys);
+    emit finished();
+}
+
 void CaptureOverlay::copyHex()
 {
     const QColor c = m_raw.pixelColor(toPhysical(m_cursor));
@@ -587,7 +609,7 @@ void CaptureOverlay::mouseDoubleClickEvent(QMouseEvent* e)
 {
     if (e->button() == Qt::LeftButton && m_state == State::Selected && m_tool == Tool::None &&
         m_sel.contains(e->position().toPoint()))
-        doCopy();
+        doDefault();
 }
 
 void CaptureOverlay::keyPressEvent(QKeyEvent* e)
@@ -596,7 +618,7 @@ void CaptureOverlay::keyPressEvent(QKeyEvent* e)
     switch (e->key()) {
     case Qt::Key_Escape: emit finished(); return;
     case Qt::Key_Return:
-    case Qt::Key_Enter: doCopy(); return;
+    case Qt::Key_Enter: doDefault(); return;
     case Qt::Key_Tab:
         m_controls = !m_controls;
         updateHover(m_cursor);
@@ -619,6 +641,7 @@ void CaptureOverlay::keyPressEvent(QKeyEvent* e)
         case Qt::Key_T: return setTool(Tool::Text);
         case Qt::Key_M: return setTool(Tool::Mosaic);
         case Qt::Key_N: return setTool(Tool::Number);
+        case Qt::Key_L: return doLongShot();
         default: break;
         }
     }

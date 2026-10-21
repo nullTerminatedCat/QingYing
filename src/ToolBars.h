@@ -9,7 +9,7 @@
 class ToolBar : public QWidget {
     Q_OBJECT
 public:
-    enum Id { TRect, TEllipse, TArrow, TPen, TText, TMosaic, TNumber, Undo, Redo, Pin, Save, Cancel, Confirm };
+    enum Id { TRect, TEllipse, TArrow, TPen, TText, TMosaic, TNumber, Undo, Redo, Pin, Save, Cancel, Confirm, LongShot };
     static constexpr int Margin = 0; // 阴影由父遮罩绘制，避免透明边缘吞掉点击
     explicit ToolBar(QWidget* parent);
     void setActive(int id);

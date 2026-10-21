@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(QingYing VERSION 0.1.0 LANGUAGES CXX)
+project(QingYing VERSION 0.2.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -23,6 +23,9 @@ qt_add_executable(QingYing WIN32
     src/CaptureOverlay.cpp src/CaptureOverlay.h
     src/PinWindow.cpp src/PinWindow.h
     src/SettingsDialog.cpp src/SettingsDialog.h
+    src/History.cpp src/History.h
+    src/HistoryWindow.cpp src/HistoryWindow.h
+    src/ScrollCapture.cpp src/ScrollCapture.h
     resources/QingYing.rc
 )
 qt_add_resources(QingYing "app_icons" PREFIX "/" FILES resources/QingYing.ico resources/QingYing.png)
