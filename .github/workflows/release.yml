@@ -29,6 +29,7 @@ jobs:
         run: |
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
           cmake --build build
+          ctest --test-dir build --output-on-failure
 
       - name: Install Inno Setup
         shell: pwsh

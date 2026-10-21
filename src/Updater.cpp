@@ -1,5 +1,6 @@
 #include <QCoreApplication>
 #include "Updater.h"
+#include "Logic.h"
 #include "Icons.h"
 #include "Notify.h"
 #include "Settings.h"
@@ -84,7 +85,7 @@ void Updater::check(bool manual)
             return;
         }
         const QVersionNumber current = QVersionNumber::fromString(QCoreApplication::applicationVersion());
-        if (r.version > current) offer(r);
+        if (Logic::isNewerVersion(r.tag, QCoreApplication::applicationVersion())) offer(r);
         else if (manual) Notify::info(QCoreApplication::translate("QingYing", "已是最新版本"), QCoreApplication::translate("QingYing", "当前版本 %1").arg(current.toString()));
     });
 }
@@ -134,12 +135,8 @@ void Updater::download(const Release& r)
             return;
         }
         const QByteArray data = setup->readAll();
-        const QString actual = QString::fromLatin1(QCryptographicHash::hash(data, QCryptographicHash::Sha256).toHex());
-        QString expected;
-        for (const QString& line : QString::fromUtf8(sums->readAll()).split(QLatin1Char('\n'))) {
-            const QStringList parts = line.simplified().split(QLatin1Char(' '));
-            if (parts.size() >= 2 && parts.last() == r.setupName) expected = parts.first().toLower();
-        }
+        const QString actual = Logic::sha256Hex(data);
+        const QString expected = Logic::expectedSha256(QString::fromUtf8(sums->readAll()), r.setupName);
         if (expected.isEmpty() || expected != actual) {
             QMessageBox::warning(nullptr, QCoreApplication::translate("QingYing", "青影 · 更新"),
                                  QCoreApplication::translate("QingYing", "安装包 SHA-256 校验失败，已放弃安装。\n期望：%1\n实际：%2")

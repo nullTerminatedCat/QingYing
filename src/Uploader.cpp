@@ -1,5 +1,6 @@
 #include <QCoreApplication>
 #include "Uploader.h"
+#include "Logic.h"
 #include "Notify.h"
 #include "Settings.h"
 
@@ -99,19 +100,7 @@ std::unique_ptr<UploadProvider> create(const Config& c)
                                           c.jsonPath, parseHeaders(c.secret), true, QCoreApplication::translate("QingYing", "请求头，每行一个“名称: 值”"));
 }
 
-QString jsonValue(const QByteArray& json, const QString& path)
-{
-    QJsonValue v = QJsonDocument::fromJson(json).object();
-    if (path.trimmed().isEmpty()) return {};
-    for (const QString& key : path.split(QLatin1Char('.'), Qt::SkipEmptyParts)) {
-        bool isIndex = false;
-        const int idx = key.toInt(&isIndex);
-        if (isIndex && v.isArray()) v = v.toArray().at(idx);
-        else if (v.isObject()) v = v.toObject().value(key);
-        else return {};
-    }
-    return v.isString() ? v.toString() : QString();
-}
+QString jsonValue(const QByteArray& json, const QString& path) { return Logic::jsonValue(json, path); }
 
 void upload(const QImage& image, const Config& cfg, std::function<void(QString, QString)> done)
 {

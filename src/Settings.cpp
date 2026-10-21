@@ -1,5 +1,6 @@
 #include <QLocale>
 #include "Settings.h"
+#include "Logic.h"
 
 #include <QCoreApplication>
 #include <QDateTime>
@@ -135,32 +136,9 @@ QString effectiveLanguage()
 
 QString colorFormat() { return store().value("colorFormat", QStringLiteral("hex")).toString(); }
 void setColorFormat(const QString& f) { store().setValue("colorFormat", f); }
-QString formatColor(const QColor& c)
-{
-    const QString f = colorFormat();
-    if (f == QLatin1String("hexlower")) return c.name().toLower();
-    if (f == QLatin1String("rgb")) return QStringLiteral("rgb(%1, %2, %3)").arg(c.red()).arg(c.green()).arg(c.blue());
-    if (f == QLatin1String("rgbplain")) return QStringLiteral("%1, %2, %3").arg(c.red()).arg(c.green()).arg(c.blue());
-    return c.name().toUpper();
-}
+QString formatColor(const QColor& c) { return Logic::formatColor(c, colorFormat()); }
 
-QString expandPattern(const QString& pattern)
-{
-    const QDateTime now = QDateTime::currentDateTime();
-    QString out = pattern;
-    static const QRegularExpression re(QStringLiteral("\\{([^}]*)\\}"));
-    auto it = re.globalMatch(pattern);
-    QList<QPair<QString, QString>> reps;
-    while (it.hasNext()) {
-        const auto m = it.next();
-        reps.append({m.captured(0), now.toString(m.captured(1))});
-    }
-    for (const auto& r : reps) out.replace(r.first, r.second);
-    static const QRegularExpression bad(QStringLiteral("[\\\\/:*?\"<>|]"));
-    out.replace(bad, QStringLiteral("_"));
-    out = out.trimmed();
-    return out.isEmpty() ? now.toString(QStringLiteral("'QingYing_'yyyyMMdd_HHmmss")) : out;
-}
+QString expandPattern(const QString& pattern) { return Logic::expandPattern(pattern, QDateTime::currentDateTime()); }
 
 QString defaultFilePath()
 {

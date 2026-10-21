@@ -1,6 +1,7 @@
 #include <QCoreApplication>
 #include "Theme.h"
 #include "ScrollCapture.h"
+#include "Logic.h"
 #include "HotkeyManager.h"
 #include "Icons.h"
 #include "PinWindow.h"
@@ -201,51 +202,7 @@ void ScrollCapture::step()
     if (m_result.height() >= kMaxHeight) stop(QCoreApplication::translate("QingYing", "已达到最大高度"));
 }
 
-int ScrollCapture::findShift(const QImage& a, const QImage& b)
-{
-    if (a.size() != b.size() || a.height() < 20) return -1;
-    const QImage prev = a.convertToFormat(QImage::Format_RGB32);
-    const QImage cur = b.convertToFormat(QImage::Format_RGB32);
-    const int w = prev.width(), h = prev.height();
-    const int x0 = w > 120 ? 8 : 0;
-    const int x1 = w > 120 ? w - 24 : w; // 忽略滚动条
-    auto rowInfo = [&](const QImage& img, QList<quint64>& hashes, QList<bool>& uniform) {
-        hashes.resize(h);
-        uniform.resize(h);
-        for (int y = 0; y < h; ++y) {
-            const QRgb* row = reinterpret_cast<const QRgb*>(img.constScanLine(y));
-            quint64 hsh = 1469598103934665603ULL;
-            bool uni = true;
-            for (int x = x0; x < x1; ++x) {
-                hsh = (hsh ^ (row[x] & 0xFFFFFF)) * 1099511628211ULL;
-                if (uni && row[x] != row[x0]) uni = false;
-            }
-            hashes[y] = hsh;
-            uniform[y] = uni;
-        }
-    };
-    QList<quint64> hp, hc;
-    QList<bool> up, uc;
-    rowInfo(prev, hp, up);
-    rowInfo(cur, hc, uc);
-    int best = -1;
-    double bestRatio = 0;
-    for (int dy = 0; dy < h - h / 5; ++dy) {
-        int total = 0, match = 0;
-        for (int y = 0; y + dy < h; ++y) {
-            if (up[y + dy] && uc[y]) continue;
-            ++total;
-            if (hp[y + dy] == hc[y]) ++match;
-        }
-        if (total < 8) continue;
-        const double ratio = double(match) / total;
-        if (ratio > bestRatio + 1e-9) {
-            bestRatio = ratio;
-            best = dy;
-        }
-    }
-    return bestRatio >= 0.85 ? best : -1;
-}
+int ScrollCapture::findShift(const QImage& a, const QImage& b) { return Logic::findShift(a, b); }
 
 void ScrollCapture::stop(const QString& reason)
 {

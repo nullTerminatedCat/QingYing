@@ -56,6 +56,7 @@ qt_add_executable(QingYing WIN32
     src/Updater.cpp src/Updater.h src/Notify.h
     src/Secret.cpp src/Secret.h
     src/Uploader.cpp src/Uploader.h
+    src/Logic.cpp src/Logic.h
     resources/QingYing.rc
 )
 # 界面翻译：源码为简体中文，en_US 编译为 .qm 嵌入资源 :/i18n
@@ -90,4 +91,19 @@ if(WINDEPLOYQT)
         COMMAND "${WINDEPLOYQT}" --no-translations --no-compiler-runtime --no-system-d3d-compiler
                 --no-opengl-sw "$<TARGET_FILE:QingYing>"
         VERBATIM)
+endif()
+
+# 单元测试（QtTest）：纯逻辑部分，ctest 运行
+option(QINGYING_BUILD_TESTS "Build unit tests" ON)
+if(QINGYING_BUILD_TESTS)
+    find_package(Qt6 REQUIRED COMPONENTS Test)
+    enable_testing()
+    qt_add_executable(qingying_tests tests/tst_logic.cpp src/Logic.cpp src/Logic.h)
+    set_target_properties(qingying_tests PROPERTIES WIN32_EXECUTABLE OFF)
+    target_link_libraries(qingying_tests PRIVATE Qt6::Gui Qt6::Test)
+    if(MSVC)
+        target_compile_options(qingying_tests PRIVATE /utf-8 /W3 /permissive-)
+    endif()
+    add_test(NAME logic COMMAND qingying_tests)
+    set_tests_properties(logic PROPERTIES ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:${_qtbin}")
 endif()
