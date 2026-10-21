@@ -1,6 +1,8 @@
 #include "Icons.h"
 #include "Style.h"
 
+#include "Theme.h"
+#include <QIconEngine>
 #include <QPainter>
 #include <QPainterPath>
 #include <QPixmap>
@@ -197,12 +199,34 @@ QIcon appIcon()
     return icon;
 }
 
-QIcon menuIcon(Icon i)
-{
-    QPixmap pm(40, 40);
-    pm.fill(Qt::transparent);
-    QPainter p(&pm);
-    paintIcon(p, i, QRectF(4, 4, 32, 32), QColor(0x8E, 0x8E, 0x93)); // 中性灰，浅色与深色菜单下都清晰
-    p.end();
-    return QIcon(pm);
+namespace {
+// 菜单图标在每次绘制时按当前主题取色，主题切换后菜单下次显示即自动更新
+class ThemedIconEngine : public QIconEngine {
+public:
+    explicit ThemedIconEngine(Icon i) : m_icon(i) {}
+    void paint(QPainter* p, const QRect& rect, QIcon::Mode mode, QIcon::State) override
+    {
+        QColor c = Theme::isDark() ? QColor(0xC7, 0xC7, 0xCC) : QColor(0x48, 0x48, 0x4A);
+        if (mode == QIcon::Disabled) c.setAlphaF(0.4f);
+        const qreal s = qMin(rect.width(), rect.height());
+        const QRectF box(rect.x() + (rect.width() - s) / 2, rect.y() + (rect.height() - s) / 2, s, s);
+        p->setRenderHint(QPainter::Antialiasing);
+        paintIcon(*p, m_icon, box.adjusted(s * 0.1, s * 0.1, -s * 0.1, -s * 0.1), c);
+    }
+    QPixmap pixmap(const QSize& size, QIcon::Mode mode, QIcon::State state) override
+    {
+        QPixmap pm(size);
+        pm.fill(Qt::transparent);
+        QPainter p(&pm);
+        paint(&p, QRect(QPoint(0, 0), size), mode, state);
+        return pm;
+    }
+    QIconEngine* clone() const override { return new ThemedIconEngine(m_icon); }
+    QString key() const override { return QStringLiteral("QingYingThemed"); }
+
+private:
+    Icon m_icon;
+};
 }
+
+QIcon menuIcon(Icon i) { return QIcon(new ThemedIconEngine(i)); }

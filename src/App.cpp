@@ -181,6 +181,20 @@ void App::writeSmokeReport()
                         .arg(rec.backend()).arg(rec.estimatedBytes()).toUtf8());
         }
     }
+    if (qEnvironmentVariableIsSet("QINGYING_SMOKE_SHOTS")) {
+        const QString dir = qEnvironmentVariable("QINGYING_SMOKE_SHOTS");
+        QDir().mkpath(dir);
+        SettingsDialog sd([](const QKeySequence&) { return true; });
+        sd.adjustSize();
+        sd.grab().save(dir + QStringLiteral("/settings.png"));
+        HistoryWindow hw;
+        hw.grab().save(dir + QStringLiteral("/history.png"));
+        QMessageBox mb(QMessageBox::Question, QStringLiteral("QingYing"), QStringLiteral("Qt dialog buttons"),
+                       QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+        mb.grab().save(dir + QStringLiteral("/msgbox.png"));
+        m_menu->grab().save(dir + QStringLiteral("/tray.png"));
+        f.write(QStringLiteral("shots=%1\n").arg(dir).toUtf8());
+    }
     if (qEnvironmentVariableIsSet("QINGYING_SMOKE_UPDATE")) {
         QNetworkAccessManager net;
         QNetworkRequest req(QUrl(QString::fromLatin1(Updater::kLatestApi)));

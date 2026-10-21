@@ -63,6 +63,14 @@ qt_add_translations(QingYing
     TS_FILES i18n/qingying_zh_CN.ts i18n/qingying_en_US.ts
     RESOURCE_PREFIX /i18n
     LUPDATE_OPTIONS -no-obsolete)
+# Qt 自带对话框的中文翻译（来自 Qt 安装目录的 qttranslations，缺失时跳过）
+set(_qtbase_qm "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_TRANSLATIONS}/qtbase_zh_CN.qm")
+if(EXISTS "${_qtbase_qm}")
+    set_source_files_properties("${_qtbase_qm}" PROPERTIES QT_RESOURCE_ALIAS qtbase_zh_CN.qm)
+    qt_add_resources(QingYing "qt_i18n" PREFIX "/i18n" FILES "${_qtbase_qm}")
+else()
+    message(WARNING "qtbase_zh_CN.qm not found; Qt dialogs will not be translated")
+endif()
 qt_add_resources(QingYing "app_icons" PREFIX "/" FILES resources/QingYing.ico resources/QingYing.png)
 
 target_compile_definitions(QingYing PRIVATE

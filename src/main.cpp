@@ -28,6 +28,10 @@ int main(int argc, char* argv[])
     const QString lang = Settings::effectiveLanguage();
     if (lang != QLatin1String("zh_CN") && translator.load(QStringLiteral(":/i18n/qingying_%1.qm").arg(lang)))
         QApplication::installTranslator(&translator);
+    // Qt 自带对话框（按钮、文件选择框等）的翻译；英文为 Qt 默认文字，无需加载
+    QTranslator qtTranslator;
+    if (lang != QLatin1String("en_US") && qtTranslator.load(QStringLiteral(":/i18n/qtbase_%1.qm").arg(lang)))
+        QApplication::installTranslator(&qtTranslator);
     QApplication::setApplicationDisplayName(QCoreApplication::translate("QingYing", "青影"));
     QApplication::setOrganizationName(QStringLiteral("QingYing"));
     QApplication::setApplicationVersion(QStringLiteral(QINGYING_VERSION));
