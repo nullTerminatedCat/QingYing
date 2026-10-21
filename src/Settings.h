@@ -24,6 +24,10 @@ void setDefaultAction(const QString& a);
 QString colorFormat(); // hex / hexlower / rgb / rgbplain
 void setColorFormat(const QString& f);
 QString formatColor(const QColor& c);
+int recordFps();
+void setRecordFps(int fps);
+bool recordCursor();
+void setRecordCursor(bool on);
 QString expandPattern(const QString& pattern);
 QString defaultFilePath();
 bool saveImage(const QImage& img, const QString& path);

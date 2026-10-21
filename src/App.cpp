@@ -7,6 +7,8 @@
 #include "QrDecoder.h"
 #include "PinWindow.h"
 #include "ScrollCapture.h"
+#include "RecordSession.h"
+#include "Recorder.h"
 #include "ScreenGrabber.h"
 #include "Settings.h"
 #include "SettingsDialog.h"
@@ -17,6 +19,8 @@
 #include <QFileInfo>
 #include <QImageReader>
 #include <QUrl>
+#include <QProcess>
+#include <chrono>
 #include <QCursor>
 #include <QDir>
 #include <QFile>
@@ -46,6 +50,9 @@ App::App()
                       [this] { QTimer::singleShot(180, this, [this] { startCapture(int(CaptureMode::LongShot)); }); });
     m_menu->addAction(menuIcon(Icon::Picker), QStringLiteral("取色"), this,
                       [this] { QTimer::singleShot(180, this, [this] { startCapture(int(CaptureMode::Pick)); }); });
+    QMenu* rec = m_menu->addMenu(menuIcon(Icon::Record), QStringLiteral("录屏"));
+    rec->addAction(QStringLiteral("录制 MP4"), this, [this] { m_recordGif = false; QTimer::singleShot(180, this, [this] { startCapture(int(CaptureMode::Record)); }); });
+    rec->addAction(QStringLiteral("录制 GIF"), this, [this] { m_recordGif = true; QTimer::singleShot(180, this, [this] { startCapture(int(CaptureMode::Record)); }); });
     m_menu->addSeparator();
     m_pinMenu = m_menu->addMenu(menuIcon(Icon::Pin), QStringLiteral("钉图"));
     m_pinMenu->addAction(QStringLiteral("全部显示"), this, [] { PinWindow::showAll(); });
@@ -70,6 +77,11 @@ App::App()
     });
     m_tray->show();
 
+    connect(m_tray, &QSystemTrayIcon::messageClicked, this, [this] {
+        if (m_lastRecording.isEmpty()) return;
+        QProcess::startDetached(QStringLiteral("explorer.exe"), {QStringLiteral("/select,"), QDir::toNativeSeparators(m_lastRecording)});
+        m_lastRecording.clear();
+    });
     connect(&m_hotkey, &HotkeyManager::activated, this, [this] { startCapture(); });
     const QKeySequence hk = Settings::hotkey();
     const bool ok = m_hotkey.setHotkey(hk);
@@ -124,6 +136,20 @@ void App::writeSmokeReport()
     }
     Ocr::Result ocr;
     std::thread([&] { ocr = Ocr::recognize(txt); }).join();
+    if (qEnvironmentVariableIsSet("QINGYING_SMOKE_RECORD")) {
+        for (auto fmt : {Recorder::Format::Mp4, Recorder::Format::Gif}) {
+            const QString out = QDir::temp().filePath(fmt == Recorder::Format::Mp4 ? QStringLiteral("qy_smoke.mp4") : QStringLiteral("qy_smoke.gif"));
+            QFile::remove(out);
+            Recorder rec(QRect(0, 0, 320, 240), fmt, 15, true, out);
+            QString err;
+            const bool started = rec.start(&err);
+            std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+            rec.stop();
+            f.write(QStringLiteral("record_%1 started=%2 frames=%3 bytes=%4 error=%5\n")
+                        .arg(fmt == Recorder::Format::Mp4 ? QStringLiteral("mp4") : QStringLiteral("gif"))
+                        .arg(started).arg(rec.framesWritten()).arg(QFileInfo(out).size()).arg(err + rec.lastError()).toUtf8());
+        }
+    }
     const QString qrPath = qEnvironmentVariable("QINGYING_SMOKE_QR");
     if (!qrPath.isEmpty()) {
         const auto codes = QrDecoder::decode(QImage(qrPath));
@@ -171,6 +197,28 @@ void App::startLongShot(const QRect& region)
     connect(sc, &ScrollCapture::delivered, this, &App::onDelivered);
     connect(sc, &QObject::destroyed, this, [this] { m_busy = false; });
     sc->start();
+}
+
+void App::startRecording(const QRect& region)
+{
+    if (m_busy) return;
+    m_busy = true;
+    auto* s = new RecordSession(region, m_recordGif ? Recorder::Format::Gif : Recorder::Format::Mp4);
+    connect(s, &QObject::destroyed, this, [this] { m_busy = false; });
+    connect(s, &RecordSession::finished, this, [this](bool ok, const QString& path, const QString& err) {
+        if (ok) {
+            m_lastRecording = path;
+            m_tray->showMessage(QStringLiteral("录制完成"), QStringLiteral("%1\n点击打开所在文件夹").arg(QDir::toNativeSeparators(path)),
+                                appIcon(), 4000);
+        } else {
+            m_tray->showMessage(QStringLiteral("录制失败"), err, QSystemTrayIcon::Warning, 5000);
+        }
+    });
+    QString err;
+    if (!s->begin(&err)) {
+        m_tray->showMessage(QStringLiteral("无法开始录制"), err, QSystemTrayIcon::Warning, 5000);
+        s->close();
+    }
 }
 
 void App::onDelivered(const QImage& image, const QString& path)
@@ -248,6 +296,9 @@ void App::startCapture(int mode)
             m_tray->showMessage(QStringLiteral("已复制颜色"), t, appIcon(), 1500);
         });
         connect(o, &CaptureOverlay::delivered, this, &App::onDelivered);
+        connect(o, &CaptureOverlay::recordRequested, this, [this](const QRect& r) {
+            QTimer::singleShot(250, this, [this, r] { startRecording(r); });
+        });
         connect(o, &CaptureOverlay::longShotRequested, this, [this](const QRect& r) {
             QTimer::singleShot(250, this, [this, r] { startLongShot(r); });
         });

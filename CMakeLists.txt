@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(QingYing VERSION 0.2.0 LANGUAGES CXX)
+project(QingYing VERSION 0.3.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -49,6 +49,9 @@ qt_add_executable(QingYing WIN32
     src/Ocr.cpp src/Ocr.h
     src/Recognize.cpp src/Recognize.h
     src/QrDecoder.cpp src/QrDecoder.h
+    src/Recorder.cpp src/Recorder.h
+    src/RecordSession.cpp src/RecordSession.h
+    third_party/gif/gif.h
     resources/QingYing.rc
 )
 qt_add_resources(QingYing "app_icons" PREFIX "/" FILES resources/QingYing.ico resources/QingYing.png)
@@ -56,7 +59,7 @@ qt_add_resources(QingYing "app_icons" PREFIX "/" FILES resources/QingYing.ico re
 target_compile_definitions(QingYing PRIVATE
     UNICODE _UNICODE NOMINMAX WIN32_LEAN_AND_MEAN
     QINGYING_VERSION="${PROJECT_VERSION}")
-target_link_libraries(QingYing PRIVATE Qt6::Widgets ZXing::ZXing user32 gdi32 dwmapi windowsapp)
+target_link_libraries(QingYing PRIVATE Qt6::Widgets ZXing::ZXing user32 gdi32 dwmapi windowsapp mfplat mfreadwrite mfuuid ole32)
 if(MSVC)
     target_compile_options(QingYing PRIVATE /utf-8 /W3 /permissive- /bigobj)
 endif()

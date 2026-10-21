@@ -31,4 +31,6 @@ private:
     QSpinBox* m_history;
     QButtonGroup* m_action;
     class QComboBox* m_colorFmt;
+    QButtonGroup* m_fps;
+    QCheckBox* m_recCursor;
 };

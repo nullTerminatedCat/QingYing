@@ -174,6 +174,22 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, Q
     h->addWidget(m_history);
     h->addStretch();
 
+    root->addWidget(card(this, QStringLiteral("录屏"), b));
+    h = row(b, QStringLiteral("帧率"));
+    m_fps = new QButtonGroup(this);
+    for (int f : {10, 15, 30}) {
+        auto* s = new QPushButton(QStringLiteral("%1 fps").arg(f), this);
+        s->setObjectName(QStringLiteral("seg"));
+        s->setCheckable(true);
+        s->setChecked(Settings::recordFps() == f);
+        m_fps->addButton(s, f);
+        h->addWidget(s);
+    }
+    h->addStretch();
+    m_recCursor = new QCheckBox(QStringLiteral("录制鼠标指针"), this);
+    m_recCursor->setChecked(Settings::recordCursor());
+    b->addWidget(m_recCursor);
+
     root->addWidget(card(this, QStringLiteral("常规"), b));
     m_autostart = new QCheckBox(QStringLiteral("开机时自动启动青影"), this);
     m_autostart->setChecked(Settings::autostart());
@@ -226,5 +242,7 @@ void SettingsDialog::save()
     Settings::setDefaultAction(QString::fromLatin1(keys[qBound(0, m_action->checkedId(), 2)]));
     Settings::setHistorySize(m_history->value());
     Settings::setColorFormat(m_colorFmt->currentData().toString());
+    Settings::setRecordFps(m_fps->checkedId() > 0 ? m_fps->checkedId() : 15);
+    Settings::setRecordCursor(m_recCursor->isChecked());
     accept();
 }

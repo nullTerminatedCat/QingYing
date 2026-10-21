@@ -23,6 +23,7 @@ public:
     void startCapture(int mode = 0);
     void startDelayedCapture(int seconds);
     void startLongShot(const QRect& physicalRegion);
+    void startRecording(const QRect& physicalRegion);
     void openSettings();
     void openHistory();
     void showAbout();
@@ -47,4 +48,6 @@ private:
     QPointer<SettingsDialog> m_settings;
     QPointer<HistoryWindow> m_history;
     bool m_busy = false;
+    bool m_recordGif = false;
+    QString m_lastRecording;
 };

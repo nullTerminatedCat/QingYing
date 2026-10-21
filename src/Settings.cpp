@@ -71,6 +71,15 @@ QString defaultAction()
 }
 void setDefaultAction(const QString& a) { store().setValue("defaultAction", a); }
 
+int recordFps()
+{
+    const int f = store().value("recordFps", 15).toInt();
+    return (f == 10 || f == 30) ? f : 15;
+}
+void setRecordFps(int fps) { store().setValue("recordFps", fps); }
+bool recordCursor() { return store().value("recordCursor", true).toBool(); }
+void setRecordCursor(bool on) { store().setValue("recordCursor", on); }
+
 QString colorFormat() { return store().value("colorFormat", QStringLiteral("hex")).toString(); }
 void setColorFormat(const QString& f) { store().setValue("colorFormat", f); }
 QString formatColor(const QColor& c)
