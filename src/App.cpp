@@ -43,7 +43,9 @@ App::App()
     for (int s : {3, 5, 10})
         delay->addAction(QStringLiteral("%1 秒后").arg(s), this, [this, s] { startDelayedCapture(s); });
     m_menu->addAction(menuIcon(Icon::Scroll), QStringLiteral("长截图（滚动）"), this,
-                      [this] { QTimer::singleShot(180, this, [this] { startCapture(true); }); });
+                      [this] { QTimer::singleShot(180, this, [this] { startCapture(int(CaptureMode::LongShot)); }); });
+    m_menu->addAction(menuIcon(Icon::Picker), QStringLiteral("取色"), this,
+                      [this] { QTimer::singleShot(180, this, [this] { startCapture(int(CaptureMode::Pick)); }); });
     m_menu->addSeparator();
     m_pinMenu = m_menu->addMenu(menuIcon(Icon::Pin), QStringLiteral("钉图"));
     m_pinMenu->addAction(QStringLiteral("全部显示"), this, [] { PinWindow::showAll(); });
@@ -217,7 +219,7 @@ void App::openHistory()
     m_history->activateWindow();
 }
 
-void App::startCapture(bool longShot)
+void App::startCapture(int mode)
 {
     if (!m_overlays.isEmpty() || m_busy) return;
     if (m_settings && m_settings->isVisible()) return;
@@ -241,7 +243,10 @@ void App::startCapture(bool longShot)
     for (const Shot& sh : shots) {
         auto* o = new CaptureOverlay(sh.screen, sh.image, sh.monitor, &m_detector);
         connect(o, &CaptureOverlay::finished, this, &App::endCapture, Qt::QueuedConnection);
-        o->setLongShotMode(longShot);
+        o->setMode(CaptureMode(mode));
+        connect(o, &CaptureOverlay::colorPicked, this, [this](const QString& t) {
+            m_tray->showMessage(QStringLiteral("已复制颜色"), t, appIcon(), 1500);
+        });
         connect(o, &CaptureOverlay::delivered, this, &App::onDelivered);
         connect(o, &CaptureOverlay::longShotRequested, this, [this](const QRect& r) {
             QTimer::singleShot(250, this, [this, r] { startLongShot(r); });

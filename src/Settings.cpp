@@ -4,6 +4,7 @@
 #include <QDateTime>
 #include <QDir>
 #include <QFileInfo>
+#include <QColor>
 #include <QImage>
 #include <QRegularExpression>
 #include <QSettings>
@@ -69,6 +70,17 @@ QString defaultAction()
     return (a == QLatin1String("save") || a == QLatin1String("pin")) ? a : QStringLiteral("copy");
 }
 void setDefaultAction(const QString& a) { store().setValue("defaultAction", a); }
+
+QString colorFormat() { return store().value("colorFormat", QStringLiteral("hex")).toString(); }
+void setColorFormat(const QString& f) { store().setValue("colorFormat", f); }
+QString formatColor(const QColor& c)
+{
+    const QString f = colorFormat();
+    if (f == QLatin1String("hexlower")) return c.name().toLower();
+    if (f == QLatin1String("rgb")) return QStringLiteral("rgb(%1, %2, %3)").arg(c.red()).arg(c.green()).arg(c.blue());
+    if (f == QLatin1String("rgbplain")) return QStringLiteral("%1, %2, %3").arg(c.red()).arg(c.green()).arg(c.blue());
+    return c.name().toUpper();
+}
 
 QString expandPattern(const QString& pattern)
 {

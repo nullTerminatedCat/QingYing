@@ -174,7 +174,7 @@ CaptureOverlay::Handle CaptureOverlay::handleAt(const QPoint& p) const
 
 void CaptureOverlay::updateHover(const QPoint& pos)
 {
-    if (m_state != State::Idle || m_passive) return;
+    if (m_state != State::Idle || m_passive || m_mode == CaptureMode::Pick) return;
     const QRect phys = m_detector->hitTest(m_monitor.topLeft() + toPhysical(pos), m_controls);
     QRect h = toLogical(phys);
     if (h.isEmpty()) h = rect();
@@ -435,7 +435,17 @@ void CaptureOverlay::doPin()
 
 void CaptureOverlay::doDefault()
 {
-    if (m_longShotMode) return doLongShot();
+    if (m_mode == CaptureMode::LongShot) return doLongShot();
+    if (m_mode == CaptureMode::Record) {
+        if (m_state != State::Selected) return;
+        QRect phys = physicalSelection().translated(m_monitor.topLeft());
+        phys.setWidth(phys.width() & ~1);
+        phys.setHeight(phys.height() & ~1);
+        if (phys.width() < 16 || phys.height() < 16) return;
+        emit recordRequested(phys);
+        emit finished();
+        return;
+    }
     const QString a = Settings::defaultAction();
     if (a == QLatin1String("save")) doSave(false);
     else if (a == QLatin1String("pin")) doPin();
@@ -466,8 +476,10 @@ void CaptureOverlay::doLongShot()
 
 void CaptureOverlay::copyHex()
 {
-    const QColor c = m_raw.pixelColor(toPhysical(m_cursor));
-    QGuiApplication::clipboard()->setText(c.name().toUpper());
+    const QString text = Settings::formatColor(m_raw.pixelColor(toPhysical(m_cursor)));
+    QGuiApplication::clipboard()->setText(text);
+    emit colorPicked(text);
+    if (m_mode == CaptureMode::Pick) emit finished();
 }
 
 bool CaptureOverlay::magnifierVisible() const
@@ -491,6 +503,10 @@ void CaptureOverlay::mousePressEvent(QMouseEvent* e)
         return;
     }
     if (e->button() != Qt::LeftButton) return;
+    if (m_mode == CaptureMode::Pick) {
+        copyHex();
+        return;
+    }
     if (m_editing) {
         commitText();
         if (m_tool == Tool::Text) return;
@@ -557,6 +573,10 @@ void CaptureOverlay::mouseMoveEvent(QMouseEvent* e)
     const QPoint pos = e->position().toPoint();
     m_cursor = pos;
     m_inside = true;
+    if (m_mode == CaptureMode::Pick) {
+        update();
+        return;
+    }
     if (m_state == State::Idle) {
         updateHover(pos);
     } else if (m_state == State::Selecting && (e->buttons() & Qt::LeftButton)) {
@@ -738,6 +758,14 @@ void CaptureOverlay::paintEvent(QPaintEvent*)
             Style::paintPill(p, at, label);
         }
     }
+    if (m_mode != CaptureMode::Normal && m_inside) {
+        static const QString tips[] = {QString(), QStringLiteral("长截图：框选要滚动的区域后按 Enter 开始"),
+                                       QStringLiteral("取色：单击或按 C 复制颜色 · Esc 退出"),
+                                       QStringLiteral("录屏：框选录制区域后按 Enter 开始")};
+        const QString tip = tips[int(m_mode)];
+        const QSizeF ts = Style::pillSize(tip);
+        Style::paintPill(p, QPointF((width() - ts.width()) / 2, 24), tip);
+    }
     if (m_bar->isVisible()) Style::paintShadow(p, QRectF(m_bar->geometry()), 14);
     if (m_styleBar->isVisible()) Style::paintShadow(p, QRectF(m_styleBar->geometry()), 12);
     if (magnifierVisible()) paintMagnifier(p);
@@ -785,11 +813,12 @@ void CaptureOverlay::paintMagnifier(QPainter& p)
     p.setBrush(col);
     p.setPen(QPen(QColor(255, 255, 255, 120), 1));
     p.drawRoundedRect(QRectF(info.left() + 10, info.top() + 9, 12, 12), 3, 3);
+    const QString colorText = Settings::formatColor(col);
     QFont mono(QStringLiteral("Consolas"));
     mono.setPixelSize(12);
     p.setFont(mono);
     p.setPen(Qt::white);
-    p.drawText(QRectF(info.left() + 30, info.top() + 6, kMag - 36, 18), Qt::AlignVCenter | Qt::AlignLeft, col.name().toUpper());
+    p.drawText(QRectF(info.left() + 30, info.top() + 6, kMag - 36, 18), Qt::AlignVCenter | Qt::AlignLeft, colorText.left(14));
     QFont small(Style::uiFontFamily());
     small.setPixelSize(11);
     p.setFont(small);

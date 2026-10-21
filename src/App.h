@@ -20,7 +20,7 @@ public:
     App();
     ~App() override;
 
-    void startCapture(bool longShot = false);
+    void startCapture(int mode = 0);
     void startDelayedCapture(int seconds);
     void startLongShot(const QRect& physicalRegion);
     void openSettings();

@@ -15,6 +15,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSpinBox>
+#include <QComboBox>
 #include <QStyle>
 #include <QVBoxLayout>
 
@@ -69,6 +70,7 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, Q
         QPushButton#primary:hover { background: #3D57E8; }
         QPushButton#seg { border-radius: 8px; padding: 5px 18px; }
         QPushButton#seg:checked { background: #4F6BFF; color: white; border: 1px solid #4F6BFF; }
+        QComboBox { background: #FFFFFF; border: 1px solid rgba(0,0,0,30); border-radius: 8px; padding: 4px 8px; min-width: 160px; }
         QSpinBox { background: #FFFFFF; border: 1px solid rgba(0,0,0,30); border-radius: 8px; padding: 4px 8px; min-width: 90px; }
         QCheckBox { font-size: 13px; spacing: 8px; }
         QCheckBox::indicator { width: 34px; height: 20px; border-radius: 10px; background: #D5D7DE; }
@@ -154,6 +156,15 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, Q
     auto* actHint = new QLabel(QStringLiteral("按 Enter、双击选区或点击 ✓ 时执行"), this);
     actHint->setObjectName(QStringLiteral("hint"));
     b->addWidget(actHint);
+    h = row(b, QStringLiteral("取色格式"));
+    m_colorFmt = new QComboBox(this);
+    m_colorFmt->addItem(QStringLiteral("#4F6BFF（HEX 大写）"), QStringLiteral("hex"));
+    m_colorFmt->addItem(QStringLiteral("#4f6bff（HEX 小写）"), QStringLiteral("hexlower"));
+    m_colorFmt->addItem(QStringLiteral("rgb(79, 107, 255)"), QStringLiteral("rgb"));
+    m_colorFmt->addItem(QStringLiteral("79, 107, 255"), QStringLiteral("rgbplain"));
+    m_colorFmt->setCurrentIndex(qMax(0, m_colorFmt->findData(Settings::colorFormat())));
+    h->addWidget(m_colorFmt);
+    h->addStretch();
     h = row(b, QStringLiteral("历史记录"));
     m_history = new QSpinBox(this);
     m_history->setRange(0, 500);
@@ -214,5 +225,6 @@ void SettingsDialog::save()
     static const char* keys[3] = {"copy", "save", "pin"};
     Settings::setDefaultAction(QString::fromLatin1(keys[qBound(0, m_action->checkedId(), 2)]));
     Settings::setHistorySize(m_history->value());
+    Settings::setColorFormat(m_colorFmt->currentData().toString());
     accept();
 }

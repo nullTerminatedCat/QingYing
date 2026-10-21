@@ -3,6 +3,7 @@
 #include <QString>
 
 class QImage;
+class QColor;
 
 namespace Settings {
 QKeySequence defaultHotkey();
@@ -20,6 +21,9 @@ int historySize();
 void setHistorySize(int n);
 QString defaultAction(); // "copy" / "save" / "pin"
 void setDefaultAction(const QString& a);
+QString colorFormat(); // hex / hexlower / rgb / rgbplain
+void setColorFormat(const QString& f);
+QString formatColor(const QColor& c);
 QString expandPattern(const QString& pattern);
 QString defaultFilePath();
 bool saveImage(const QImage& img, const QString& path);

@@ -30,4 +30,5 @@ private:
     QCheckBox* m_autostart;
     QSpinBox* m_history;
     QButtonGroup* m_action;
+    class QComboBox* m_colorFmt;
 };

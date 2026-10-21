@@ -12,6 +12,8 @@ class StyleBar;
 class ToolBar;
 class WindowDetector;
 
+enum class CaptureMode { Normal, LongShot, Pick, Record };
+
 // 单个显示器上的冻结截图遮罩（每屏一个，保证混合 DPI 下像素精确）
 class CaptureOverlay : public QWidget {
     Q_OBJECT
@@ -26,6 +28,8 @@ signals:
     void finished();
     // 请求对选区（全局物理像素）进行滚动长截图
     void longShotRequested(const QRect& physicalGlobal);
+    void recordRequested(const QRect& physicalGlobal);
+    void colorPicked(const QString& text);
     // 截图已产出（复制/保存/钉图），savedPath 非空表示已写入文件
     void delivered(const QImage& image, const QString& savedPath);
 
@@ -73,9 +77,9 @@ private:
     void doLongShot();
     void doRecognize(bool qr);
 public:
-    void setLongShotMode(bool on) { m_longShotMode = on; }
+    void setMode(CaptureMode m) { m_mode = m; }
 private:
-    bool m_longShotMode = false;
+    CaptureMode m_mode = CaptureMode::Normal;
     void copyHex();
     void paintMagnifier(QPainter& p);
     bool magnifierVisible() const;
