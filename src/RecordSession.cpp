@@ -162,7 +162,8 @@ bool RecordSession::begin(QString* error)
 void RecordSession::refresh()
 {
     const qint64 s = m_rec->elapsedMs() / 1000;
-    m_time->setText(QStringLiteral("%1:%2").arg(s / 60, 2, 10, QLatin1Char('0')).arg(s % 60, 2, 10, QLatin1Char('0')));
+    const double mb = m_rec->estimatedBytes() / 1048576.0;
+    m_time->setText(QStringLiteral("%1:%2  %3 MB").arg(s / 60, 2, 10, QLatin1Char('0')).arg(s % 60, 2, 10, QLatin1Char('0')).arg(mb, 0, 'f', 1));
 }
 
 void RecordSession::finish()

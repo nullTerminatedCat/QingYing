@@ -175,9 +175,10 @@ void App::writeSmokeReport()
             const bool started = rec.start(&err);
             std::this_thread::sleep_for(std::chrono::milliseconds(1500));
             rec.stop();
-            f.write(QStringLiteral("record_%1 started=%2 frames=%3 bytes=%4 error=%5\n")
+            f.write(QStringLiteral("record_%1 started=%2 backend=%6 frames=%3 bytes=%4 est=%7 error=%5\n")
                         .arg(fmt == Recorder::Format::Mp4 ? QStringLiteral("mp4") : QStringLiteral("gif"))
-                        .arg(started).arg(rec.framesWritten()).arg(QFileInfo(out).size()).arg(err + rec.lastError()).toUtf8());
+                        .arg(started).arg(rec.framesWritten()).arg(QFileInfo(out).size()).arg(err + rec.lastError())
+                        .arg(rec.backend()).arg(rec.estimatedBytes()).toUtf8());
         }
     }
     if (qEnvironmentVariableIsSet("QINGYING_SMOKE_UPDATE")) {

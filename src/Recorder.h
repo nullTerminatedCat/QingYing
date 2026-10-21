@@ -6,7 +6,7 @@
 #include <memory>
 #include <thread>
 
-// 区域录屏：GDI BitBlt 抓帧，编码为 MP4（Media Foundation H.264）或 GIF（gif.h）
+// 区域录屏：Desktop Duplication 抓帧（不可用时回退 GDI BitBlt），编码为 MP4（Media Foundation H.264）或 GIF（gif.h）
 class Recorder : public QObject {
     Q_OBJECT
 public:
@@ -22,6 +22,8 @@ public:
     QString outputPath() const { return m_path; }
     QString lastError() const { return m_error; }
     int framesWritten() const { return m_frames; }
+    qint64 estimatedBytes() const { return m_bytes; }
+    QString backend() const { return m_backend; } // dxgi / gdi / dxgi+gdi，仅在 stop() 后读取
 
 private:
     void run();
@@ -31,6 +33,8 @@ private:
     bool m_cursor;
     QString m_path;
     QString m_error;
+    QString m_backend;
+    std::atomic<qint64> m_bytes{0};
     std::thread m_thread;
     std::atomic<bool> m_stop{false};
     std::atomic<bool> m_paused{false};
