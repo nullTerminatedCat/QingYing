@@ -1,7 +1,9 @@
 #include <QCoreApplication>
 #include "Theme.h"
 #include "App.h"
+#include "Language.h"
 #include <windows.h>
+#include <dwmapi.h>
 #include "Recognize.h"
 #include "Diagnostics.h"
 #include "EditRequest.h"
@@ -70,6 +72,87 @@ App::App()
         "QMenu::item:selected{background:rgba(79,107,255,31);color:#1C1C1E;}"
         "QMenu::separator{height:1px;background:rgba(0,0,0,15);margin:5px 8px;}"
         "QMenu::icon{padding-left:8px;}"));
+    buildMenu();
+    connect(m_menu, &QMenu::aboutToShow, this, &App::updateMenu);
+
+    EditRequest::setHandler([this](const QImage& img, const QPoint& pos, bool hasPos, QWidget* src) { editImage(img, pos, hasPos, src); });
+
+    m_tray = new QSystemTrayIcon(appIcon(), this);
+    m_tray->setContextMenu(m_menu);
+    connect(m_tray, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason r) {
+        if (r == QSystemTrayIcon::Trigger) QTimer::singleShot(120, this, [this] { startCapture(); });
+    });
+    m_tray->show();
+    g_tray = m_tray;
+    m_updater = new Updater(this);
+    if (!qEnvironmentVariableIsSet("QINGYING_SMOKE_REPORT"))
+        QTimer::singleShot(8000, m_updater, &Updater::maybeAutoCheck);
+
+    connect(m_tray, &QSystemTrayIcon::messageClicked, this, [this] {
+        if (m_lastRecording.isEmpty()) return;
+        QProcess::startDetached(QStringLiteral("explorer.exe"), {QStringLiteral("/select,"), QDir::toNativeSeparators(m_lastRecording)});
+        m_lastRecording.clear();
+    });
+    connect(&m_hotkey, &HotkeyManager::activated, this, [this] { startCapture(); });
+    const QKeySequence hk = Settings::hotkey();
+    const bool ok = m_hotkey.setHotkey(hk);
+    updateMenu();
+    const QString hkText = hk.toString(QKeySequence::NativeText);
+    if (ok)
+        m_tray->showMessage(QCoreApplication::translate("QingYing", "青影已在后台运行"), QCoreApplication::translate("QingYing", "按 %1 开始截图").arg(hkText),
+                            appIcon(), 3000);
+    else
+        m_tray->showMessage(QCoreApplication::translate("QingYing", "快捷键冲突"),
+                            QCoreApplication::translate("QingYing", "%1 已被其他程序占用，请在设置中更换。也可单击托盘图标截图。").arg(hkText),
+                            QSystemTrayIcon::Warning, 6000);
+    writeSmokeReport();
+    if (qEnvironmentVariableIsSet("QINGYING_SMOKE_EDIT") && qEnvironmentVariableIsSet("QINGYING_SMOKE_REPORT")) {
+        // 在报告写完之后再运行（报告生成期间可能有嵌套事件循环，提前运行会与报告文件写入交错）
+        const QString path = qEnvironmentVariable("QINGYING_SMOKE_REPORT");
+        // 钉图编辑流程自检：编辑 → 原钉图隐藏、出现预选遮罩 → 取消 → 原钉图恢复
+        QImage img(240, 160, QImage::Format_RGB32);
+        img.fill(QColor(0x4F, 0x6B, 0xFF));
+        auto* pin = new PinWindow(img);
+        pin->placeImageAt(QPoint(200, 200));
+        pin->show();
+        QTimer::singleShot(600, this, [this, pin, path] {
+            Diagnostics::log(QStringLiteral("smoke: edit request"));
+            EditRequest::request(pin->grab().toImage(), QPoint(200, 200), true, pin);
+            Diagnostics::log(QStringLiteral("smoke: edit returned overlays=%1").arg(m_overlays.size()));
+            {
+                QFile f(path);
+                const bool during = !m_overlays.isEmpty() && !pin->isVisible();
+                const QString dbg = QStringLiteral("overlays=%1 pin_visible=%2 busy=%3 handler=%4").arg(m_overlays.size()).arg(pin->isVisible()).arg(m_busy).arg(EditRequest::available());
+                endCapture();
+                Diagnostics::log(QStringLiteral("smoke: edit ended pin_visible=%1 path=%2").arg(pin->isVisible()).arg(path));
+                if (f.open(QIODevice::Append | QIODevice::Text))
+                    f.write(QStringLiteral("edit_overlay=%1 edit_restored=%2 %3\n").arg(during).arg(pin->isVisible()).arg(dbg).toUtf8());
+                pin->close();
+            }
+        });
+    }
+    if (qEnvironmentVariableIsSet("QINGYING_SMOKE_QUIT_OCR")) {
+        // 退出自检：OCR 进行中时退出，进程应正常结束且不崩溃
+        QTimer::singleShot(500, this, [] {
+            QImage img(800, 200, QImage::Format_RGB32);
+            img.fill(Qt::white);
+            QPainter p(&img);
+            p.setFont(QFont(QStringLiteral("Microsoft YaHei UI"), 32));
+            p.drawText(img.rect(), Qt::AlignCenter, QStringLiteral("quit while OCR"));
+            p.end();
+            Recognize::ocr(img);
+            Diagnostics::log(QStringLiteral("smoke: quitting during OCR"));
+            QApplication::quit();
+        });
+    }
+}
+
+// 托盘菜单（语言切换后重建）
+void App::buildMenu()
+{
+    for (QAction* a : m_menu->actions())
+        if (a->menu()) a->menu()->deleteLater();
+    m_menu->clear();
     m_captureAct = m_menu->addAction(menuIcon(Icon::Capture), QCoreApplication::translate("QingYing", "截图"));
     connect(m_captureAct, &QAction::triggered, this, [this] { QTimer::singleShot(180, this, [this] { startCapture(); }); });
     QMenu* delay = m_menu->addMenu(menuIcon(Icon::Clock), QCoreApplication::translate("QingYing", "延时截图"));
@@ -133,52 +216,17 @@ App::App()
                              .arg(st.join(QLatin1Char(' '))));
         QApplication::quit();
     });
-    connect(m_menu, &QMenu::aboutToShow, this, &App::updateMenu);
+}
 
-    EditRequest::setHandler([this](const QImage& img, const QPoint& pos, bool hasPos, QWidget* src) { editImage(img, pos, hasPos, src); });
-
-    m_tray = new QSystemTrayIcon(appIcon(), this);
-    m_tray->setContextMenu(m_menu);
-    connect(m_tray, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason r) {
-        if (r == QSystemTrayIcon::Trigger) QTimer::singleShot(120, this, [this] { startCapture(); });
-    });
-    m_tray->show();
-    g_tray = m_tray;
-    m_updater = new Updater(this);
-    if (!qEnvironmentVariableIsSet("QINGYING_SMOKE_REPORT"))
-        QTimer::singleShot(8000, m_updater, &Updater::maybeAutoCheck);
-
-    connect(m_tray, &QSystemTrayIcon::messageClicked, this, [this] {
-        if (m_lastRecording.isEmpty()) return;
-        QProcess::startDetached(QStringLiteral("explorer.exe"), {QStringLiteral("/select,"), QDir::toNativeSeparators(m_lastRecording)});
-        m_lastRecording.clear();
-    });
-    connect(&m_hotkey, &HotkeyManager::activated, this, [this] { startCapture(); });
-    const QKeySequence hk = Settings::hotkey();
-    const bool ok = m_hotkey.setHotkey(hk);
+void App::retranslate()
+{
+    buildMenu();
+    QApplication::setApplicationDisplayName(QCoreApplication::translate("QingYing", "青影"));
     updateMenu();
-    const QString hkText = hk.toString(QKeySequence::NativeText);
-    if (ok)
-        m_tray->showMessage(QCoreApplication::translate("QingYing", "青影已在后台运行"), QCoreApplication::translate("QingYing", "按 %1 开始截图").arg(hkText),
-                            appIcon(), 3000);
-    else
-        m_tray->showMessage(QCoreApplication::translate("QingYing", "快捷键冲突"),
-                            QCoreApplication::translate("QingYing", "%1 已被其他程序占用，请在设置中更换。也可单击托盘图标截图。").arg(hkText),
-                            QSystemTrayIcon::Warning, 6000);
-    writeSmokeReport();
-    if (qEnvironmentVariableIsSet("QINGYING_SMOKE_QUIT_OCR")) {
-        // 退出自检：OCR 进行中时退出，进程应正常结束且不崩溃
-        QTimer::singleShot(500, this, [] {
-            QImage img(800, 200, QImage::Format_RGB32);
-            img.fill(Qt::white);
-            QPainter p(&img);
-            p.setFont(QFont(QStringLiteral("Microsoft YaHei UI"), 32));
-            p.drawText(img.rect(), Qt::AlignCenter, QStringLiteral("quit while OCR"));
-            p.end();
-            Recognize::ocr(img);
-            Diagnostics::log(QStringLiteral("smoke: quitting during OCR"));
-            QApplication::quit();
-        });
+    if (m_history) { // 历史窗口重新创建以刷新文字
+        const bool visible = m_history->isVisible();
+        m_history->close();
+        if (visible) QTimer::singleShot(0, this, &App::openHistory);
     }
 }
 
@@ -192,26 +240,6 @@ void App::writeSmokeReport()
 {
     const QString path = qEnvironmentVariable("QINGYING_SMOKE_REPORT");
     if (path.isEmpty()) return;
-    if (qEnvironmentVariableIsSet("QINGYING_SMOKE_EDIT")) {
-        // 钉图编辑流程自检：编辑 → 原钉图隐藏、出现预选遮罩 → 取消 → 原钉图恢复
-        QImage img(240, 160, QImage::Format_RGB32);
-        img.fill(QColor(0x4F, 0x6B, 0xFF));
-        auto* pin = new PinWindow(img);
-        pin->placeImageAt(QPoint(200, 200));
-        pin->show();
-        QTimer::singleShot(600, this, [this, pin, path] {
-            EditRequest::request(pin->grab().toImage(), QPoint(200, 200), true, pin);
-            QTimer::singleShot(1200, this, [this, pin, path] {
-                QFile f(path);
-                const bool during = !m_overlays.isEmpty() && !pin->isVisible();
-                const QString dbg = QStringLiteral("overlays=%1 pin_visible=%2 busy=%3 handler=%4").arg(m_overlays.size()).arg(pin->isVisible()).arg(m_busy).arg(EditRequest::available());
-                endCapture();
-                if (f.open(QIODevice::Append | QIODevice::Text))
-                    f.write(QStringLiteral("edit_overlay=%1 edit_restored=%2 %3\n").arg(during).arg(pin->isVisible()).arg(dbg).toUtf8());
-                pin->close();
-            });
-        });
-    }
     QFile f(path);
     if (f.open(QIODevice::WriteOnly | QIODevice::Text))
         f.write(QStringLiteral("tray_available=%1\ntray_visible=%2\nhotkey=%3\nhotkey_registered=%4\nscreens=%5\n")
@@ -242,16 +270,18 @@ void App::writeSmokeReport()
     Ocr::Result ocr;
     std::thread([&] { ocr = Ocr::recognize(txt); }).join();
     if (qEnvironmentVariableIsSet("QINGYING_SMOKE_RECORD")) {
-        for (auto fmt : {Recorder::Format::Mp4, Recorder::Format::Gif}) {
+        for (int variant = 0; variant < 3; ++variant) {
+            const auto fmt = variant == 0 ? Recorder::Format::Mp4 : Recorder::Format::Gif;
             const QString out = QDir::temp().filePath(fmt == Recorder::Format::Mp4 ? QStringLiteral("qy_smoke.mp4") : QStringLiteral("qy_smoke.gif"));
             QFile::remove(out);
             Recorder rec(QRect(0, 0, 320, 240), fmt, 15, true, out);
+            rec.setGifDither(variant == 2);
             QString err;
             const bool started = rec.start(&err);
             std::this_thread::sleep_for(std::chrono::milliseconds(1500));
             rec.stop();
             f.write(QStringLiteral("record_%1 started=%2 backend=%6 frames=%3 bytes=%4 est=%7 error=%5\n")
-                        .arg(fmt == Recorder::Format::Mp4 ? QStringLiteral("mp4") : QStringLiteral("gif"))
+                        .arg(variant == 0 ? QStringLiteral("mp4") : variant == 1 ? QStringLiteral("gif") : QStringLiteral("gif_dither"))
                         .arg(started).arg(rec.framesWritten()).arg(QFileInfo(out).size()).arg(err + rec.lastError())
                         .arg(rec.backend()).arg(rec.estimatedBytes()).toUtf8());
         }
@@ -308,6 +338,18 @@ void App::writeSmokeReport()
         QTimer::singleShot(30000, &loop, &QEventLoop::quit);
         loop.exec();
         f.write(QStringLiteral("upload_url=%1 err=%2\n").arg(url, err).toUtf8());
+    }
+    {
+        // 运行时切换语言：重建托盘菜单后第一项文字应随之变化，再切回
+        const QString orig = Language::current();
+        const QString other = orig == QLatin1String("en_US") ? QStringLiteral("zh_CN") : QStringLiteral("en_US");
+        Language::apply(other);
+        retranslate();
+        const QString switched = m_menu->actions().value(0) ? m_menu->actions().first()->text() : QString();
+        Language::apply(orig);
+        retranslate();
+        const QString back = m_menu->actions().value(0) ? m_menu->actions().first()->text() : QString();
+        f.write(QStringLiteral("lang_switch=%1>%2:%3>%4:%5 actions=%6\n").arg(orig, other, switched, orig, back).arg(m_menu->actions().size()).toUtf8());
     }
     f.write(QStringLiteral("lang=%1 sample=%2\n").arg(Settings::effectiveLanguage(), QCoreApplication::translate("QingYing", "设置")).toUtf8());
     f.write(QStringLiteral("theme=%1 dark=%2 system_dark=%3\n").arg(Settings::theme()).arg(Theme::isDark()).arg(Theme::systemIsDark()).toUtf8());
@@ -522,21 +564,28 @@ void App::startCapture(int mode)
 
 void App::editImage(const QImage& image, const QPoint& pos, bool hasPos, QWidget* source)
 {
-    if (!m_overlays.isEmpty() || m_busy || image.isNull()) return;
+    Diagnostics::log(QStringLiteral("edit begin"));
+    if (!m_overlays.isEmpty() || m_busy || image.isNull()) {
+        Diagnostics::log(QStringLiteral("edit refused: overlays=%1 busy=%2 null=%3").arg(m_overlays.size()).arg(m_busy).arg(image.isNull()));
+        return;
+    }
     m_edit = Edit();
     m_edit.pending = true;
     m_edit.image = image;
     m_edit.pos = pos;
     m_edit.hasPos = hasPos;
     m_edit.source = source;
-    if (source) source->hide(); // 冻结画面前先隐藏原钉图
-    QTimer::singleShot(source ? 200 : 120, this, [this] {
-        startCapture();
-        if (m_overlays.isEmpty()) { // 未能进入编辑（如设置窗口打开中）：恢复原状
-            if (m_edit.source) m_edit.source->show();
-            m_edit = Edit();
-        }
-    });
+    // 冻结画面前先隐藏原钉图 / 菜单：等待 DWM 合成完成两帧，确保屏幕上已不再显示它们（不依赖固定延时）
+    if (source) source->hide();
+    QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+    DwmFlush();
+    DwmFlush();
+    startCapture();
+    if (m_overlays.isEmpty()) { // 未能进入编辑（如设置窗口打开中）：恢复原状
+        Diagnostics::log(QStringLiteral("edit: capture did not start"));
+        if (m_edit.source) m_edit.source->show();
+        m_edit = Edit();
+    }
 }
 
 void App::startTimedCapture(int seconds)
@@ -602,7 +651,8 @@ void App::openSettings()
     }
     m_settings = new SettingsDialog([this](const QKeySequence& k) { return applyHotkey(k); });
     m_settings->setAttribute(Qt::WA_DeleteOnClose);
-    connect(m_settings, &QDialog::finished, this, [this] {
+    connect(m_settings, &QDialog::finished, this, [this, lang = Language::current()] {
+        if (Language::current() != lang) retranslate();
         updateMenu();
         History::prune();
     });

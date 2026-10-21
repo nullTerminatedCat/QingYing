@@ -37,6 +37,8 @@ public:
 private:
     bool applyHotkey(const QKeySequence& seq);
     void updateMenu();
+    void buildMenu();
+    void retranslate();
     void rebuildRecentMenu();
     void endCapture();
     void onDelivered(const QImage& image, const QString& savedPath);
