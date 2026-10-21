@@ -1,6 +1,9 @@
 #include <QCoreApplication>
 #include "Theme.h"
 #include "App.h"
+#include <windows.h>
+#include "Recognize.h"
+#include "Diagnostics.h"
 #include "EditRequest.h"
 #include "CaptureOverlay.h"
 #include "History.h"
@@ -108,7 +111,28 @@ App::App()
     m_menu->addAction(QCoreApplication::translate("QingYing", "检查更新"), this, [this] { m_updater->check(true); });
     m_menu->addAction(QCoreApplication::translate("QingYing", "关于青影"), this, &App::showAbout);
     m_menu->addSeparator();
-    m_menu->addAction(QCoreApplication::translate("QingYing", "退出"), qApp, &QApplication::quit);
+    m_menu->addAction(QCoreApplication::translate("QingYing", "退出"), qApp, [this] {
+        QWidget* aw = QApplication::activeWindow();
+        QWidget* pop = QApplication::activePopupWidget();
+        void* frames[24];
+        const USHORT n = CaptureStackBackTrace(0, 24, frames, nullptr);
+        QStringList st;
+        for (USHORT i = 0; i < n; ++i) {
+            HMODULE mod = nullptr;
+            GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, static_cast<LPCWSTR>(frames[i]), &mod);
+            wchar_t name[MAX_PATH] = {};
+            GetModuleFileNameW(mod, name, MAX_PATH);
+            st << QStringLiteral("%1+0x%2").arg(QFileInfo(QString::fromWCharArray(name)).fileName())
+                      .arg(quintptr(frames[i]) - quintptr(mod), 0, 16);
+        }
+        Diagnostics::log(QStringLiteral("quit requested from tray menu (menuVisible=%1 active=%2 popup=%3 buttons=%4) stack=%5")
+                             .arg(m_menu->isVisible())
+                             .arg(aw ? QString::fromLatin1(aw->metaObject()->className()) : QStringLiteral("-"))
+                             .arg(pop ? QString::fromLatin1(pop->metaObject()->className()) : QStringLiteral("-"))
+                             .arg(int(QGuiApplication::mouseButtons()))
+                             .arg(st.join(QLatin1Char(' '))));
+        QApplication::quit();
+    });
     connect(m_menu, &QMenu::aboutToShow, this, &App::updateMenu);
 
     EditRequest::setHandler([this](const QImage& img, const QPoint& pos, bool hasPos, QWidget* src) { editImage(img, pos, hasPos, src); });
@@ -142,6 +166,20 @@ App::App()
                             QCoreApplication::translate("QingYing", "%1 已被其他程序占用，请在设置中更换。也可单击托盘图标截图。").arg(hkText),
                             QSystemTrayIcon::Warning, 6000);
     writeSmokeReport();
+    if (qEnvironmentVariableIsSet("QINGYING_SMOKE_QUIT_OCR")) {
+        // 退出自检：OCR 进行中时退出，进程应正常结束且不崩溃
+        QTimer::singleShot(500, this, [] {
+            QImage img(800, 200, QImage::Format_RGB32);
+            img.fill(Qt::white);
+            QPainter p(&img);
+            p.setFont(QFont(QStringLiteral("Microsoft YaHei UI"), 32));
+            p.drawText(img.rect(), Qt::AlignCenter, QStringLiteral("quit while OCR"));
+            p.end();
+            Recognize::ocr(img);
+            Diagnostics::log(QStringLiteral("smoke: quitting during OCR"));
+            QApplication::quit();
+        });
+    }
 }
 
 App::~App()

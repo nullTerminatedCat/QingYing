@@ -1,5 +1,6 @@
 #include <QCoreApplication>
 #include "Updater.h"
+#include "Diagnostics.h"
 #include "Logic.h"
 #include "Icons.h"
 #include "Notify.h"
@@ -153,7 +154,10 @@ void Updater::download(const Release& r)
         if (QMessageBox::question(nullptr, QCoreApplication::translate("QingYing", "青影 · 更新"),
                                   QCoreApplication::translate("QingYing", "安装包已下载并通过校验。现在启动安装程序并退出青影吗？")) != QMessageBox::Yes)
             return;
-        if (QProcess::startDetached(path, {})) qApp->quit();
+        if (QProcess::startDetached(path, {})) {
+            Diagnostics::log(QStringLiteral("installer launched, quitting: %1").arg(path));
+            qApp->quit();
+        }
         else Notify::warn(QCoreApplication::translate("QingYing", "无法启动安装程序"), path);
     };
     connect(sums, &QNetworkReply::finished, this, finish);

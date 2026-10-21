@@ -57,6 +57,7 @@ qt_add_executable(QingYing WIN32
     src/Secret.cpp src/Secret.h
     src/Uploader.cpp src/Uploader.h
     src/Logic.cpp src/Logic.h
+    src/Diagnostics.cpp src/Diagnostics.h
     src/EditRequest.cpp src/EditRequest.h
     resources/QingYing.rc
 )
@@ -78,7 +79,7 @@ qt_add_resources(QingYing "app_icons" PREFIX "/" FILES resources/QingYing.ico re
 target_compile_definitions(QingYing PRIVATE
     UNICODE _UNICODE NOMINMAX WIN32_LEAN_AND_MEAN
     QINGYING_VERSION="${PROJECT_VERSION}")
-target_link_libraries(QingYing PRIVATE Qt6::Widgets Qt6::Network ZXing::ZXing user32 gdi32 dwmapi windowsapp mfplat mfreadwrite mfuuid ole32 crypt32 d3d11 dxgi)
+target_link_libraries(QingYing PRIVATE Qt6::Widgets Qt6::Network ZXing::ZXing user32 gdi32 dwmapi windowsapp mfplat mfreadwrite mfuuid ole32 crypt32 d3d11 dxgi dbghelp)
 if(MSVC)
     target_compile_options(QingYing PRIVATE /utf-8 /W3 /permissive- /bigobj)
 endif()
