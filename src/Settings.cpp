@@ -80,6 +80,13 @@ void setRecordFps(int fps) { store().setValue("recordFps", fps); }
 bool recordCursor() { return store().value("recordCursor", true).toBool(); }
 void setRecordCursor(bool on) { store().setValue("recordCursor", on); }
 
+QString theme()
+{
+    const QString t = store().value("theme", QStringLiteral("system")).toString();
+    return (t == QLatin1String("light") || t == QLatin1String("dark")) ? t : QStringLiteral("system");
+}
+void setTheme(const QString& t) { store().setValue("theme", t); }
+
 QString colorFormat() { return store().value("colorFormat", QStringLiteral("hex")).toString(); }
 void setColorFormat(const QString& f) { store().setValue("colorFormat", f); }
 QString formatColor(const QColor& c)

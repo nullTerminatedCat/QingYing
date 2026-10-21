@@ -1,3 +1,4 @@
+#include "Theme.h"
 #include "ResultDialog.h"
 #include "Icons.h"
 
@@ -20,7 +21,7 @@ ResultDialog::ResultDialog(const QString& title, QWidget* parent) : QDialog(pare
     setWindowFlag(Qt::WindowContextHelpButtonHint, false);
     setWindowFlag(Qt::WindowStaysOnTopHint, true);
     resize(520, 380);
-    setStyleSheet(QStringLiteral(R"(
+    Theme::setSheet(this, QStringLiteral(R"(
         QDialog { background: #F6F7FB; }
         QLabel#title { font-size: 20px; font-weight: 600; color: #1C1C1E; }
         QLabel#status { font-size: 12px; color: #6E6E73; }
@@ -73,7 +74,7 @@ ResultDialog::ResultDialog(const QString& title, QWidget* parent) : QDialog(pare
 void ResultDialog::setStatus(const QString& s, bool error)
 {
     m_status->setObjectName(error ? QStringLiteral("error") : QStringLiteral("status"));
-    m_status->setStyleSheet(QString());
+    Theme::setSheet(m_status, QString());
     m_status->setText(s);
 }
 

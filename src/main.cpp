@@ -1,4 +1,5 @@
 #include "App.h"
+#include "Theme.h"
 
 #include <QApplication>
 #include <QFont>
@@ -7,7 +8,9 @@
 int main(int argc, char* argv[])
 {
     // 单实例：已运行时直接退出
-    HANDLE mutex = CreateMutexW(nullptr, TRUE, L"Local\\QingYing.SingleInstance");
+    // 冒烟测试使用独立互斥量，不影响用户正在运行的实例
+    const bool smoke = GetEnvironmentVariableW(L"QINGYING_SMOKE_REPORT", nullptr, 0) > 0;
+    HANDLE mutex = CreateMutexW(nullptr, TRUE, smoke ? L"Local\\QingYing.SmokeTest" : L"Local\\QingYing.SingleInstance");
     if (mutex && GetLastError() == ERROR_ALREADY_EXISTS) {
         CloseHandle(mutex);
         return 0;
@@ -24,6 +27,7 @@ int main(int argc, char* argv[])
     f.setPixelSize(13);
     QApplication::setFont(f);
 
+    Theme::init();
     App app;
     const int rc = a.exec();
     if (mutex) {

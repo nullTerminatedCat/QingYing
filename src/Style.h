@@ -10,14 +10,17 @@ namespace Style {
 inline const QColor Accent{0x4F, 0x6B, 0xFF};
 inline const QColor AccentHover{0x3D, 0x57, 0xE8};
 inline const QColor AccentTint{79, 107, 255, 31};
-inline const QColor Text{0x1C, 0x1C, 0x1E};
-inline const QColor Text2{0x6E, 0x6E, 0x73};
-inline const QColor Text3{0xA1, 0xA1, 0xA6};
-inline const QColor Line{0, 0, 0, 15};
-inline const QColor Glass{255, 255, 255, 236};
+inline QColor Text{0x1C, 0x1C, 0x1E};
+inline QColor Text2{0x6E, 0x6E, 0x73};
+inline QColor Text3{0xA1, 0xA1, 0xA6};
+inline QColor Line{0, 0, 0, 15};
+inline QColor Glass{255, 255, 255, 236};
 inline const QColor Overlay{15, 18, 30, 107};
 inline const QColor Pill{28, 28, 30, 184};
 inline const QColor Danger{0xFF, 0x45, 0x3A};
+inline QColor Hover{0, 0, 0, 13};
+inline QColor Separator{0, 0, 0, 22};
+inline QColor Border{0, 0, 0, 18};
 
 QList<QColor> annotationColors();
 QString uiFontFamily();

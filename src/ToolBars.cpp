@@ -79,7 +79,7 @@ void ToolBar::paintEvent(QPaintEvent*)
     for (int i = 0; i < m_items.size(); ++i) {
         const Item& it = m_items[i];
         if (it.separator) {
-            p.setPen(QPen(QColor(0, 0, 0, 22), 1));
+            p.setPen(QPen(Style::Separator, 1));
             const qreal cx = it.rect.center().x() + 0.5;
             p.drawLine(QPointF(cx, it.rect.top() + 9), QPointF(cx, it.rect.bottom() - 8));
             continue;
@@ -94,7 +94,7 @@ void ToolBar::paintEvent(QPaintEvent*)
             fg = Qt::white;
         } else if (i == m_hover && enabled) {
             p.setPen(Qt::NoPen);
-            p.setBrush(QColor(0, 0, 0, 13));
+            p.setBrush(Style::Hover);
             p.drawRoundedRect(QRectF(it.rect), 10, 10);
         }
         if (it.id == Confirm) fg = active ? Qt::white : Style::Accent;
@@ -188,7 +188,7 @@ void StyleBar::paintEvent(QPaintEvent*)
             p.drawRoundedRect(r, 8, 8);
         } else if (m_hover == i) {
             p.setPen(Qt::NoPen);
-            p.setBrush(QColor(0, 0, 0, 13));
+            p.setBrush(Style::Hover);
             p.drawRoundedRect(r, 8, 8);
         }
         const QColor fg = i == m_size ? Style::Accent : Style::Text2;
@@ -207,7 +207,7 @@ void StyleBar::paintEvent(QPaintEvent*)
         }
     }
     if (!m_colors) return;
-    p.setPen(QPen(QColor(0, 0, 0, 22), 1));
+    p.setPen(QPen(Style::Separator, 1));
     p.drawLine(QPointF(m_sepX + 4.5, Margin + 12), QPointF(m_sepX + 4.5, height() - Margin - 12));
     for (int i = 0; i < m_colorRects.size(); ++i) {
         const QRectF r = m_colorRects[i];

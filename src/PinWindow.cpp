@@ -127,7 +127,7 @@ void PinWindow::paintEvent(QPaintEvent*)
         for (int i = 0; i < 3; ++i) {
             const QRectF r = buttonRect(i);
             if (i == m_hoverBtn) {
-                p.setBrush(QColor(0, 0, 0, 15));
+                p.setBrush(Style::Hover);
                 p.drawRoundedRect(r, 7, 7);
             }
             paintIcon(p, icons[i], r.adjusted(5, 5, -5, -5), i == 2 && i == m_hoverBtn ? Style::Danger : Style::Text);

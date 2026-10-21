@@ -32,7 +32,7 @@ void paintGlass(QPainter& p, const QRectF& r, qreal radius, bool shadow)
     if (shadow) paintShadow(p, r, radius);
     p.save();
     p.setRenderHint(QPainter::Antialiasing);
-    p.setPen(QPen(QColor(0, 0, 0, 18), 1));
+    p.setPen(QPen(Border, 1));
     p.setBrush(Glass);
     p.drawRoundedRect(r, radius, radius);
     p.restore();

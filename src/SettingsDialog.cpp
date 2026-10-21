@@ -1,3 +1,4 @@
+#include "Theme.h"
 #include "SettingsDialog.h"
 #include "HotkeyManager.h"
 #include "Icons.h"
@@ -52,7 +53,7 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, Q
     setWindowIcon(appIcon());
     setWindowFlag(Qt::WindowContextHelpButtonHint, false);
     setMinimumWidth(480);
-    setStyleSheet(QStringLiteral(R"(
+    Theme::setSheet(this, QStringLiteral(R"(
         QDialog { background: #F6F7FB; }
         QLabel { color: #1C1C1E; font-size: 13px; }
         QLabel#title { font-size: 20px; font-weight: 600; }
@@ -191,6 +192,19 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, Q
     b->addWidget(m_recCursor);
 
     root->addWidget(card(this, QStringLiteral("常规"), b));
+    h = row(b, QStringLiteral("外观"));
+    m_theme = new QButtonGroup(this);
+    const QStringList themeKeys = {QStringLiteral("system"), QStringLiteral("light"), QStringLiteral("dark")};
+    const QStringList themeNames = {QStringLiteral("跟随系统"), QStringLiteral("浅色"), QStringLiteral("深色")};
+    for (int i = 0; i < 3; ++i) {
+        auto* s = new QPushButton(themeNames[i], this);
+        s->setObjectName(QStringLiteral("seg"));
+        s->setCheckable(true);
+        s->setChecked(Settings::theme() == themeKeys[i]);
+        m_theme->addButton(s, i);
+        h->addWidget(s);
+    }
+    h->addStretch();
     m_autostart = new QCheckBox(QStringLiteral("开机时自动启动青影"), this);
     m_autostart->setChecked(Settings::autostart());
     b->addWidget(m_autostart);
@@ -241,6 +255,12 @@ void SettingsDialog::save()
     static const char* keys[3] = {"copy", "save", "pin"};
     Settings::setDefaultAction(QString::fromLatin1(keys[qBound(0, m_action->checkedId(), 2)]));
     Settings::setHistorySize(m_history->value());
+    static const char* themeKeys[3] = {"system", "light", "dark"};
+    const QString newTheme = QString::fromLatin1(themeKeys[qBound(0, m_theme->checkedId(), 2)]);
+    if (newTheme != Settings::theme()) {
+        Settings::setTheme(newTheme);
+        Theme::apply();
+    }
     Settings::setColorFormat(m_colorFmt->currentData().toString());
     Settings::setRecordFps(m_fps->checkedId() > 0 ? m_fps->checkedId() : 15);
     Settings::setRecordCursor(m_recCursor->isChecked());

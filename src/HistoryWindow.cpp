@@ -1,3 +1,4 @@
+#include "Theme.h"
 #include "HistoryWindow.h"
 #include "History.h"
 #include "Icons.h"
@@ -23,7 +24,7 @@ HistoryWindow::HistoryWindow(QWidget* parent) : QDialog(parent)
     setWindowIcon(appIcon());
     setWindowFlag(Qt::WindowContextHelpButtonHint, false);
     resize(760, 520);
-    setStyleSheet(QStringLiteral(R"(
+    Theme::setSheet(this, QStringLiteral(R"(
         QDialog { background: #F6F7FB; }
         QLabel#title { font-size: 20px; font-weight: 600; color: #1C1C1E; }
         QListWidget { background: #FFFFFF; border: 1px solid rgba(0,0,0,15); border-radius: 10px; padding: 8px; }

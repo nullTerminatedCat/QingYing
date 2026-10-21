@@ -1,3 +1,4 @@
+#include "Theme.h"
 #include "ScrollCapture.h"
 #include "HotkeyManager.h"
 #include "Icons.h"
@@ -76,7 +77,7 @@ ScrollCapture::ScrollCapture(const QRect& region)
     setAttribute(Qt::WA_DeleteOnClose);
     setAttribute(Qt::WA_TranslucentBackground);
     setWindowTitle(QStringLiteral("青影 长截图"));
-    setStyleSheet(QStringLiteral(R"(
+    Theme::setSheet(this, QStringLiteral(R"(
         QLabel { color: #1C1C1E; font-size: 12px; }
         QLabel#status { color: #6E6E73; }
         QPushButton { background: #FFFFFF; border: 1px solid rgba(0,0,0,30); border-radius: 8px; padding: 5px 10px; font-size: 12px; }

@@ -1,3 +1,4 @@
+#include "Theme.h"
 #include "App.h"
 #include "CaptureOverlay.h"
 #include "History.h"
@@ -35,7 +36,7 @@
 App::App()
 {
     m_menu = new QMenu;
-    m_menu->setStyleSheet(QStringLiteral(
+    Theme::setSheet(m_menu, QStringLiteral(
         "QMenu{background:#FFFFFF;border:1px solid rgba(0,0,0,20);border-radius:10px;padding:6px;}"
         "QMenu::item{padding:7px 28px 7px 12px;border-radius:6px;color:#1C1C1E;}"
         "QMenu::item:selected{background:rgba(79,107,255,31);color:#1C1C1E;}"
@@ -150,6 +151,7 @@ void App::writeSmokeReport()
                         .arg(started).arg(rec.framesWritten()).arg(QFileInfo(out).size()).arg(err + rec.lastError()).toUtf8());
         }
     }
+    f.write(QStringLiteral("theme=%1 dark=%2 system_dark=%3\n").arg(Settings::theme()).arg(Theme::isDark()).arg(Theme::systemIsDark()).toUtf8());
     const QString qrPath = qEnvironmentVariable("QINGYING_SMOKE_QR");
     if (!qrPath.isEmpty()) {
         const auto codes = QrDecoder::decode(QImage(qrPath));

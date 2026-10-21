@@ -1,3 +1,4 @@
+#include "Theme.h"
 #include "RecordSession.h"
 #include "HotkeyManager.h"
 #include "Icons.h"
@@ -95,10 +96,10 @@ RecordSession::RecordSession(const QRect& region, Recorder::Format format)
     lay->setSpacing(6);
     auto* dot = new QLabel(this);
     dot->setFixedSize(10, 10);
-    dot->setStyleSheet(QStringLiteral("background:#FF453A;border-radius:5px;"));
+    Theme::setSheet(dot, QStringLiteral("background:#FF453A;border-radius:5px;"));
     lay->addWidget(dot);
     m_time = new QLabel(QStringLiteral("00:00"), this);
-    m_time->setStyleSheet(QStringLiteral("font-family:Consolas;font-size:14px;color:#1C1C1E;padding:0 6px;"));
+    Theme::setSheet(m_time, QStringLiteral("font-family:Consolas;font-size:14px;color:#1C1C1E;padding:0 6px;"));
     lay->addWidget(m_time);
     auto mk = [this](const QIcon& icon, const QString& tip) {
         auto* b = new QToolButton(this);
@@ -106,7 +107,7 @@ RecordSession::RecordSession(const QRect& region, Recorder::Format format)
         b->setIconSize(QSize(20, 20));
         b->setToolTip(tip);
         b->setCursor(Qt::PointingHandCursor);
-        b->setStyleSheet(QStringLiteral("QToolButton{border:none;border-radius:8px;padding:5px;}QToolButton:hover{background:rgba(0,0,0,13);}"));
+        Theme::setSheet(b, QStringLiteral("QToolButton{border:none;border-radius:8px;padding:5px;}QToolButton:hover{background:rgba(0,0,0,13);}"));
         return b;
     };
     m_pause = mk(pauseIcon(false), QStringLiteral("暂停"));

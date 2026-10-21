@@ -1,3 +1,4 @@
+#include "Theme.h"
 #include "CaptureOverlay.h"
 #include "PinWindow.h"
 #include "Recognize.h"
@@ -82,7 +83,7 @@ CaptureOverlay::CaptureOverlay(QScreen* screen, const QImage& shot, const QRect&
     });
     connect(m_styleBar, &StyleBar::colorChanged, this, [this](const QColor& c) {
         m_color = c;
-        if (m_editing) m_editor->setStyleSheet(editorStyle());
+        if (m_editing) Theme::setSheet(m_editor, editorStyle());
         setFocus();
     });
 
@@ -317,7 +318,7 @@ void CaptureOverlay::beginText(const QPoint& pos)
     m_editorPos = pos;
     QFont f = annotationFont(currentFontSize());
     m_editor->setFont(f);
-    m_editor->setStyleSheet(editorStyle());
+    Theme::setSheet(m_editor, editorStyle());
     m_editor->clear();
     m_editor->move(pos.x() - 3, pos.y() - 3);
     resizeEditor();

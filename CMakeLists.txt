@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(QingYing VERSION 0.3.0 LANGUAGES CXX)
+project(QingYing VERSION 0.4.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -52,6 +52,7 @@ qt_add_executable(QingYing WIN32
     src/Recorder.cpp src/Recorder.h
     src/RecordSession.cpp src/RecordSession.h
     third_party/gif/gif.h
+    src/Theme.cpp src/Theme.h
     resources/QingYing.rc
 )
 qt_add_resources(QingYing "app_icons" PREFIX "/" FILES resources/QingYing.ico resources/QingYing.png)

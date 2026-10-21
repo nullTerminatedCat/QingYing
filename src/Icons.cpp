@@ -197,7 +197,7 @@ QIcon menuIcon(Icon i)
     QPixmap pm(40, 40);
     pm.fill(Qt::transparent);
     QPainter p(&pm);
-    paintIcon(p, i, QRectF(4, 4, 32, 32), Style::Text);
+    paintIcon(p, i, QRectF(4, 4, 32, 32), QColor(0x8E, 0x8E, 0x93)); // 中性灰，浅色与深色菜单下都清晰
     p.end();
     return QIcon(pm);
 }

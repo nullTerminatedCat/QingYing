@@ -28,6 +28,8 @@ int recordFps();
 void setRecordFps(int fps);
 bool recordCursor();
 void setRecordCursor(bool on);
+QString theme(); // system / light / dark
+void setTheme(const QString& t);
 QString expandPattern(const QString& pattern);
 QString defaultFilePath();
 bool saveImage(const QImage& img, const QString& path);
