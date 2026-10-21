@@ -33,7 +33,7 @@
 - **多语言**：简体中文 / English / 跟随系统，在设置中切换后立即生效（托盘菜单与历史窗口自动刷新）；Qt 自带对话框同步翻译
 - **自动更新**：启动时自动检查（每天最多一次，可关闭），托盘「检查更新」手动检查；显示更新说明，下载安装包并按 SHA256SUMS 校验后经确认启动安装；免安装版改为打开发布页
 - **上传**（默认关闭）：在设置 → 上传中启用，支持 SM.MS、Imgur 和自定义 HTTP（multipart，可配置地址、文件字段、请求头、JSON 链接路径）；截图工具条「上传」按钮（`U`）或钉图右键菜单上传，成功后链接自动复制；令牌 / 请求头使用 Windows DPAPI 加密保存，不以明文落盘
-- **设置**：热键、保存位置、文件名规则（`{}` 内为日期格式）、默认格式、完成时默认动作（复制 / 保存 / 钉图）、历史保留数量、默认标注工具与颜色、开机自启
+- **设置**：左侧导航分为 常规 / 截图 / 标注 / 录屏 / 上传 / 外观与语言 / 关于与更新；分组卡片，每项附一行说明；开关、分段选择、快捷键录制框（点击后直接按组合键，冲突即时提示）、保存位置带“打开文件夹”、文件名实时预览、上传只显示所选服务需要的参数；修改即时生效（无“确定 / 取消”），输入有误时就地标红提示；窗口可缩放并记住大小；关于页含版本、检查更新、GitHub 与日志文件夹
 
 ## 快捷键（截图中）
 
@@ -119,7 +119,8 @@ src/
   Ocr.* QrDecoder.* Recognize.* ResultDialog.*  OCR / 二维码识别与结果面板
   Recorder.* RecordSession.*  录屏（MP4 / GIF）与控制条
 third_party/gif/      gif.h（公有领域）
-  SettingsDialog.*    设置窗口
+  SettingsDialog.*    设置窗口（侧栏导航、即时生效）
+  SettingsWidgets.*   开关、分段控件、快捷键录制框
   Settings.*          QSettings 持久化
   Style.* Icons.*     设计规范颜色与线性图标
   Theme.*             浅色 / 深色主题
@@ -149,6 +150,7 @@ QingYing (青影) is a simple, good-looking screenshot tool for Windows: an indi
 - Color picker, plus MP4 / GIF screen recording (Desktop Duplication with GDI fallback)
 - Re-annotate a pin (`E`) or a history item; default tool and color; timed full-screen capture
 - Light, dark, or follow-system themes
+- Settings with sidebar navigation, toggle switches, a hotkey recorder, live file-name preview, and instant apply (no OK / Cancel)
 - Simplified Chinese or English UI, switchable at runtime
 - Auto-update with release notes and SHA-256 verification; the portable build opens the release page instead
 - Optional upload (off by default): SM.MS, Imgur, or custom HTTP multipart. The link is copied to the clipboard, and secrets are encrypted with Windows DPAPI.
