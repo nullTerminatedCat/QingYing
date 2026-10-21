@@ -31,6 +31,7 @@
 #include <QSpinBox>
 #include <QStackedWidget>
 #include <QStyle>
+#include <QTimer>
 #include <QToolButton>
 #include <QUrl>
 #include <QVBoxLayout>
@@ -275,6 +276,8 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, Q
 
 SettingsDialog::~SettingsDialog()
 {
+    if (m_upTimer && m_upTimer->isActive()) saveUpload(); // 关闭时写入未保存的请求头
+    if (m_hotkey && m_hotkey->isRecording() && m_suspend) m_suspend(false);
     QSettings st(QStringLiteral("QingYing"), QStringLiteral("QingYing"));
     if (!isMaximized()) st.setValue("settingsSize", size());
 }
@@ -334,6 +337,9 @@ QWidget* SettingsDialog::buildGeneral()
         setStatus(m_hotkeyHint, QCoreApplication::translate("QingYing", "已生效：%1").arg(k.toString(QKeySequence::NativeText)), false);
         emit changed();
     };
+    connect(m_hotkey, &HotkeyEdit::recordingChanged, this, [this](bool on) {
+        if (m_suspend) m_suspend(on);
+    });
     connect(m_hotkey, &HotkeyEdit::recorded, this, tryApply);
     connect(reset, &QPushButton::clicked, this, [tryApply] { tryApply(Settings::defaultHotkey()); });
 
@@ -582,7 +588,11 @@ QWidget* SettingsDialog::buildUpload()
         saveUpload();
     });
     for (QLineEdit* e : {m_upUrl, m_upField, m_upPath, m_upToken}) connect(e, &QLineEdit::editingFinished, this, &SettingsDialog::saveUpload);
-    connect(m_upHeaders, &QPlainTextEdit::textChanged, this, &SettingsDialog::saveUpload);
+    m_upTimer = new QTimer(this);
+    m_upTimer->setSingleShot(true);
+    m_upTimer->setInterval(500);
+    connect(m_upTimer, &QTimer::timeout, this, &SettingsDialog::saveUpload);
+    connect(m_upHeaders, &QPlainTextEdit::textChanged, m_upTimer, qOverload<>(&QTimer::start));
     m_upBody->setEnabled(Settings::uploadEnabled());
     updateUploadUi();
     b->addStretch();
@@ -600,6 +610,7 @@ void SettingsDialog::updateUploadUi()
 
 void SettingsDialog::saveUpload()
 {
+    if (m_upTimer) m_upTimer->stop();
     Uploads::Config up;
     up.provider = m_upProvider->currentData().toString();
     up.url = m_upUrl->text().trimmed();

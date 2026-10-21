@@ -112,7 +112,9 @@ void HotkeyEdit::setSequence(const QKeySequence& k)
 
 void HotkeyEdit::setRecording(bool on)
 {
+    if (m_recording == on) return;
     m_recording = on;
+    emit recordingChanged(on);
     setProperty("recording", on);
     style()->unpolish(this);
     style()->polish(this);

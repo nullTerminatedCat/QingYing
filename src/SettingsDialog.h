@@ -19,6 +19,8 @@ public:
     explicit SettingsDialog(std::function<bool(const QKeySequence&)> applyHotkey, QWidget* parent = nullptr);
     ~SettingsDialog() override;
     void setCheckUpdate(std::function<void()> f) { m_checkUpdate = std::move(f); }
+    // 录制快捷键期间暂停全局热键（true 暂停，false 恢复），以便录到当前组合
+    void setSuspendHotkey(std::function<void(bool)> f) { m_suspend = std::move(f); }
     int page() const;
     void setPage(int i);
     int pageCount() const;
@@ -42,6 +44,8 @@ private:
 
     std::function<bool(const QKeySequence&)> m_apply;
     std::function<void()> m_checkUpdate;
+    std::function<void(bool)> m_suspend;
+    class QTimer* m_upTimer = nullptr;
     QListWidget* m_nav = nullptr;
     QStackedWidget* m_stack = nullptr;
     HotkeyEdit* m_hotkey = nullptr;

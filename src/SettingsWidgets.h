@@ -46,6 +46,7 @@ public:
     bool isRecording() const { return m_recording; }
 signals:
     void recorded(const QKeySequence& k); // 空序列表示清除
+    void recordingChanged(bool on);
 
 protected:
     void keyPressEvent(QKeyEvent* e) override;
