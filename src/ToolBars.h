@@ -10,7 +10,7 @@ class ToolBar : public QWidget {
     Q_OBJECT
 public:
     enum Id { TRect, TEllipse, TArrow, TPen, TText, TMosaic, TNumber, Undo, Redo, Pin, Save, Cancel, Confirm };
-    static constexpr int Margin = 12;
+    static constexpr int Margin = 0; // 阴影由父遮罩绘制，避免透明边缘吞掉点击
     explicit ToolBar(QWidget* parent);
     void setActive(int id);
     void setUndoRedo(bool canUndo, bool canRedo);
@@ -46,7 +46,7 @@ private:
 class StyleBar : public QWidget {
     Q_OBJECT
 public:
-    static constexpr int Margin = 12;
+    static constexpr int Margin = 0;
     explicit StyleBar(QWidget* parent);
     void configure(bool textMode, bool showColors, int sizeIndex, const QColor& color);
     QSize visualSize() const { return size() - QSize(2 * Margin, 2 * Margin); }

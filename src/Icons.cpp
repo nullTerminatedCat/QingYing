@@ -47,7 +47,7 @@ void paintIcon(QPainter& p, Icon icon, const QRectF& r, const QColor& color)
     case Icon::Mosaic: {
         path.addRoundedRect(4, 4, 16, 16, 2.5, 2.5);
         QColor fill = color;
-        fill.setAlphaF(color.alphaF() * 0.85);
+        fill.setAlphaF(color.alphaF() * 0.85f);
         p.setPen(Qt::NoPen);
         p.setBrush(fill);
         for (int y = 0; y < 4; ++y)
@@ -105,6 +105,14 @@ void paintIcon(QPainter& p, Icon icon, const QRectF& r, const QColor& color)
 
 QIcon appIcon()
 {
+    static QIcon cached;
+    if (!cached.isNull()) return cached;
+    QIcon fromRes(QStringLiteral(":/resources/QingYing.ico"));
+    if (!fromRes.availableSizes().isEmpty()) {
+        fromRes.addFile(QStringLiteral(":/resources/QingYing.png"));
+        cached = fromRes;
+        return cached;
+    }
     QIcon icon;
     for (int s : {16, 20, 24, 32, 48, 64, 128, 256}) {
         QPixmap pm(s, s);
@@ -135,6 +143,7 @@ QIcon appIcon()
         q.restore();
         icon.addPixmap(pm);
     }
+    cached = icon;
     return icon;
 }
 

@@ -27,9 +27,9 @@ void paintShadow(QPainter& p, const QRectF& r, qreal radius, int spread)
     p.restore();
 }
 
-void paintGlass(QPainter& p, const QRectF& r, qreal radius)
+void paintGlass(QPainter& p, const QRectF& r, qreal radius, bool shadow)
 {
-    paintShadow(p, r, radius);
+    if (shadow) paintShadow(p, r, radius);
     p.save();
     p.setRenderHint(QPainter::Antialiasing);
     p.setPen(QPen(QColor(0, 0, 0, 18), 1));

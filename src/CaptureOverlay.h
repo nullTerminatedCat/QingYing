@@ -6,7 +6,7 @@
 #include <QPointer>
 #include <QWidget>
 
-class QLineEdit;
+class QPlainTextEdit;
 class QScreen;
 class StyleBar;
 class ToolBar;
@@ -24,6 +24,8 @@ signals:
     void selectionStarted(CaptureOverlay* self);
     void selectionCleared(CaptureOverlay* self);
     void finished();
+    // 截图已产出（复制/保存/钉图），savedPath 非空表示已写入文件
+    void delivered(const QImage& image, const QString& savedPath);
 
 protected:
     void paintEvent(QPaintEvent*) override;
@@ -61,7 +63,9 @@ private:
     void cancelText();
     QImage renderResult() const;
     void doCopy();
-    void doSave();
+    void doSave(bool saveAs);
+    void resizeEditor();
+    QString editorStyle() const;
     void doPin();
     void copyHex();
     void paintMagnifier(QPainter& p);
@@ -97,7 +101,7 @@ private:
 
     ToolBar* m_bar;
     StyleBar* m_styleBar;
-    QLineEdit* m_editor;
+    QPlainTextEdit* m_editor;
     QPoint m_editorPos;
     bool m_editing = false;
 };

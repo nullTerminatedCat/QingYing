@@ -26,7 +26,7 @@ ToolBar::ToolBar(QWidget* parent) : QWidget(parent)
         {Redo, Icon::Redo, QStringLiteral("重做  Ctrl+Y"), {}, false},
         {-1, Icon::Rect, {}, {}, true},
         {Pin, Icon::Pin, QStringLiteral("钉在桌面  F3"), {}, false},
-        {Save, Icon::Save, QStringLiteral("保存  Ctrl+S"), {}, false},
+        {Save, Icon::Save, QStringLiteral("快速保存  Ctrl+S（另存为 Ctrl+Shift+S）"), {}, false},
         {Cancel, Icon::Close, QStringLiteral("取消  Esc"), {}, false},
         {Confirm, Icon::Confirm, QStringLiteral("复制到剪贴板  Enter"), {}, false},
     };
@@ -72,7 +72,7 @@ void ToolBar::paintEvent(QPaintEvent*)
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
     const QRectF body = QRectF(rect()).adjusted(Margin, Margin, -Margin, -Margin);
-    Style::paintGlass(p, body, 14);
+    Style::paintGlass(p, body.adjusted(0.5, 0.5, -0.5, -0.5), 14, false);
     for (int i = 0; i < m_items.size(); ++i) {
         const Item& it = m_items[i];
         if (it.separator) {
@@ -95,7 +95,7 @@ void ToolBar::paintEvent(QPaintEvent*)
             p.drawRoundedRect(QRectF(it.rect), 10, 10);
         }
         if (it.id == Confirm) fg = active ? Qt::white : Style::Accent;
-        if (!enabled) fg.setAlphaF(0.3);
+        if (!enabled) fg.setAlphaF(0.3f);
         const QRectF ir(it.rect.center().x() - 9.5 + 0.5, it.rect.center().y() - 9.5 + 0.5, 19, 19);
         paintIcon(p, it.icon, ir, fg);
     }
@@ -176,7 +176,7 @@ void StyleBar::paintEvent(QPaintEvent*)
 {
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
-    Style::paintGlass(p, QRectF(rect()).adjusted(Margin, Margin, -Margin, -Margin), 12);
+    Style::paintGlass(p, QRectF(rect()).adjusted(0.5, 0.5, -0.5, -0.5), 12, false);
     for (int i = 0; i < 3; ++i) {
         const QRectF r = m_sizeRects[i];
         if (i == m_size) {

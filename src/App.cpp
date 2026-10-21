@@ -122,6 +122,10 @@ void App::startCapture()
     for (const Shot& sh : shots) {
         auto* o = new CaptureOverlay(sh.screen, sh.image, sh.monitor, &m_detector);
         connect(o, &CaptureOverlay::finished, this, &App::endCapture, Qt::QueuedConnection);
+        connect(o, &CaptureOverlay::delivered, this, [this](const QImage&, const QString& path) {
+            if (!path.isEmpty())
+                m_tray->showMessage(QStringLiteral("截图已保存"), QDir::toNativeSeparators(path), appIcon(), 2500);
+        });
         connect(o, &CaptureOverlay::selectionStarted, this, [this](CaptureOverlay* self) {
             for (auto& other : m_overlays)
                 if (other && other != self) other->setPassive(true);

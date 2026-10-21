@@ -10,7 +10,8 @@
 #include <QFileDialog>
 #include <QGuiApplication>
 #include <QKeyEvent>
-#include <QLineEdit>
+#include <QPlainTextEdit>
+#include <QTextDocument>
 #include <QMessageBox>
 #include <QPainter>
 #include <QPainterPath>
@@ -63,7 +64,7 @@ CaptureOverlay::CaptureOverlay(QScreen* screen, const QImage& shot, const QRect&
         case ToolBar::Undo: undo(); break;
         case ToolBar::Redo: redo(); break;
         case ToolBar::Pin: doPin(); break;
-        case ToolBar::Save: doSave(); break;
+        case ToolBar::Save: doSave(false); break;
         case ToolBar::Cancel: emit finished(); break;
         case ToolBar::Confirm: doCopy(); break;
         }
@@ -77,21 +78,35 @@ CaptureOverlay::CaptureOverlay(QScreen* screen, const QImage& shot, const QRect&
     });
     connect(m_styleBar, &StyleBar::colorChanged, this, [this](const QColor& c) {
         m_color = c;
-        if (m_editing)
-            m_editor->setStyleSheet(QStringLiteral("QLineEdit{background:rgba(255,255,255,30);border:1px dashed %1;color:%2;padding:0 2px;}")
-                                        .arg(Style::Accent.name(), m_color.name()));
+        if (m_editing) m_editor->setStyleSheet(editorStyle());
         setFocus();
     });
 
-    m_editor = new QLineEdit(this);
+    m_editor = new QPlainTextEdit(this);
     m_editor->hide();
-    m_editor->setFrame(false);
+    m_editor->setFrameShape(QFrame::NoFrame);
+    m_editor->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_editor->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_editor->setLineWrapMode(QPlainTextEdit::NoWrap);
+    m_editor->document()->setDocumentMargin(0);
     m_editor->installEventFilter(this);
-    connect(m_editor, &QLineEdit::textChanged, this, [this] {
-        const QFontMetrics fm(m_editor->font());
-        m_editor->resize(qMax(60, fm.horizontalAdvance(m_editor->text() + QStringLiteral("  ")) + 12), fm.height() + 6);
-    });
-    connect(m_editor, &QLineEdit::editingFinished, this, &CaptureOverlay::commitText);
+    connect(m_editor, &QPlainTextEdit::textChanged, this, &CaptureOverlay::resizeEditor);
+}
+
+QString CaptureOverlay::editorStyle() const
+{
+    return QStringLiteral("QPlainTextEdit{background:rgba(255,255,255,30);border:1px dashed %1;color:%2;padding:0;}")
+        .arg(Style::Accent.name(), m_color.name());
+}
+
+void CaptureOverlay::resizeEditor()
+{
+    const QFontMetrics fm(m_editor->font());
+    const QStringList lines = m_editor->toPlainText().split(QLatin1Char('\n'));
+    int w = 60;
+    for (const QString& l : lines) w = qMax(w, fm.horizontalAdvance(l + QStringLiteral("  ")) + 12);
+    const int h = fm.lineSpacing() * qMax<qsizetype>(1, lines.size()) + 8;
+    m_editor->resize(qMin(w, width() - m_editor->x() - 2), h);
 }
 
 void CaptureOverlay::activate()
@@ -298,11 +313,10 @@ void CaptureOverlay::beginText(const QPoint& pos)
     m_editorPos = pos;
     QFont f = annotationFont(currentFontSize());
     m_editor->setFont(f);
-    m_editor->setStyleSheet(QStringLiteral("QLineEdit{background:rgba(255,255,255,30);border:1px dashed %1;color:%2;padding:0 2px;}")
-                                .arg(Style::Accent.name(), m_color.name()));
+    m_editor->setStyleSheet(editorStyle());
     m_editor->clear();
-    const QFontMetrics fm(f);
-    m_editor->setGeometry(pos.x() - 3, pos.y() - 3, 60, fm.height() + 6);
+    m_editor->move(pos.x() - 3, pos.y() - 3);
+    resizeEditor();
     m_editor->show();
     m_editor->setFocus();
 }
@@ -311,7 +325,8 @@ void CaptureOverlay::commitText()
 {
     if (!m_editing) return;
     m_editing = false;
-    const QString text = m_editor->text();
+    QString text = m_editor->toPlainText();
+    while (text.endsWith(QLatin1Char('\n'))) text.chop(1);
     m_editor->hide();
     if (!text.trimmed().isEmpty()) {
         Annotation a;
@@ -338,7 +353,8 @@ bool CaptureOverlay::eventFilter(QObject* o, QEvent* e)
 {
     if (o == m_editor && e->type() == QEvent::KeyPress) {
         auto* k = static_cast<QKeyEvent*>(e);
-        if (k->key() == Qt::Key_Return || k->key() == Qt::Key_Enter) {
+        // Enter / Shift+Enter 换行，Ctrl+Enter 完成
+        if ((k->key() == Qt::Key_Return || k->key() == Qt::Key_Enter) && (k->modifiers() & Qt::ControlModifier)) {
             commitText();
             return true;
         }
@@ -346,6 +362,9 @@ bool CaptureOverlay::eventFilter(QObject* o, QEvent* e)
             cancelText();
             return true;
         }
+    }
+    if (o == m_editor && e->type() == QEvent::FocusOut && m_editing) {
+        QMetaObject::invokeMethod(this, &CaptureOverlay::commitText, Qt::QueuedConnection);
     }
     return QWidget::eventFilter(o, e);
 }
@@ -370,26 +389,30 @@ void CaptureOverlay::doCopy()
     QImage img = renderResult();
     img.setDevicePixelRatio(1);
     QGuiApplication::clipboard()->setImage(img);
+    emit delivered(img, QString());
     emit finished();
 }
 
-void CaptureOverlay::doSave()
+void CaptureOverlay::doSave(bool saveAs)
 {
     if (m_state != State::Selected) return;
     if (m_editing) commitText();
     const QImage img = renderResult();
-    const bool jpg = Settings::format() == QLatin1String("jpg");
-    const QString png = QStringLiteral("PNG 图片 (*.png)"), jpgf = QStringLiteral("JPG 图片 (*.jpg *.jpeg)");
-    QString filter = jpg ? jpgf : png;
-    QDir().mkpath(Settings::saveDir());
-    const QString path = QFileDialog::getSaveFileName(this, QStringLiteral("保存截图"), Settings::defaultFilePath(),
-                                                      png + QStringLiteral(";;") + jpgf, &filter);
-    setFocus();
-    if (path.isEmpty()) return;
+    QString path = Settings::defaultFilePath();
+    if (saveAs) {
+        const bool jpg = Settings::format() == QLatin1String("jpg");
+        const QString png = QStringLiteral("PNG 图片 (*.png)"), jpgf = QStringLiteral("JPG 图片 (*.jpg *.jpeg)");
+        QString filter = jpg ? jpgf : png;
+        QDir().mkpath(Settings::saveDir());
+        path = QFileDialog::getSaveFileName(this, QStringLiteral("另存为"), path, png + QStringLiteral(";;") + jpgf, &filter);
+        setFocus();
+        if (path.isEmpty()) return;
+    }
     if (!Settings::saveImage(img, path)) {
         QMessageBox::warning(this, QStringLiteral("青影"), QStringLiteral("保存失败：%1").arg(path));
         return;
     }
+    emit delivered(img, path);
     emit finished();
 }
 
@@ -397,7 +420,9 @@ void CaptureOverlay::doPin()
 {
     if (m_state != State::Selected) return;
     if (m_editing) commitText();
-    auto* pin = new PinWindow(renderResult());
+    const QImage img = renderResult();
+    emit delivered(img, QString());
+    auto* pin = new PinWindow(img);
     pin->placeImageAt(mapToGlobal(m_sel.topLeft()));
     pin->show();
     pin->activateWindow();
@@ -425,9 +450,9 @@ void CaptureOverlay::mousePressEvent(QMouseEvent* e)
     const QPoint pos = e->position().toPoint();
     m_cursor = pos;
     if (e->button() == Qt::RightButton) {
+        // 右键：编辑文字时取消输入，否则退出截图
         if (m_editing) cancelText();
-        else if (m_state == State::Selected) resetSelection();
-        else emit finished();
+        else if (!m_drawing) emit finished();
         return;
     }
     if (e->button() != Qt::LeftButton) return;
@@ -580,7 +605,7 @@ void CaptureOverlay::keyPressEvent(QKeyEvent* e)
     case Qt::Key_F3: doPin(); return;
     default: break;
     }
-    if (ctrl && e->key() == Qt::Key_S) return doSave();
+    if (ctrl && e->key() == Qt::Key_S) return doSave(e->modifiers() & Qt::ShiftModifier);
     if (ctrl && e->key() == Qt::Key_C) return m_state == State::Selected ? doCopy() : copyHex();
     if (ctrl && (e->key() == Qt::Key_Y || (e->key() == Qt::Key_Z && (e->modifiers() & Qt::ShiftModifier)))) return redo();
     if (ctrl && e->key() == Qt::Key_Z) return undo();
@@ -675,6 +700,8 @@ void CaptureOverlay::paintEvent(QPaintEvent*)
             Style::paintPill(p, at, label);
         }
     }
+    if (m_bar->isVisible()) Style::paintShadow(p, QRectF(m_bar->geometry()), 14);
+    if (m_styleBar->isVisible()) Style::paintShadow(p, QRectF(m_styleBar->geometry()), 12);
     if (magnifierVisible()) paintMagnifier(p);
 }
 

@@ -23,7 +23,7 @@ QList<QColor> annotationColors();
 QString uiFontFamily();
 // 柔和阴影 + 圆角背景
 void paintShadow(QPainter& p, const QRectF& r, qreal radius, int spread = 10);
-void paintGlass(QPainter& p, const QRectF& r, qreal radius);
+void paintGlass(QPainter& p, const QRectF& r, qreal radius, bool shadow = true);
 // 深色胶囊标签，返回绘制区域
 QRectF paintPill(QPainter& p, const QPointF& topLeft, const QString& text);
 QSizeF pillSize(const QString& text);

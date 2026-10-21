@@ -23,7 +23,9 @@ qt_add_executable(QingYing WIN32
     src/CaptureOverlay.cpp src/CaptureOverlay.h
     src/PinWindow.cpp src/PinWindow.h
     src/SettingsDialog.cpp src/SettingsDialog.h
+    resources/QingYing.rc
 )
+qt_add_resources(QingYing "app_icons" PREFIX "/" FILES resources/QingYing.ico resources/QingYing.png)
 
 target_compile_definitions(QingYing PRIVATE
     UNICODE _UNICODE NOMINMAX WIN32_LEAN_AND_MEAN
