@@ -1,4 +1,7 @@
 #include "../src/Logic.h"
+#include "../src/CursorBlend.h"
+#include "../src/GifPalette.h"
+#include <cmath>
 
 #include <QTest>
 
@@ -112,6 +115,111 @@ private slots:
         QVERIFY(Logic::jsonValue(j, QStringLiteral("")).isEmpty());
         QVERIFY(Logic::jsonValue("not json", QStringLiteral("a")).isEmpty());
     }
+    // ---- GIF 调色板 ----
+    void gifFewColorsExact()
+    {
+        std::vector<uint32_t> s = {0xFF0000, 0x00FF00, 0x0000FF, 0xFF0000};
+        const GifQuant::Palette p = GifQuant::medianCut(s);
+        QCOMPARE(p.size, 4); // 透明 + 3
+        GifQuant::Mapper m(p);
+        const int i = m.nearest(0, 255, 0);
+        QCOMPARE(int(p.rgb[i * 3 + 1]), 255);
+        QCOMPARE(int(p.rgb[i * 3]), 0);
+    }
+    void gifManyColorsBounded()
+    {
+        std::vector<uint32_t> s;
+        for (int r = 0; r < 256; r += 4)
+            for (int g = 0; g < 256; g += 8)
+                for (int b = 0; b < 256; b += 16) s.push_back((uint32_t(r) << 16) | (uint32_t(g) << 8) | uint32_t(b));
+        const GifQuant::Palette p = GifQuant::medianCut(s);
+        QVERIFY(p.size <= 256);
+        QVERIFY(p.size > 200);
+        // 平均量化误差应很小
+        GifQuant::Mapper m(p);
+        double err = 0;
+        for (uint32_t c : s) {
+            const int r = c >> 16, g = (c >> 8) & 255, b = c & 255, i = m.nearest(r, g, b);
+            err += std::abs(r - p.rgb[i * 3]) + std::abs(g - p.rgb[i * 3 + 1]) + std::abs(b - p.rgb[i * 3 + 2]);
+        }
+        QVERIFY2(err / s.size() < 40, qPrintable(QString::number(err / s.size())));
+    }
+    void gifEmptySamples() { QCOMPARE(GifQuant::medianCut({}).size, 2); }
+    void gifDeltaTransparent()
+    {
+        const int w = 8, h = 4;
+        std::vector<uint8_t> a(w * h * 4, 0), b, out(w * h * 4);
+        for (int i = 0; i < w * h; ++i) a[i * 4] = uint8_t(i * 8);
+        b = a;
+        b[5 * 4 + 1] = 200; // 只改一个像素
+        std::vector<uint32_t> s;
+        GifQuant::sample(a.data(), w, h, 1000, s);
+        GifQuant::sample(b.data(), w, h, 1000, s);
+        GifQuant::Mapper m(GifQuant::medianCut(s));
+        QCOMPARE(GifQuant::quantize(a.data(), nullptr, w, h, m, false, out.data()), w * h);
+        QCOMPARE(GifQuant::quantize(b.data(), a.data(), w, h, m, false, out.data()), 1);
+        QCOMPARE(int(out[0 * 4 + 3]), GifQuant::kTransparent);
+        QVERIFY(out[5 * 4 + 3] != GifQuant::kTransparent);
+    }
+    void gifDitherReducesBanding()
+    {
+        // 黑白两色调色板量化 50% 灰：不抖动全部变成同一色，抖动后平均亮度接近 128
+        const int w = 64, h = 64;
+        std::vector<uint8_t> img(w * h * 4, 128), out(w * h * 4);
+        GifQuant::Mapper m(GifQuant::medianCut({0x000000, 0xFFFFFF}));
+        GifQuant::quantize(img.data(), nullptr, w, h, m, false, out.data());
+        double flat = 0;
+        for (int i = 0; i < w * h; ++i) flat += out[i * 4];
+        GifQuant::quantize(img.data(), nullptr, w, h, m, true, out.data());
+        double dith = 0;
+        for (int i = 0; i < w * h; ++i) dith += out[i * 4];
+        flat /= w * h;
+        dith /= w * h;
+        QVERIFY(std::abs(flat - 128) > 100);
+        QVERIFY2(std::abs(dith - 128) < 12, qPrintable(QString::number(dith)));
+    }
+
+    // ---- 指针合成 ----
+    void cursorColorAlpha()
+    {
+        uint8_t dst[4 * 4 * 4] = {};
+        const uint8_t shape[2 * 2 * 4] = {255, 0, 0, 255, 0, 255, 0, 0, 0, 0, 255, 128, 10, 10, 10, 255};
+        CursorBlend::draw(dst, 16, 4, 4, CursorBlend::Color, shape, 2, 2, 8, 1, 1);
+        QCOMPARE(int(dst[(1 * 4 + 1) * 4]), 255);          // 不透明：覆盖
+        QCOMPARE(int(dst[(1 * 4 + 2) * 4 + 1]), 0);        // 全透明：不变
+        QCOMPARE(int(dst[(2 * 4 + 1) * 4 + 2]), 128);      // 半透明：混合
+        QCOMPARE(int(dst[0]), 0);                           // 形状外：不变
+    }
+    void cursorClipped()
+    {
+        uint8_t dst[2 * 2 * 4] = {};
+        const uint8_t shape[2 * 2 * 4] = {9, 9, 9, 255, 9, 9, 9, 255, 9, 9, 9, 255, 9, 9, 9, 255};
+        CursorBlend::draw(dst, 8, 2, 2, CursorBlend::Color, shape, 2, 2, 8, -1, -1); // 只有右下角落在画面内
+        QCOMPARE(int(dst[0]), 9);
+        QCOMPARE(int(dst[4]), 0);
+        CursorBlend::draw(dst, 8, 2, 2, CursorBlend::Color, shape, 2, 2, 8, 5, 5); // 完全在外
+    }
+    void cursorMonochrome()
+    {
+        // 8x1 形状：AND 行 0b11110000，XOR 行 0b10101010 → 像素 0 反色、1 不变、4 白、5 黑
+        uint8_t dst[8 * 4];
+        for (int i = 0; i < 8; ++i) dst[i * 4] = dst[i * 4 + 1] = dst[i * 4 + 2] = 100;
+        const uint8_t shape[2] = {0xF0, 0xAA};
+        CursorBlend::draw(dst, 32, 8, 1, CursorBlend::Monochrome, shape, 8, 2, 1, 0, 0);
+        QCOMPARE(int(dst[0]), 155);
+        QCOMPARE(int(dst[4]), 100);
+        QCOMPARE(int(dst[16]), 255);
+        QCOMPARE(int(dst[20]), 0);
+    }
+    void cursorMasked()
+    {
+        uint8_t dst[2 * 4] = {100, 100, 100, 0, 100, 100, 100, 0};
+        const uint8_t shape[2 * 4] = {7, 8, 9, 0, 0xFF, 0xFF, 0xFF, 0xFF};
+        CursorBlend::draw(dst, 8, 2, 1, CursorBlend::MaskedColor, shape, 2, 1, 8, 0, 0);
+        QCOMPARE(int(dst[0]), 7);   // 掩码 0：替换
+        QCOMPARE(int(dst[4]), 155); // 掩码 FF：异或
+    }
+
 };
 
 QTEST_GUILESS_MAIN(TestLogic)

@@ -91,6 +91,7 @@ RecordSession::RecordSession(const QRect& region, Recorder::Format format)
     const QString ext = format == Recorder::Format::Mp4 ? QStringLiteral(".mp4") : QStringLiteral(".gif");
     const QString path = QDir(Settings::saveDir()).filePath(Settings::expandPattern(Settings::filePattern()) + ext);
     m_rec = new Recorder(region, format, Settings::recordFps(), Settings::recordCursor(), path);
+    m_rec->setGifDither(Settings::gifDither());
 
     auto* lay = new QHBoxLayout(this);
     lay->setContentsMargins(22, 18, 18, 18);

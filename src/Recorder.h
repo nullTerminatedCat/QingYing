@@ -17,6 +17,7 @@ public:
     bool start(QString* error);
     void stop(); // 阻塞直到文件写完
     void setPaused(bool p) { m_paused = p; }
+    void setGifDither(bool on) { m_gifDither = on; } // start() 之前调用
     bool isPaused() const { return m_paused; }
     qint64 elapsedMs() const { return m_elapsed; }
     QString outputPath() const { return m_path; }
@@ -31,6 +32,7 @@ private:
     Format m_format;
     int m_fps;
     bool m_cursor;
+    bool m_gifDither = false;
     QString m_path;
     QString m_error;
     QString m_backend;

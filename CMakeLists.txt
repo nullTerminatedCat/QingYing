@@ -57,6 +57,9 @@ qt_add_executable(QingYing WIN32
     src/Secret.cpp src/Secret.h
     src/Uploader.cpp src/Uploader.h
     src/Logic.cpp src/Logic.h
+    src/Language.cpp src/Language.h
+    src/GifPalette.cpp src/GifPalette.h
+    src/CursorBlend.cpp src/CursorBlend.h
     src/Diagnostics.cpp src/Diagnostics.h
     src/EditRequest.cpp src/EditRequest.h
     resources/QingYing.rc
@@ -75,6 +78,8 @@ else()
     message(WARNING "qtbase_zh_CN.qm not found; Qt dialogs will not be translated")
 endif()
 qt_add_resources(QingYing "app_icons" PREFIX "/" FILES resources/QingYing.ico resources/QingYing.png)
+qt_add_resources(QingYing "ui_images" PREFIX "/ui" BASE resources/ui FILES
+    resources/ui/chevron-up.png resources/ui/chevron-up@2x.png resources/ui/chevron-down.png resources/ui/chevron-down@2x.png)
 
 target_compile_definitions(QingYing PRIVATE
     UNICODE _UNICODE NOMINMAX WIN32_LEAN_AND_MEAN
@@ -100,7 +105,7 @@ option(QINGYING_BUILD_TESTS "Build unit tests" ON)
 if(QINGYING_BUILD_TESTS)
     find_package(Qt6 REQUIRED COMPONENTS Test)
     enable_testing()
-    qt_add_executable(qingying_tests tests/tst_logic.cpp src/Logic.cpp src/Logic.h)
+    qt_add_executable(qingying_tests tests/tst_logic.cpp src/Logic.cpp src/Logic.h src/CursorBlend.cpp src/CursorBlend.h src/GifPalette.cpp src/GifPalette.h)
     set_target_properties(qingying_tests PROPERTIES WIN32_EXECUTABLE OFF)
     target_link_libraries(qingying_tests PRIVATE Qt6::Gui Qt6::Test)
     if(MSVC)

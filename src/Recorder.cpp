@@ -12,6 +12,9 @@
 #include <chrono>
 #include <condition_variable>
 #include <deque>
+#include <vector>
+#include "CursorBlend.h"
+#include "GifPalette.h"
 #include <mutex>
 
 #include <windows.h>
@@ -143,6 +146,7 @@ private:
 // GIF：抓帧线程只做拷贝，调色板量化与 LZW 编码放在独立线程；连续相同的帧合并为一帧（延长显示时间）
 class GifSink : public Sink {
 public:
+    explicit GifSink(bool dither) : m_dither(dither) {}
     ~GifSink() override { stopWorker(); }
 
     bool open(int w, int h, int fps, const QString& path, QString* err) override
@@ -222,9 +226,39 @@ private:
             }
             const QImage rgba = it.img.convertToFormat(QImage::Format_RGBA8888);
             const uint32_t delay = uint32_t(qMax<qint64>(2, (it.durationMs + 5) / 10)); // 1/100 秒
-            GifWriteFrame(&m_gif, rgba.constBits(), m_w, m_h, delay);
+            encode(rgba.constBits(), delay, it.durationMs);
             if (m_gif.f) m_bytes = qint64(ftell(m_gif.f));
         }
+    }
+    // 自适应调色板：由当前帧与上次建表的样本共同生成（中位切分），约每 2 秒或画面大幅变化时重建，
+    // 期间各帧共用同一调色板，避免逐帧调色板造成的闪烁与色带跳变；可选 Floyd–Steinberg 抖动
+    void encode(const uchar* rgba, uint32_t delay, qint64 durationMs)
+    {
+        const size_t bytes = size_t(m_w) * m_h * 4;
+        if (!m_mapper || m_sinceBuild >= 2000 || m_rebuild) {
+            std::vector<uint32_t> samples;
+            GifQuant::sample(rgba, m_w, m_h, 60000, samples);
+            samples.insert(samples.end(), m_lastSamples.begin(), m_lastSamples.end());
+            m_mapper = std::make_unique<GifQuant::Mapper>(GifQuant::medianCut(samples));
+            m_lastSamples.clear();
+            GifQuant::sample(rgba, m_w, m_h, 20000, m_lastSamples);
+            m_sinceBuild = 0;
+            m_rebuild = false;
+        }
+        m_out.resize(bytes);
+        const int changed = GifQuant::quantize(rgba, m_prev.empty() ? nullptr : m_prev.data(), m_w, m_h, *m_mapper, m_dither, m_out.data());
+        if (changed > m_w * m_h / 2) m_rebuild = true; // 场景切换：下一帧重建调色板
+        m_sinceBuild += durationMs;
+        GifPalette gp{};
+        gp.bitDepth = 8;
+        const auto& pal = m_mapper->palette();
+        for (int i = 0; i < 256; ++i) {
+            gp.r[i] = pal.rgb[i * 3];
+            gp.g[i] = pal.rgb[i * 3 + 1];
+            gp.b[i] = pal.rgb[i * 3 + 2];
+        }
+        GifWriteLzwImage(m_gif.f, m_out.data(), 0, 0, uint32_t(m_w), uint32_t(m_h), delay, &gp);
+        m_prev.assign(rgba, rgba + bytes);
     }
     void stopWorker()
     {
@@ -247,6 +281,12 @@ private:
     std::deque<Item> m_queue;
     bool m_quit = false;
     std::atomic<qint64> m_bytes{0};
+    bool m_dither = false;
+    std::unique_ptr<GifQuant::Mapper> m_mapper;
+    std::vector<uint32_t> m_lastSamples;
+    std::vector<uchar> m_prev, m_out;
+    qint64 m_sinceBuild = 0;
+    bool m_rebuild = false;
 };
 
 // Desktop Duplication：GPU 直接复制目标显示器画面，只回读选区，CPU 占用远低于 BitBlt。
@@ -255,8 +295,10 @@ class DxgiSource {
 public:
     ~DxgiSource() { reset(); }
 
-    bool init(const QRect& region)
+    bool init(const QRect& region, bool cursor)
     {
+        m_drawCursor = cursor;
+        m_region = region;
         IDXGIFactory1* factory = nullptr;
         if (FAILED(CreateDXGIFactory1(__uuidof(IDXGIFactory1), reinterpret_cast<void**>(&factory)))) return false;
         IDXGIAdapter1* adapter = nullptr;
@@ -322,6 +364,9 @@ public:
         for (int y = 0; y < h; ++y)
             memcpy(dst + size_t(y) * stride, static_cast<const uchar*>(m.pData) + size_t(y) * m.RowPitch, size_t(w) * 4);
         m_ctx->Unmap(m_staging, 0);
+        if (m_drawCursor && m_ptrVisible && !m_shape.empty())
+            CursorBlend::draw(dst, stride, w, h, m_shapeInfo.Type, m_shape.data(), int(m_shapeInfo.Width), int(m_shapeInfo.Height),
+                              int(m_shapeInfo.Pitch), m_ptrPos.x() + m_origin.x() - m_region.x(), m_ptrPos.y() + m_origin.y() - m_region.y());
         return true;
     }
 
@@ -343,6 +388,20 @@ private:
             return duplicate() || false;
         }
         if (FAILED(hr)) return false;
+        // 指针：位置与形状随帧信息返回（物理像素，相对本显示器；Position 为形状左上角，已含热点偏移）
+        if (info.LastMouseUpdateTime.QuadPart != 0) {
+            m_ptrVisible = info.PointerPosition.Visible;
+            m_ptrPos = QPoint(info.PointerPosition.Position.x, info.PointerPosition.Position.y);
+        }
+        if (info.PointerShapeBufferSize > 0) {
+            std::vector<uchar> buf(info.PointerShapeBufferSize);
+            UINT need = 0;
+            DXGI_OUTDUPL_POINTER_SHAPE_INFO si{};
+            if (SUCCEEDED(m_dup->GetFramePointerShape(UINT(buf.size()), buf.data(), &need, &si))) {
+                m_shape = std::move(buf);
+                m_shapeInfo = si;
+            }
+        }
         if (info.LastPresentTime.QuadPart != 0 || !m_hasFrame) {
             ID3D11Texture2D* tex = nullptr;
             if (SUCCEEDED(res->QueryInterface(__uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&tex)))) {
@@ -370,7 +429,13 @@ private:
     ID3D11Texture2D* m_staging = nullptr;
     D3D11_BOX m_box{};
     QPoint m_origin;
+    QRect m_region;
     bool m_hasFrame = false;
+    bool m_drawCursor = false;
+    bool m_ptrVisible = false;
+    QPoint m_ptrPos;
+    std::vector<uchar> m_shape;
+    DXGI_OUTDUPL_POINTER_SHAPE_INFO m_shapeInfo{};
 };
 
 void drawCursor(HDC dc, const QPoint& origin)
@@ -420,7 +485,7 @@ void Recorder::run()
     const int w = m_region.width(), h = m_region.height();
     std::unique_ptr<Sink> sink;
     if (m_format == Format::Mp4) sink = std::make_unique<Mp4Sink>();
-    else sink = std::make_unique<GifSink>();
+    else sink = std::make_unique<GifSink>(m_gifDither);
     QDir().mkpath(QFileInfo(m_path).absolutePath());
     QString err;
     if (w < 16 || h < 16 || !sink->open(w, h, m_fps, m_path, &err)) {
@@ -445,7 +510,7 @@ void Recorder::run()
     HGDIOBJ old = SelectObject(mem, bmp);
 
     auto dxgi = std::make_unique<DxgiSource>();
-    if (qEnvironmentVariableIsSet("QINGYING_FORCE_GDI") || !dxgi->init(m_region)) dxgi.reset();
+    if (qEnvironmentVariableIsSet("QINGYING_FORCE_GDI") || !dxgi->init(m_region, m_cursor)) dxgi.reset();
     m_backend = dxgi ? QStringLiteral("dxgi") : QStringLiteral("gdi");
 
     QElapsedTimer clock;
@@ -472,7 +537,7 @@ void Recorder::run()
             m_backend = QStringLiteral("dxgi+gdi");
         }
         if (!dxgi) BitBlt(mem, 0, 0, w, h, screen, m_region.x(), m_region.y(), SRCCOPY);
-        if (m_cursor) drawCursor(mem, m_region.topLeft());
+        if (m_cursor && !dxgi) drawCursor(mem, m_region.topLeft()); // DXGI 模式下指针由帧信息绘制
         GdiFlush();
         if (!sink->write(static_cast<const uchar*>(bits), w * 4, t)) {
             m_error = QCoreApplication::translate("QingYing", "写入视频帧失败");
