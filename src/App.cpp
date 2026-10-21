@@ -4,6 +4,7 @@
 #include "HistoryWindow.h"
 #include "Icons.h"
 #include "Ocr.h"
+#include "QrDecoder.h"
 #include "PinWindow.h"
 #include "ScrollCapture.h"
 #include "ScreenGrabber.h"
@@ -121,6 +122,12 @@ void App::writeSmokeReport()
     }
     Ocr::Result ocr;
     std::thread([&] { ocr = Ocr::recognize(txt); }).join();
+    const QString qrPath = qEnvironmentVariable("QINGYING_SMOKE_QR");
+    if (!qrPath.isEmpty()) {
+        const auto codes = QrDecoder::decode(QImage(qrPath));
+        f.write(QStringLiteral("qr_count=%1\nqr_text=%2\n").arg(codes.size())
+                    .arg(codes.isEmpty() ? QString() : codes.first().format + QStringLiteral(": ") + codes.first().text).toUtf8());
+    }
     f.write(QStringLiteral("ocr_ok=%1\nocr_lang=%2\nocr_text=%3\nocr_error=%4\n")
                 .arg(ocr.ok).arg(ocr.language, ocr.text, ocr.error).toUtf8());
 }

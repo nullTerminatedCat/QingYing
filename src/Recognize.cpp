@@ -1,10 +1,12 @@
 #include "Recognize.h"
 #include "Ocr.h"
+#include "QrDecoder.h"
 #include "ResultDialog.h"
 
 #include <QCoreApplication>
 #include <QPointer>
 #include <QStringList>
+#include <QUrl>
 #include <thread>
 
 namespace Recognize {
@@ -34,10 +36,25 @@ void ocr(const QImage& image)
 }
 
 namespace Recognize {
-void qr(const QImage&)
+void qr(const QImage& image)
 {
-    auto* dlg = new ResultDialog(QStringLiteral("二维码识别"));
-    dlg->setStatus(QStringLiteral("二维码识别即将推出"), true);
+    auto* dlg = new ResultDialog(QStringLiteral("二维码 / 条码识别"));
+    const QList<QrDecoder::Code> codes = QrDecoder::decode(image);
+    if (codes.isEmpty()) {
+        dlg->setStatus(QStringLiteral("未识别到二维码或条码。请尽量只框选码的区域，并保证清晰。"), true);
+    } else {
+        QStringList texts;
+        for (const auto& c : codes) texts << c.text;
+        dlg->setText(texts.join(QStringLiteral("\n\n")));
+        QStringList fmts;
+        for (const auto& c : codes) fmts << c.format;
+        dlg->setStatus(QStringLiteral("识别到 %1 个：%2").arg(codes.size()).arg(fmts.join(QStringLiteral("、"))));
+        const QUrl url(codes.first().text.trimmed(), QUrl::StrictMode);
+        if (codes.size() == 1 && url.isValid() && (url.scheme() == QLatin1String("http") || url.scheme() == QLatin1String("https")))
+            dlg->setUrl(url.toString());
+    }
     dlg->show();
+    dlg->raise();
+    dlg->activateWindow();
 }
 }
