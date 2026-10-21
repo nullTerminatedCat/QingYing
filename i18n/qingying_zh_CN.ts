@@ -53,10 +53,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>GIF 抖动（减少渐变色带，文件稍大）</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>H.264 编码器不支持该尺寸（0x%1）</source>
         <translation type="unfinished"></translation>
     </message>
@@ -229,14 +225,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>启动时自动检查更新（每天最多一次）</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>启用上传（截图工具条与钉图菜单出现“上传”）</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>复制</source>
         <translation type="unfinished"></translation>
     </message>
@@ -264,10 +252,6 @@
     </message>
     <message>
         <source>定时截图已开始</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>密钥使用 Windows DPAPI 加密保存，仅当前用户可解密</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -323,10 +307,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>开机时自动启动青影</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>开机自启</source>
         <translation type="unfinished"></translation>
     </message>
@@ -371,19 +351,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>快捷键 %1 已被其他程序占用，请换一个组合。</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>快捷键冲突</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>快捷键无效</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>快捷键需要包含 Ctrl / Alt / Shift / Win 之一，并使用字母、数字或功能键。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -588,10 +556,6 @@
     </message>
     <message>
         <source>清空历史</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>点击输入框后直接按下新的组合键，例如 Ctrl+Alt+A</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -842,10 +806,6 @@
     </message>
     <message>
         <source>顺时针旋转 90°	R</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>预览：%1%2    {} 内为日期格式，如 {yyyyMMdd_HHmmss}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1110,6 +1070,19 @@
     </message>
     <message>
         <source>默认颜色</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>欢迎使用青影</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>按 %1 或单击托盘图标开始截图；右键托盘图标可录屏、钉图、查看历史。点击此提示打开设置。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>还没有截图记录
+按截图快捷键或单击托盘图标截一张试试</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

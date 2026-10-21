@@ -54,10 +54,6 @@ Click to open the containing folder</translation>
         <translation>C Copy</translation>
     </message>
     <message>
-        <source>GIF 抖动（减少渐变色带，文件稍大）</source>
-        <translation>GIF dithering (less banding, slightly larger files)</translation>
-    </message>
-    <message>
         <source>H.264 编码器不支持该尺寸（0x%1）</source>
         <translation>The H.264 encoder does not support this size (0x%1)</translation>
     </message>
@@ -230,14 +226,6 @@ Click to open the containing folder</translation>
         <translation>Save as…</translation>
     </message>
     <message>
-        <source>启动时自动检查更新（每天最多一次）</source>
-        <translation>Check for updates on startup (at most once a day)</translation>
-    </message>
-    <message>
-        <source>启用上传（截图工具条与钉图菜单出现“上传”）</source>
-        <translation>Enable upload (adds "Upload" to the toolbar and pin menu)</translation>
-    </message>
-    <message>
         <source>复制</source>
         <translation>Copy</translation>
     </message>
@@ -270,10 +258,6 @@ Actual: %2</translation>
         <translation>Timed capture started</translation>
     </message>
     <message>
-        <source>密钥使用 Windows DPAPI 加密保存，仅当前用户可解密</source>
-        <translation>Secrets are encrypted with Windows DPAPI and can only be decrypted by the current user</translation>
-    </message>
-    <message>
         <source>将下载安装包并校验 SHA-256，校验通过后启动安装程序并退出青影。</source>
         <translation>The installer will be downloaded and its SHA-256 verified; then it will launch and QingYing will quit.</translation>
     </message>
@@ -295,7 +279,7 @@ Actual: %2</translation>
     </message>
     <message>
         <source>已是最新版本</source>
-        <translation>You're up to date</translation>
+        <translation>You&apos;re up to date</translation>
     </message>
     <message>
         <source>已达到最大高度</source>
@@ -324,10 +308,6 @@ Actual: %2</translation>
     <message>
         <source>开始写入失败</source>
         <translation>Failed to start writing</translation>
-    </message>
-    <message>
-        <source>开机时自动启动青影</source>
-        <translation>Start QingYing when Windows starts</translation>
     </message>
     <message>
         <source>开机自启</source>
@@ -374,20 +354,8 @@ Actual: %2</translation>
         <translation>Hotkey</translation>
     </message>
     <message>
-        <source>快捷键 %1 已被其他程序占用，请换一个组合。</source>
-        <translation>Hotkey %1 is used by another program. Please choose another.</translation>
-    </message>
-    <message>
         <source>快捷键冲突</source>
         <translation>Hotkey conflict</translation>
-    </message>
-    <message>
-        <source>快捷键无效</source>
-        <translation>Invalid hotkey</translation>
-    </message>
-    <message>
-        <source>快捷键需要包含 Ctrl / Alt / Shift / Win 之一，并使用字母、数字或功能键。</source>
-        <translation>A hotkey needs Ctrl / Alt / Shift / Win plus a letter, digit, or function key.</translation>
     </message>
     <message>
         <source>快速保存  Ctrl+S（另存为 Ctrl+Shift+S）</source>
@@ -594,10 +562,6 @@ Actual: %2</translation>
         <translation>Clear history</translation>
     </message>
     <message>
-        <source>点击输入框后直接按下新的组合键，例如 Ctrl+Alt+A</source>
-        <translation>Click the box and press a new combination, e.g. Ctrl+Alt+A</translation>
-    </message>
-    <message>
         <source>画笔</source>
         <translation>Pen</translation>
     </message>
@@ -727,7 +691,7 @@ Actual: %2</translation>
     </message>
     <message>
         <source>请求头，每行一个“名称: 值”</source>
-        <translation>Headers, one "Name: value" per line</translation>
+        <translation>Headers, one &quot;Name: value&quot; per line</translation>
     </message>
     <message>
         <source>跟随系统</source>
@@ -848,10 +812,6 @@ Actual: %2</translation>
     <message>
         <source>顺时针旋转 90°	R</source>
         <translation>Rotate 90° right	R</translation>
-    </message>
-    <message>
-        <source>预览：%1%2    {} 内为日期格式，如 {yyyyMMdd_HHmmss}</source>
-        <translation>Preview: %1%2    {} holds a date format, e.g. {yyyyMMdd_HHmmss}</translation>
     </message>
     <message>
         <source>马赛克</source>
@@ -987,7 +947,7 @@ Actual: %2</translation>
     </message>
     <message>
         <source>截图工具条与钉图菜单中出现“上传”</source>
-        <translation>Adds "Upload" to the capture toolbar and pin menu</translation>
+        <translation>Adds &quot;Upload&quot; to the capture toolbar and pin menu</translation>
     </message>
     <message>
         <source>打开 GitHub</source>
@@ -1091,7 +1051,7 @@ Actual: %2</translation>
     </message>
     <message>
         <source>选择“无”时先调整选区，再手动选工具</source>
-        <translation>With "None" you adjust the selection first, then pick a tool</translation>
+        <translation>With &quot;None&quot; you adjust the selection first, then pick a tool</translation>
     </message>
     <message>
         <source>选择图床；下方只显示该服务需要的参数</source>
@@ -1116,6 +1076,20 @@ Actual: %2</translation>
     <message>
         <source>默认颜色</source>
         <translation>Default color</translation>
+    </message>
+    <message>
+        <source>欢迎使用青影</source>
+        <translation>Welcome to QingYing</translation>
+    </message>
+    <message>
+        <source>按 %1 或单击托盘图标开始截图；右键托盘图标可录屏、钉图、查看历史。点击此提示打开设置。</source>
+        <translation>Press %1 or click the tray icon to capture. Right-click the tray icon to record, pin or open History. Click this message to open Settings.</translation>
+    </message>
+    <message>
+        <source>还没有截图记录
+按截图快捷键或单击托盘图标截一张试试</source>
+        <translation>No captures yet
+Press the capture hotkey or click the tray icon to take one</translation>
     </message>
 </context>
 </TS>
