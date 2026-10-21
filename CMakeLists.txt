@@ -26,6 +26,9 @@ qt_add_executable(QingYing WIN32
     src/History.cpp src/History.h
     src/HistoryWindow.cpp src/HistoryWindow.h
     src/ScrollCapture.cpp src/ScrollCapture.h
+    src/ResultDialog.cpp src/ResultDialog.h
+    src/Ocr.cpp src/Ocr.h
+    src/Recognize.cpp src/Recognize.h
     resources/QingYing.rc
 )
 qt_add_resources(QingYing "app_icons" PREFIX "/" FILES resources/QingYing.ico resources/QingYing.png)
@@ -33,9 +36,9 @@ qt_add_resources(QingYing "app_icons" PREFIX "/" FILES resources/QingYing.ico re
 target_compile_definitions(QingYing PRIVATE
     UNICODE _UNICODE NOMINMAX WIN32_LEAN_AND_MEAN
     QINGYING_VERSION="${PROJECT_VERSION}")
-target_link_libraries(QingYing PRIVATE Qt6::Widgets user32 gdi32 dwmapi)
+target_link_libraries(QingYing PRIVATE Qt6::Widgets user32 gdi32 dwmapi windowsapp)
 if(MSVC)
-    target_compile_options(QingYing PRIVATE /utf-8 /W3 /permissive-)
+    target_compile_options(QingYing PRIVATE /utf-8 /W3 /permissive- /bigobj)
 endif()
 
 # 构建后自动部署 Qt 运行库，使 exe 可直接运行

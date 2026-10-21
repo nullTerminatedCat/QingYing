@@ -1,5 +1,6 @@
 #include "CaptureOverlay.h"
 #include "PinWindow.h"
+#include "Recognize.h"
 #include "Settings.h"
 #include "Style.h"
 #include "ToolBars.h"
@@ -68,6 +69,8 @@ CaptureOverlay::CaptureOverlay(QScreen* screen, const QImage& shot, const QRect&
         case ToolBar::Cancel: emit finished(); break;
         case ToolBar::Confirm: doDefault(); break;
         case ToolBar::LongShot: doLongShot(); break;
+        case ToolBar::OcrBtn: doRecognize(false); break;
+        case ToolBar::QrBtn: doRecognize(true); break;
         }
         setFocus();
     });
@@ -439,6 +442,16 @@ void CaptureOverlay::doDefault()
     else doCopy();
 }
 
+void CaptureOverlay::doRecognize(bool qr)
+{
+    if (m_state != State::Selected) return;
+    if (m_editing) commitText();
+    const QImage img = renderResult();
+    emit finished();
+    if (qr) Recognize::qr(img);
+    else Recognize::ocr(img);
+}
+
 void CaptureOverlay::doLongShot()
 {
     if (m_state != State::Selected) return;
@@ -642,6 +655,8 @@ void CaptureOverlay::keyPressEvent(QKeyEvent* e)
         case Qt::Key_M: return setTool(Tool::Mosaic);
         case Qt::Key_N: return setTool(Tool::Number);
         case Qt::Key_L: return doLongShot();
+        case Qt::Key_O: return doRecognize(false);
+        case Qt::Key_Q: return doRecognize(true);
         default: break;
         }
     }

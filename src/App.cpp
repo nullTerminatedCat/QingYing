@@ -3,6 +3,7 @@
 #include "History.h"
 #include "HistoryWindow.h"
 #include "Icons.h"
+#include "Ocr.h"
 #include "PinWindow.h"
 #include "ScrollCapture.h"
 #include "ScreenGrabber.h"
@@ -23,6 +24,8 @@
 #include <QScreen>
 #include <QSystemTrayIcon>
 #include <QTimer>
+#include <QPainter>
+#include <thread>
 
 App::App()
 {
@@ -105,6 +108,21 @@ void App::writeSmokeReport()
     const QImage a = tall.copy(0, 0, 300, 400), b = tall.copy(0, 37, 300, 400);
     f.write(QStringLiteral("stitch_shift=%1 (expect 37)\nstitch_same=%2 (expect 0)\n")
                 .arg(ScrollCapture::findShift(a, b)).arg(ScrollCapture::findShift(a, a)).toUtf8());
+    // OCR 自检：渲染一段文字后识别
+    QImage txt(520, 90, QImage::Format_RGB32);
+    txt.fill(Qt::white);
+    {
+        QPainter tp(&txt);
+        QFont tf(QStringLiteral("Microsoft YaHei UI"));
+        tf.setPixelSize(36);
+        tp.setFont(tf);
+        tp.setPen(Qt::black);
+        tp.drawText(txt.rect(), Qt::AlignCenter, QStringLiteral("Hello 青影 2026"));
+    }
+    Ocr::Result ocr;
+    std::thread([&] { ocr = Ocr::recognize(txt); }).join();
+    f.write(QStringLiteral("ocr_ok=%1\nocr_lang=%2\nocr_text=%3\nocr_error=%4\n")
+                .arg(ocr.ok).arg(ocr.language, ocr.text, ocr.error).toUtf8());
 }
 
 void App::updateMenu()

@@ -108,6 +108,37 @@ void paintIcon(QPainter& p, Icon icon, const QRectF& r, const QColor& color)
         path.moveTo(19, 12); path.arcTo(QRectF(5, 5, 14, 14), 0, 270);
         path.moveTo(19, 7.5); path.lineTo(19, 12); path.lineTo(14.5, 12);
         break;
+    case Icon::Ocr:
+        path.moveTo(4, 8); path.lineTo(4, 4); path.lineTo(8, 4);
+        path.moveTo(16, 4); path.lineTo(20, 4); path.lineTo(20, 8);
+        path.moveTo(20, 16); path.lineTo(20, 20); path.lineTo(16, 20);
+        path.moveTo(8, 20); path.lineTo(4, 20); path.lineTo(4, 16);
+        path.moveTo(8, 9); path.lineTo(16, 9);
+        path.moveTo(12, 9); path.lineTo(12, 16);
+        break;
+    case Icon::Qr:
+        path.addRoundedRect(4, 4, 6, 6, 1, 1);
+        path.addRoundedRect(14, 4, 6, 6, 1, 1);
+        path.addRoundedRect(4, 14, 6, 6, 1, 1);
+        path.moveTo(14, 14); path.lineTo(16.5, 14);
+        path.moveTo(19.5, 14); path.lineTo(20, 14); path.lineTo(20, 16.5);
+        path.moveTo(14, 17.5); path.lineTo(14, 20); path.lineTo(16.5, 20);
+        path.moveTo(17.5, 17.5); path.lineTo(20, 20);
+        break;
+    case Icon::Picker:
+        path.moveTo(14, 6); path.lineTo(18, 10);
+        path.moveTo(16, 4.5); path.cubicTo(17.5, 3, 20.5, 6, 19.5, 7.5); path.lineTo(17.5, 9.5);
+        path.moveTo(15.5, 8.5); path.lineTo(7, 17); path.lineTo(5, 19); path.lineTo(4.5, 19.5);
+        path.moveTo(7, 17); path.lineTo(6, 18);
+        break;
+    case Icon::Record:
+        path.addEllipse(QPointF(12, 12), 8, 8);
+        p.setPen(Qt::NoPen);
+        p.setBrush(color);
+        p.drawEllipse(QPointF(12, 12), 3.5, 3.5);
+        p.setPen(pen);
+        p.setBrush(Qt::NoBrush);
+        break;
     case Icon::Settings:
         path.addEllipse(QPointF(12, 12), 3, 3);
         path.addEllipse(QPointF(12, 12), 8, 8);

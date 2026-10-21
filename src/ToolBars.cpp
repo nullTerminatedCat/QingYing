@@ -25,6 +25,8 @@ ToolBar::ToolBar(QWidget* parent) : QWidget(parent)
         {Undo, Icon::Undo, QStringLiteral("撤销  Ctrl+Z"), {}, false},
         {Redo, Icon::Redo, QStringLiteral("重做  Ctrl+Y"), {}, false},
         {-1, Icon::Rect, {}, {}, true},
+        {OcrBtn, Icon::Ocr, QStringLiteral("识别文字（OCR）  O"), {}, false},
+        {QrBtn, Icon::Qr, QStringLiteral("识别二维码 / 条码  Q"), {}, false},
         {LongShot, Icon::Scroll, QStringLiteral("长截图（滚动）  L"), {}, false},
         {Pin, Icon::Pin, QStringLiteral("钉在桌面  F3"), {}, false},
         {Save, Icon::Save, QStringLiteral("快速保存  Ctrl+S（另存为 Ctrl+Shift+S）"), {}, false},

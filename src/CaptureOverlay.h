@@ -71,6 +71,7 @@ private:
     void doPin();
     void doDefault();
     void doLongShot();
+    void doRecognize(bool qr);
 public:
     void setLongShotMode(bool on) { m_longShotMode = on; }
 private:

@@ -1,5 +1,6 @@
 #include "PinWindow.h"
 #include "Icons.h"
+#include "Recognize.h"
 #include "Settings.h"
 #include "Style.h"
 
@@ -217,6 +218,9 @@ void PinWindow::contextMenuEvent(QContextMenuEvent* e)
     QMenu menu(this);
     menu.addAction(menuIcon(Icon::Copy), QStringLiteral("复制"), this, &PinWindow::copy);
     menu.addAction(menuIcon(Icon::Save), QStringLiteral("另存为…"), this, &PinWindow::save);
+    menu.addAction(menuIcon(Icon::Ocr), QStringLiteral("识别文字（OCR）"), this, [this] { Recognize::ocr(m_img); });
+    menu.addAction(menuIcon(Icon::Qr), QStringLiteral("识别二维码 / 条码"), this, [this] { Recognize::qr(m_img); });
+    menu.addSeparator();
     menu.addAction(menuIcon(Icon::Rotate), QStringLiteral("顺时针旋转 90°\tR"), this, [this] { rotate(90); });
     menu.addAction(QStringLiteral("逆时针旋转 90°\tShift+R"), this, [this] { rotate(-90); });
     menu.addAction(QStringLiteral("水平翻转\tH"), this, &PinWindow::flip);
