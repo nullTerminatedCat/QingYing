@@ -1,3 +1,4 @@
+#include <QCoreApplication>
 #include "Theme.h"
 #include "SettingsDialog.h"
 #include "HotkeyManager.h"
@@ -50,7 +51,7 @@ QHBoxLayout* row(QVBoxLayout* body, const QString& label)
 SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, QWidget* parent)
     : QDialog(parent), m_apply(std::move(apply))
 {
-    setWindowTitle(QStringLiteral("青影 设置"));
+    setWindowTitle(QCoreApplication::translate("QingYing", "青影 设置"));
     setWindowIcon(appIcon());
     setWindowFlag(Qt::WindowContextHelpButtonHint, false);
     setMinimumWidth(480);
@@ -83,20 +84,20 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, Q
     auto* root = new QVBoxLayout(this);
     root->setContentsMargins(24, 20, 24, 20);
     root->setSpacing(14);
-    auto* title = new QLabel(QStringLiteral("设置"), this);
+    auto* title = new QLabel(QCoreApplication::translate("QingYing", "设置"), this);
     title->setObjectName(QStringLiteral("title"));
     root->addWidget(title);
 
     QVBoxLayout* b = nullptr;
-    root->addWidget(card(this, QStringLiteral("快捷键"), b));
-    auto* h = row(b, QStringLiteral("截图"));
+    root->addWidget(card(this, QCoreApplication::translate("QingYing", "快捷键"), b));
+    auto* h = row(b, QCoreApplication::translate("QingYing", "截图"));
     m_hotkey = new QKeySequenceEdit(Settings::hotkey(), this);
     m_hotkey->setMaximumSequenceLength(1);
     m_hotkey->setClearButtonEnabled(true);
     h->addWidget(m_hotkey, 1);
-    auto* reset = new QPushButton(QStringLiteral("恢复默认"), this);
+    auto* reset = new QPushButton(QCoreApplication::translate("QingYing", "恢复默认"), this);
     h->addWidget(reset);
-    m_hotkeyHint = new QLabel(QStringLiteral("点击输入框后直接按下新的组合键，例如 Ctrl+Alt+A"), this);
+    m_hotkeyHint = new QLabel(QCoreApplication::translate("QingYing", "点击输入框后直接按下新的组合键，例如 Ctrl+Alt+A"), this);
     m_hotkeyHint->setObjectName(QStringLiteral("hint"));
     b->addWidget(m_hotkeyHint);
     connect(reset, &QPushButton::clicked, this, [this] { m_hotkey->setKeySequence(Settings::defaultHotkey()); });
@@ -104,29 +105,29 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, Q
         unsigned m = 0, v = 0;
         const bool ok = k.isEmpty() || (HotkeyManager::toNative(k, m, v) && m != 0);
         m_hotkeyHint->setObjectName(ok ? QStringLiteral("hint") : QStringLiteral("warn"));
-        m_hotkeyHint->setText(ok ? QStringLiteral("点击输入框后直接按下新的组合键，例如 Ctrl+Alt+A")
-                                 : QStringLiteral("需要包含 Ctrl / Alt / Shift / Win 之一，并使用字母、数字或功能键"));
+        m_hotkeyHint->setText(ok ? QCoreApplication::translate("QingYing", "点击输入框后直接按下新的组合键，例如 Ctrl+Alt+A")
+                                 : QCoreApplication::translate("QingYing", "需要包含 Ctrl / Alt / Shift / Win 之一，并使用字母、数字或功能键"));
         m_hotkeyHint->style()->unpolish(m_hotkeyHint);
         m_hotkeyHint->style()->polish(m_hotkeyHint);
     });
 
-    root->addWidget(card(this, QStringLiteral("保存"), b));
-    h = row(b, QStringLiteral("保存位置"));
+    root->addWidget(card(this, QCoreApplication::translate("QingYing", "保存"), b));
+    h = row(b, QCoreApplication::translate("QingYing", "保存位置"));
     m_dir = new QLineEdit(QDir::toNativeSeparators(Settings::saveDir()), this);
     h->addWidget(m_dir, 1);
-    auto* browse = new QPushButton(QStringLiteral("浏览…"), this);
+    auto* browse = new QPushButton(QCoreApplication::translate("QingYing", "浏览…"), this);
     h->addWidget(browse);
     connect(browse, &QPushButton::clicked, this, [this] {
-        const QString d = QFileDialog::getExistingDirectory(this, QStringLiteral("选择保存位置"), m_dir->text());
+        const QString d = QFileDialog::getExistingDirectory(this, QCoreApplication::translate("QingYing", "选择保存位置"), m_dir->text());
         if (!d.isEmpty()) m_dir->setText(QDir::toNativeSeparators(d));
     });
-    h = row(b, QStringLiteral("文件名"));
+    h = row(b, QCoreApplication::translate("QingYing", "文件名"));
     m_pattern = new QLineEdit(Settings::filePattern(), this);
     h->addWidget(m_pattern, 1);
     m_preview = new QLabel(this);
     m_preview->setObjectName(QStringLiteral("hint"));
     b->addWidget(m_preview);
-    h = row(b, QStringLiteral("格式"));
+    h = row(b, QCoreApplication::translate("QingYing", "格式"));
     m_png = new QPushButton(QStringLiteral("PNG"), this);
     m_jpg = new QPushButton(QStringLiteral("JPG"), this);
     for (QPushButton* s : {m_png, m_jpg}) {
@@ -142,11 +143,11 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, Q
     connect(m_pattern, &QLineEdit::textChanged, this, &SettingsDialog::updatePreview);
     connect(grp, &QButtonGroup::buttonToggled, this, &SettingsDialog::updatePreview);
 
-    root->addWidget(card(this, QStringLiteral("截图完成"), b));
-    h = row(b, QStringLiteral("默认动作"));
+    root->addWidget(card(this, QCoreApplication::translate("QingYing", "截图完成"), b));
+    h = row(b, QCoreApplication::translate("QingYing", "默认动作"));
     m_action = new QButtonGroup(this);
     const QStringList keys = {QStringLiteral("copy"), QStringLiteral("save"), QStringLiteral("pin")};
-    const QStringList names = {QStringLiteral("复制"), QStringLiteral("保存"), QStringLiteral("钉图")};
+    const QStringList names = {QCoreApplication::translate("QingYing", "复制"), QCoreApplication::translate("QingYing", "保存"), QCoreApplication::translate("QingYing", "钉图")};
     for (int i = 0; i < 3; ++i) {
         auto* s = new QPushButton(names[i], this);
         s->setObjectName(QStringLiteral("seg"));
@@ -156,29 +157,29 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, Q
         h->addWidget(s);
     }
     h->addStretch();
-    auto* actHint = new QLabel(QStringLiteral("按 Enter、双击选区或点击 ✓ 时执行"), this);
+    auto* actHint = new QLabel(QCoreApplication::translate("QingYing", "按 Enter、双击选区或点击 ✓ 时执行"), this);
     actHint->setObjectName(QStringLiteral("hint"));
     b->addWidget(actHint);
-    h = row(b, QStringLiteral("取色格式"));
+    h = row(b, QCoreApplication::translate("QingYing", "取色格式"));
     m_colorFmt = new QComboBox(this);
-    m_colorFmt->addItem(QStringLiteral("#4F6BFF（HEX 大写）"), QStringLiteral("hex"));
-    m_colorFmt->addItem(QStringLiteral("#4f6bff（HEX 小写）"), QStringLiteral("hexlower"));
+    m_colorFmt->addItem(QCoreApplication::translate("QingYing", "#4F6BFF（HEX 大写）"), QStringLiteral("hex"));
+    m_colorFmt->addItem(QCoreApplication::translate("QingYing", "#4f6bff（HEX 小写）"), QStringLiteral("hexlower"));
     m_colorFmt->addItem(QStringLiteral("rgb(79, 107, 255)"), QStringLiteral("rgb"));
     m_colorFmt->addItem(QStringLiteral("79, 107, 255"), QStringLiteral("rgbplain"));
     m_colorFmt->setCurrentIndex(qMax(0, m_colorFmt->findData(Settings::colorFormat())));
     h->addWidget(m_colorFmt);
     h->addStretch();
-    h = row(b, QStringLiteral("历史记录"));
+    h = row(b, QCoreApplication::translate("QingYing", "历史记录"));
     m_history = new QSpinBox(this);
     m_history->setRange(0, 500);
     m_history->setValue(Settings::historySize());
-    m_history->setSuffix(QStringLiteral(" 张"));
-    m_history->setSpecialValueText(QStringLiteral("不保留"));
+    m_history->setSuffix(QCoreApplication::translate("QingYing", " 张"));
+    m_history->setSpecialValueText(QCoreApplication::translate("QingYing", "不保留"));
     h->addWidget(m_history);
     h->addStretch();
 
-    root->addWidget(card(this, QStringLiteral("录屏"), b));
-    h = row(b, QStringLiteral("帧率"));
+    root->addWidget(card(this, QCoreApplication::translate("QingYing", "录屏"), b));
+    h = row(b, QCoreApplication::translate("QingYing", "帧率"));
     m_fps = new QButtonGroup(this);
     for (int f : {10, 15, 30}) {
         auto* s = new QPushButton(QStringLiteral("%1 fps").arg(f), this);
@@ -189,18 +190,18 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, Q
         h->addWidget(s);
     }
     h->addStretch();
-    m_recCursor = new QCheckBox(QStringLiteral("录制鼠标指针"), this);
+    m_recCursor = new QCheckBox(QCoreApplication::translate("QingYing", "录制鼠标指针"), this);
     m_recCursor->setChecked(Settings::recordCursor());
     b->addWidget(m_recCursor);
 
-    root->addWidget(card(this, QStringLiteral("上传"), b));
+    root->addWidget(card(this, QCoreApplication::translate("QingYing", "上传"), b));
     const Uploads::Config up = Settings::uploadConfig();
-    m_upEnabled = new QCheckBox(QStringLiteral("启用上传（截图工具条与钉图菜单出现“上传”）"), this);
+    m_upEnabled = new QCheckBox(QCoreApplication::translate("QingYing", "启用上传（截图工具条与钉图菜单出现“上传”）"), this);
     m_upEnabled->setChecked(Settings::uploadEnabled());
     b->addWidget(m_upEnabled);
-    h = row(b, QStringLiteral("服务"));
+    h = row(b, QCoreApplication::translate("QingYing", "服务"));
     m_upProvider = new QComboBox(this);
-    m_upProvider->addItem(QStringLiteral("自定义 HTTP（multipart POST）"), QStringLiteral("custom"));
+    m_upProvider->addItem(QCoreApplication::translate("QingYing", "自定义 HTTP（multipart POST）"), QStringLiteral("custom"));
     m_upProvider->addItem(QStringLiteral("SM.MS"), QStringLiteral("smms"));
     m_upProvider->addItem(QStringLiteral("Imgur"), QStringLiteral("imgur"));
     m_upProvider->setCurrentIndex(qMax(0, m_upProvider->findData(up.provider)));
@@ -209,20 +210,20 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, Q
     auto* cl = new QVBoxLayout(m_upCustom);
     cl->setContentsMargins(0, 0, 0, 0);
     cl->setSpacing(10);
-    auto* cr = row(cl, QStringLiteral("上传地址"));
+    auto* cr = row(cl, QCoreApplication::translate("QingYing", "上传地址"));
     m_upUrl = new QLineEdit(up.url, this);
     m_upUrl->setPlaceholderText(QStringLiteral("https://example.com/upload"));
     cr->addWidget(m_upUrl, 1);
-    cr = row(cl, QStringLiteral("文件字段"));
+    cr = row(cl, QCoreApplication::translate("QingYing", "文件字段"));
     m_upField = new QLineEdit(up.field, this);
     cr->addWidget(m_upField, 1);
-    cr = row(cl, QStringLiteral("链接路径"));
+    cr = row(cl, QCoreApplication::translate("QingYing", "链接路径"));
     m_upPath = new QLineEdit(up.jsonPath, this);
-    m_upPath->setPlaceholderText(QStringLiteral("返回 JSON 中链接的位置，如 data.url"));
+    m_upPath->setPlaceholderText(QCoreApplication::translate("QingYing", "返回 JSON 中链接的位置，如 data.url"));
     cr->addWidget(m_upPath, 1);
-    cr = row(cl, QStringLiteral("请求头"));
+    cr = row(cl, QCoreApplication::translate("QingYing", "请求头"));
     m_upHeaders = new QPlainTextEdit(this);
-    m_upHeaders->setPlaceholderText(QStringLiteral("每行一个，如 Authorization: Bearer xxx"));
+    m_upHeaders->setPlaceholderText(QCoreApplication::translate("QingYing", "每行一个，如 Authorization: Bearer xxx"));
     m_upHeaders->setFixedHeight(64);
     cr->addWidget(m_upHeaders, 1);
     b->addWidget(m_upCustom);
@@ -236,17 +237,17 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, Q
     b->addWidget(m_upPreset);
     if (up.provider == QLatin1String("custom")) m_upHeaders->setPlainText(up.secret);
     else m_upToken->setText(up.secret);
-    auto* secretHint = new QLabel(QStringLiteral("密钥使用 Windows DPAPI 加密保存，仅当前用户可解密"), this);
+    auto* secretHint = new QLabel(QCoreApplication::translate("QingYing", "密钥使用 Windows DPAPI 加密保存，仅当前用户可解密"), this);
     secretHint->setObjectName(QStringLiteral("hint"));
     b->addWidget(secretHint);
     connect(m_upProvider, &QComboBox::currentIndexChanged, this, &SettingsDialog::updateUploadUi);
     updateUploadUi();
 
-    root->addWidget(card(this, QStringLiteral("常规"), b));
-    h = row(b, QStringLiteral("外观"));
+    root->addWidget(card(this, QCoreApplication::translate("QingYing", "常规"), b));
+    h = row(b, QCoreApplication::translate("QingYing", "外观"));
     m_theme = new QButtonGroup(this);
     const QStringList themeKeys = {QStringLiteral("system"), QStringLiteral("light"), QStringLiteral("dark")};
-    const QStringList themeNames = {QStringLiteral("跟随系统"), QStringLiteral("浅色"), QStringLiteral("深色")};
+    const QStringList themeNames = {QCoreApplication::translate("QingYing", "跟随系统"), QCoreApplication::translate("QingYing", "浅色"), QCoreApplication::translate("QingYing", "深色")};
     for (int i = 0; i < 3; ++i) {
         auto* s = new QPushButton(themeNames[i], this);
         s->setObjectName(QStringLiteral("seg"));
@@ -256,18 +257,26 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, Q
         h->addWidget(s);
     }
     h->addStretch();
-    m_autostart = new QCheckBox(QStringLiteral("开机时自动启动青影"), this);
+    h = row(b, QCoreApplication::translate("QingYing", "语言"));
+    m_lang = new QComboBox(this);
+    m_lang->addItem(QCoreApplication::translate("QingYing", "跟随系统"), QStringLiteral("system"));
+    m_lang->addItem(QString::fromUtf8("\u7b80\u4f53\u4e2d\u6587"), QStringLiteral("zh_CN"));
+    m_lang->addItem(QStringLiteral("English"), QStringLiteral("en_US"));
+    m_lang->setCurrentIndex(qMax(0, m_lang->findData(Settings::language())));
+    h->addWidget(m_lang);
+    h->addStretch();
+    m_autostart = new QCheckBox(QCoreApplication::translate("QingYing", "开机时自动启动青影"), this);
     m_autostart->setChecked(Settings::autostart());
     b->addWidget(m_autostart);
-    m_autoUpdate = new QCheckBox(QStringLiteral("启动时自动检查更新（每天最多一次）"), this);
+    m_autoUpdate = new QCheckBox(QCoreApplication::translate("QingYing", "启动时自动检查更新（每天最多一次）"), this);
     m_autoUpdate->setChecked(Settings::autoUpdate());
     b->addWidget(m_autoUpdate);
 
     root->addStretch();
     auto* btns = new QHBoxLayout;
     btns->addStretch();
-    auto* cancel = new QPushButton(QStringLiteral("取消"), this);
-    auto* ok = new QPushButton(QStringLiteral("保存"), this);
+    auto* cancel = new QPushButton(QCoreApplication::translate("QingYing", "取消"), this);
+    auto* ok = new QPushButton(QCoreApplication::translate("QingYing", "保存"), this);
     ok->setObjectName(QStringLiteral("primary"));
     ok->setDefault(true);
     btns->addWidget(cancel);
@@ -289,7 +298,7 @@ void SettingsDialog::updateUploadUi()
 void SettingsDialog::updatePreview()
 {
     const QString ext = m_jpg->isChecked() ? QStringLiteral(".jpg") : QStringLiteral(".png");
-    m_preview->setText(QStringLiteral("预览：%1%2    {} 内为日期格式，如 {yyyyMMdd_HHmmss}")
+    m_preview->setText(QCoreApplication::translate("QingYing", "预览：%1%2    {} 内为日期格式，如 {yyyyMMdd_HHmmss}")
                            .arg(Settings::expandPattern(m_pattern->text()), ext));
 }
 
@@ -299,13 +308,13 @@ void SettingsDialog::save()
     if (k.isEmpty()) k = Settings::defaultHotkey();
     unsigned m = 0, v = 0;
     if (!HotkeyManager::toNative(k, m, v) || m == 0) {
-        QMessageBox::warning(this, QStringLiteral("快捷键无效"),
-                             QStringLiteral("快捷键需要包含 Ctrl / Alt / Shift / Win 之一，并使用字母、数字或功能键。"));
+        QMessageBox::warning(this, QCoreApplication::translate("QingYing", "快捷键无效"),
+                             QCoreApplication::translate("QingYing", "快捷键需要包含 Ctrl / Alt / Shift / Win 之一，并使用字母、数字或功能键。"));
         return;
     }
     if (!m_apply(k)) {
-        QMessageBox::warning(this, QStringLiteral("快捷键冲突"),
-                             QStringLiteral("快捷键 %1 已被其他程序占用，请换一个组合。").arg(k.toString(QKeySequence::NativeText)));
+        QMessageBox::warning(this, QCoreApplication::translate("QingYing", "快捷键冲突"),
+                             QCoreApplication::translate("QingYing", "快捷键 %1 已被其他程序占用，请换一个组合。").arg(k.toString(QKeySequence::NativeText)));
         return;
     }
     Settings::setHotkey(k);
@@ -331,6 +340,14 @@ void SettingsDialog::save()
     if (newTheme != Settings::theme()) {
         Settings::setTheme(newTheme);
         Theme::apply();
+    }
+    const QString newLang = m_lang->currentData().toString();
+    if (newLang != Settings::language()) {
+        const QString before = Settings::effectiveLanguage();
+        Settings::setLanguage(newLang);
+        if (Settings::effectiveLanguage() != before)
+            QMessageBox::information(this, QCoreApplication::translate("QingYing", "青影 设置"),
+                                     QCoreApplication::translate("QingYing", "语言设置将在重启青影后生效。"));
     }
     Settings::setColorFormat(m_colorFmt->currentData().toString());
     Settings::setRecordFps(m_fps->checkedId() > 0 ? m_fps->checkedId() : 15);

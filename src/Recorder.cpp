@@ -1,4 +1,5 @@
 #define _CRT_SECURE_NO_WARNINGS
+#include <QCoreApplication>
 #include "Recorder.h"
 
 #include <QDir>
@@ -42,14 +43,14 @@ public:
         m_w = w;
         m_h = h;
         m_fps = fps;
-        if (FAILED(MFStartup(MF_VERSION))) return fail(err, QStringLiteral("Media Foundation 初始化失败"));
+        if (FAILED(MFStartup(MF_VERSION))) return fail(err, QCoreApplication::translate("QingYing", "Media Foundation 初始化失败"));
         m_mf = true;
         IMFAttributes* attrs = nullptr;
         MFCreateAttributes(&attrs, 1);
         attrs->SetUINT32(MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS, TRUE);
         HRESULT hr = MFCreateSinkWriterFromURL(reinterpret_cast<LPCWSTR>(path.utf16()), nullptr, attrs, &m_writer);
         releaseCom(attrs);
-        if (FAILED(hr)) return fail(err, QStringLiteral("无法创建 MP4 文件（0x%1）").arg(quint32(hr), 8, 16, QLatin1Char('0')));
+        if (FAILED(hr)) return fail(err, QCoreApplication::translate("QingYing", "无法创建 MP4 文件（0x%1）").arg(quint32(hr), 8, 16, QLatin1Char('0')));
         IMFMediaType* out = nullptr;
         MFCreateMediaType(&out);
         out->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
@@ -62,7 +63,7 @@ public:
         MFSetAttributeRatio(out, MF_MT_PIXEL_ASPECT_RATIO, 1, 1);
         hr = m_writer->AddStream(out, &m_stream);
         releaseCom(out);
-        if (FAILED(hr)) return fail(err, QStringLiteral("H.264 编码器不支持该尺寸（0x%1）").arg(quint32(hr), 8, 16, QLatin1Char('0')));
+        if (FAILED(hr)) return fail(err, QCoreApplication::translate("QingYing", "H.264 编码器不支持该尺寸（0x%1）").arg(quint32(hr), 8, 16, QLatin1Char('0')));
         IMFMediaType* in = nullptr;
         MFCreateMediaType(&in);
         in->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
@@ -74,8 +75,8 @@ public:
         MFSetAttributeRatio(in, MF_MT_PIXEL_ASPECT_RATIO, 1, 1);
         hr = m_writer->SetInputMediaType(m_stream, in, nullptr);
         releaseCom(in);
-        if (FAILED(hr)) return fail(err, QStringLiteral("设置输入格式失败（0x%1）").arg(quint32(hr), 8, 16, QLatin1Char('0')));
-        if (FAILED(m_writer->BeginWriting())) return fail(err, QStringLiteral("开始写入失败"));
+        if (FAILED(hr)) return fail(err, QCoreApplication::translate("QingYing", "设置输入格式失败（0x%1）").arg(quint32(hr), 8, 16, QLatin1Char('0')));
+        if (FAILED(m_writer->BeginWriting())) return fail(err, QCoreApplication::translate("QingYing", "开始写入失败"));
         return true;
     }
 
@@ -104,7 +105,7 @@ public:
     bool close(QString* err) override
     {
         bool ok = true;
-        if (m_writer && FAILED(m_writer->Finalize())) ok = fail(err, QStringLiteral("写入 MP4 结尾失败（录制时间可能太短）"));
+        if (m_writer && FAILED(m_writer->Finalize())) ok = fail(err, QCoreApplication::translate("QingYing", "写入 MP4 结尾失败（录制时间可能太短）"));
         releaseCom(m_writer);
         if (m_mf) MFShutdown();
         m_mf = false;
@@ -140,7 +141,7 @@ public:
         // gif.h 只接受窄字符路径：先写到 ASCII 临时文件再改名
         m_tmp = QDir::temp().filePath(QStringLiteral("qingying_%1.gif").arg(QUuid::createUuid().toString(QUuid::Id128)));
         if (!GifBegin(&m_gif, QFile::encodeName(m_tmp).constData(), w, h, 100 / fps)) {
-            if (err) *err = QStringLiteral("无法创建 GIF 临时文件");
+            if (err) *err = QCoreApplication::translate("QingYing", "无法创建 GIF 临时文件");
             return false;
         }
         return true;
@@ -161,7 +162,7 @@ public:
         GifEnd(&m_gif);
         QFile::remove(m_final);
         if (!QFile::rename(m_tmp, m_final) && !(QFile::copy(m_tmp, m_final) && QFile::remove(m_tmp))) {
-            if (err) *err = QStringLiteral("无法写入 %1").arg(m_final);
+            if (err) *err = QCoreApplication::translate("QingYing", "无法写入 %1").arg(m_final);
             return false;
         }
         return true;
@@ -232,7 +233,7 @@ void Recorder::run()
     QDir().mkpath(QFileInfo(m_path).absolutePath());
     QString err;
     if (w < 16 || h < 16 || !sink->open(w, h, m_fps, m_path, &err)) {
-        m_error = err.isEmpty() ? QStringLiteral("录制区域太小") : err;
+        m_error = err.isEmpty() ? QCoreApplication::translate("QingYing", "录制区域太小") : err;
         m_started = -1;
         CoUninitialize();
         return;
@@ -275,7 +276,7 @@ void Recorder::run()
         if (m_cursor) drawCursor(mem, m_region.topLeft());
         GdiFlush();
         if (!sink->write(static_cast<const uchar*>(bits), w * 4, t)) {
-            m_error = QStringLiteral("写入视频帧失败");
+            m_error = QCoreApplication::translate("QingYing", "写入视频帧失败");
             break;
         }
         ++m_frames;

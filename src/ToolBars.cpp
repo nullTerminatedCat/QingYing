@@ -1,3 +1,4 @@
+#include <QCoreApplication>
 #include "ToolBars.h"
 #include "Style.h"
 #include "Settings.h"
@@ -15,30 +16,30 @@ ToolBar::ToolBar(QWidget* parent) : QWidget(parent)
     setMouseTracking(true);
     setCursor(Qt::ArrowCursor);
     const QList<Item> defs = {
-        {TRect, Icon::Rect, QStringLiteral("矩形  R"), {}, false},
-        {TEllipse, Icon::Ellipse, QStringLiteral("椭圆  E"), {}, false},
-        {TArrow, Icon::Arrow, QStringLiteral("箭头  A"), {}, false},
-        {TPen, Icon::Pen, QStringLiteral("画笔  P"), {}, false},
-        {TText, Icon::Text, QStringLiteral("文字  T"), {}, false},
-        {TMosaic, Icon::Mosaic, QStringLiteral("马赛克  M"), {}, false},
-        {TNumber, Icon::Number, QStringLiteral("序号  N"), {}, false},
+        {TRect, Icon::Rect, QCoreApplication::translate("QingYing", "矩形  R"), {}, false},
+        {TEllipse, Icon::Ellipse, QCoreApplication::translate("QingYing", "椭圆  E"), {}, false},
+        {TArrow, Icon::Arrow, QCoreApplication::translate("QingYing", "箭头  A"), {}, false},
+        {TPen, Icon::Pen, QCoreApplication::translate("QingYing", "画笔  P"), {}, false},
+        {TText, Icon::Text, QCoreApplication::translate("QingYing", "文字  T"), {}, false},
+        {TMosaic, Icon::Mosaic, QCoreApplication::translate("QingYing", "马赛克  M"), {}, false},
+        {TNumber, Icon::Number, QCoreApplication::translate("QingYing", "序号  N"), {}, false},
         {-1, Icon::Rect, {}, {}, true},
-        {Undo, Icon::Undo, QStringLiteral("撤销  Ctrl+Z"), {}, false},
-        {Redo, Icon::Redo, QStringLiteral("重做  Ctrl+Y"), {}, false},
+        {Undo, Icon::Undo, QCoreApplication::translate("QingYing", "撤销  Ctrl+Z"), {}, false},
+        {Redo, Icon::Redo, QCoreApplication::translate("QingYing", "重做  Ctrl+Y"), {}, false},
         {-1, Icon::Rect, {}, {}, true},
-        {OcrBtn, Icon::Ocr, QStringLiteral("识别文字（OCR）  O"), {}, false},
-        {QrBtn, Icon::Qr, QStringLiteral("识别二维码 / 条码  Q"), {}, false},
-        {LongShot, Icon::Scroll, QStringLiteral("长截图（滚动）  L"), {}, false},
-        {Pin, Icon::Pin, QStringLiteral("钉在桌面  F3"), {}, false},
-        {Save, Icon::Save, QStringLiteral("快速保存  Ctrl+S（另存为 Ctrl+Shift+S）"), {}, false},
-        {Cancel, Icon::Close, QStringLiteral("取消  Esc"), {}, false},
-        {Confirm, Icon::Confirm, QStringLiteral("完成  Enter（默认动作见设置）"), {}, false},
+        {OcrBtn, Icon::Ocr, QCoreApplication::translate("QingYing", "识别文字（OCR）  O"), {}, false},
+        {QrBtn, Icon::Qr, QCoreApplication::translate("QingYing", "识别二维码 / 条码  Q"), {}, false},
+        {LongShot, Icon::Scroll, QCoreApplication::translate("QingYing", "长截图（滚动）  L"), {}, false},
+        {Pin, Icon::Pin, QCoreApplication::translate("QingYing", "钉在桌面  F3"), {}, false},
+        {Save, Icon::Save, QCoreApplication::translate("QingYing", "快速保存  Ctrl+S（另存为 Ctrl+Shift+S）"), {}, false},
+        {Cancel, Icon::Close, QCoreApplication::translate("QingYing", "取消  Esc"), {}, false},
+        {Confirm, Icon::Confirm, QCoreApplication::translate("QingYing", "完成  Enter（默认动作见设置）"), {}, false},
     };
     QList<Item> all = defs;
     if (Settings::uploadEnabled()) {
         for (int i = 0; i < all.size(); ++i)
             if (all[i].id == Pin) {
-                all.insert(i, {UploadBtn, Icon::Upload, QStringLiteral("上传并复制链接  U"), {}, false});
+                all.insert(i, {UploadBtn, Icon::Upload, QCoreApplication::translate("QingYing", "上传并复制链接  U"), {}, false});
                 break;
             }
     }

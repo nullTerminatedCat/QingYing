@@ -9,6 +9,7 @@ class QLineEdit;
 class QPushButton;
 class QSpinBox;
 class QButtonGroup;
+class QComboBox;
 
 class SettingsDialog : public QDialog {
     Q_OBJECT
@@ -34,6 +35,7 @@ private:
     QButtonGroup* m_fps;
     QCheckBox* m_recCursor;
     QButtonGroup* m_theme;
+    QComboBox* m_lang;
     QCheckBox* m_autoUpdate;
     QCheckBox* m_upEnabled;
     class QComboBox* m_upProvider;

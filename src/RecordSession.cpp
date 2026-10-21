@@ -1,3 +1,4 @@
+#include <QCoreApplication>
 #include "Theme.h"
 #include "RecordSession.h"
 #include "HotkeyManager.h"
@@ -110,14 +111,14 @@ RecordSession::RecordSession(const QRect& region, Recorder::Format format)
         Theme::setSheet(b, QStringLiteral("QToolButton{border:none;border-radius:8px;padding:5px;}QToolButton:hover{background:rgba(0,0,0,13);}"));
         return b;
     };
-    m_pause = mk(pauseIcon(false), QStringLiteral("暂停"));
-    m_stop = mk(stopIcon(), QStringLiteral("停止并保存（Esc）"));
+    m_pause = mk(pauseIcon(false), QCoreApplication::translate("QingYing", "暂停"));
+    m_stop = mk(stopIcon(), QCoreApplication::translate("QingYing", "停止并保存（Esc）"));
     lay->addWidget(m_pause);
     lay->addWidget(m_stop);
     connect(m_pause, &QToolButton::clicked, this, [this] {
         m_rec->setPaused(!m_rec->isPaused());
         m_pause->setIcon(pauseIcon(m_rec->isPaused()));
-        m_pause->setToolTip(m_rec->isPaused() ? QStringLiteral("继续") : QStringLiteral("暂停"));
+        m_pause->setToolTip(m_rec->isPaused() ? QCoreApplication::translate("QingYing", "继续") : QCoreApplication::translate("QingYing", "暂停"));
         static_cast<Frame*>(m_frame)->paused = m_rec->isPaused();
         m_frame->update();
     });
@@ -174,7 +175,7 @@ void RecordSession::finish()
     hide();
     m_rec->stop();
     const bool ok = m_rec->lastError().isEmpty() && m_rec->framesWritten() > 0;
-    emit finished(ok, m_rec->outputPath(), ok ? QString() : (m_rec->lastError().isEmpty() ? QStringLiteral("没有录到画面") : m_rec->lastError()));
+    emit finished(ok, m_rec->outputPath(), ok ? QString() : (m_rec->lastError().isEmpty() ? QCoreApplication::translate("QingYing", "没有录到画面") : m_rec->lastError()));
     close();
 }
 

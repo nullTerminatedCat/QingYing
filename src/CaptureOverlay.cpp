@@ -1,3 +1,4 @@
+#include <QCoreApplication>
 #include "Theme.h"
 #include "CaptureOverlay.h"
 #include "PinWindow.h"
@@ -408,15 +409,15 @@ void CaptureOverlay::doSave(bool saveAs)
     QString path = Settings::defaultFilePath();
     if (saveAs) {
         const bool jpg = Settings::format() == QLatin1String("jpg");
-        const QString png = QStringLiteral("PNG 图片 (*.png)"), jpgf = QStringLiteral("JPG 图片 (*.jpg *.jpeg)");
+        const QString png = QCoreApplication::translate("QingYing", "PNG 图片 (*.png)"), jpgf = QCoreApplication::translate("QingYing", "JPG 图片 (*.jpg *.jpeg)");
         QString filter = jpg ? jpgf : png;
         QDir().mkpath(Settings::saveDir());
-        path = QFileDialog::getSaveFileName(this, QStringLiteral("另存为"), path, png + QStringLiteral(";;") + jpgf, &filter);
+        path = QFileDialog::getSaveFileName(this, QCoreApplication::translate("QingYing", "另存为"), path, png + QStringLiteral(";;") + jpgf, &filter);
         setFocus();
         if (path.isEmpty()) return;
     }
     if (!Settings::saveImage(img, path)) {
-        QMessageBox::warning(this, QStringLiteral("青影"), QStringLiteral("保存失败：%1").arg(path));
+        QMessageBox::warning(this, QCoreApplication::translate("QingYing", "青影"), QCoreApplication::translate("QingYing", "保存失败：%1").arg(path));
         return;
     }
     emit delivered(img, path);
@@ -480,7 +481,7 @@ void CaptureOverlay::doLongShot()
     if (m_state != State::Selected) return;
     const QRect phys = physicalSelection().translated(m_monitor.topLeft());
     if (phys.height() < 60 || phys.width() < 60) {
-        QMessageBox::information(this, QStringLiteral("长截图"), QStringLiteral("选区太小，请至少选择 60×60 像素。"));
+        QMessageBox::information(this, QCoreApplication::translate("QingYing", "长截图"), QCoreApplication::translate("QingYing", "选区太小，请至少选择 60×60 像素。"));
         return;
     }
     emit longShotRequested(phys);
@@ -737,13 +738,13 @@ void CaptureOverlay::paintEvent(QPaintEvent*)
             p.setBrush(Qt::NoBrush);
             p.drawRect(QRectF(hole).adjusted(1, 1, -1, -1));
             const QSize ps = (QSizeF(hole.size()) * m_dpr).toSize();
-            const QString label = QStringLiteral("%1  %2 × %3").arg(m_controls ? QStringLiteral("窗口/控件") : QStringLiteral("窗口"))
+            const QString label = QStringLiteral("%1  %2 × %3").arg(m_controls ? QCoreApplication::translate("QingYing", "窗口/控件") : QCoreApplication::translate("QingYing", "窗口"))
                                       .arg(ps.width()).arg(ps.height());
             const QSizeF sz = Style::pillSize(label);
             QPointF at(hole.left() + 8, hole.top() + 8);
             Style::paintPill(p, at, label);
             if (hole.height() > 120) {
-                const QString tip = QStringLiteral("单击选中 · 拖动框选 · Tab 切换控件识别");
+                const QString tip = QCoreApplication::translate("QingYing", "单击选中 · 拖动框选 · Tab 切换控件识别");
                 const QSizeF ts = Style::pillSize(tip);
                 Style::paintPill(p, QPointF(hole.left() + 8, at.y() + sz.height() + 6), tip).width();
                 Q_UNUSED(ts);
@@ -773,9 +774,9 @@ void CaptureOverlay::paintEvent(QPaintEvent*)
         }
     }
     if (m_mode != CaptureMode::Normal && m_inside) {
-        static const QString tips[] = {QString(), QStringLiteral("长截图：框选要滚动的区域后按 Enter 开始"),
-                                       QStringLiteral("取色：单击或按 C 复制颜色 · Esc 退出"),
-                                       QStringLiteral("录屏：框选录制区域后按 Enter 开始")};
+        static const QString tips[] = {QString(), QCoreApplication::translate("QingYing", "长截图：框选要滚动的区域后按 Enter 开始"),
+                                       QCoreApplication::translate("QingYing", "取色：单击或按 C 复制颜色 · Esc 退出"),
+                                       QCoreApplication::translate("QingYing", "录屏：框选录制区域后按 Enter 开始")};
         const QString tip = tips[int(m_mode)];
         const QSizeF ts = Style::pillSize(tip);
         Style::paintPill(p, QPointF((width() - ts.width()) / 2, 24), tip);
@@ -837,7 +838,7 @@ void CaptureOverlay::paintMagnifier(QPainter& p)
     small.setPixelSize(11);
     p.setFont(small);
     p.setPen(Style::Text3);
-    p.drawText(QRectF(info.left() + 30, info.top() + 6, kMag - 40, 18), Qt::AlignVCenter | Qt::AlignRight, QStringLiteral("C 复制"));
+    p.drawText(QRectF(info.left() + 30, info.top() + 6, kMag - 40, 18), Qt::AlignVCenter | Qt::AlignRight, QCoreApplication::translate("QingYing", "C 复制"));
     p.setFont(mono);
     p.setPen(QColor(255, 255, 255, 200));
     p.drawText(QRectF(info.left() + 10, info.top() + 24, kMag - 20, 18), Qt::AlignVCenter | Qt::AlignLeft,

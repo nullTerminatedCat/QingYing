@@ -1,3 +1,4 @@
+#include <QCoreApplication>
 #include "Theme.h"
 #include "ResultDialog.h"
 #include "Icons.h"
@@ -16,7 +17,7 @@
 ResultDialog::ResultDialog(const QString& title, QWidget* parent) : QDialog(parent)
 {
     setAttribute(Qt::WA_DeleteOnClose);
-    setWindowTitle(QStringLiteral("青影 · %1").arg(title));
+    setWindowTitle(QCoreApplication::translate("QingYing", "青影 · %1").arg(title));
     setWindowIcon(appIcon());
     setWindowFlag(Qt::WindowContextHelpButtonHint, false);
     setWindowFlag(Qt::WindowStaysOnTopHint, true);
@@ -46,12 +47,12 @@ ResultDialog::ResultDialog(const QString& title, QWidget* parent) : QDialog(pare
     m_edit = new QPlainTextEdit(this);
     root->addWidget(m_edit, 1);
     auto* row = new QHBoxLayout;
-    m_open = new QPushButton(QStringLiteral("打开链接"), this);
+    m_open = new QPushButton(QCoreApplication::translate("QingYing", "打开链接"), this);
     m_open->hide();
     row->addWidget(m_open);
     row->addStretch();
-    auto* close = new QPushButton(QStringLiteral("关闭"), this);
-    m_copy = new QPushButton(QStringLiteral("复制"), this);
+    auto* close = new QPushButton(QCoreApplication::translate("QingYing", "关闭"), this);
+    m_copy = new QPushButton(QCoreApplication::translate("QingYing", "复制"), this);
     m_copy->setObjectName(QStringLiteral("primary"));
     m_copy->setEnabled(false);
     row->addWidget(close);
@@ -61,12 +62,12 @@ ResultDialog::ResultDialog(const QString& title, QWidget* parent) : QDialog(pare
     connect(m_copy, &QPushButton::clicked, this, [this] {
         QString sel = m_edit->textCursor().selectedText();
         QGuiApplication::clipboard()->setText(sel.isEmpty() ? m_edit->toPlainText() : sel.replace(QChar(0x2029), QLatin1Char('\n')));
-        m_copy->setText(QStringLiteral("已复制"));
+        m_copy->setText(QCoreApplication::translate("QingYing", "已复制"));
     });
-    connect(m_edit, &QPlainTextEdit::textChanged, this, [this] { m_copy->setText(QStringLiteral("复制")); });
+    connect(m_edit, &QPlainTextEdit::textChanged, this, [this] { m_copy->setText(QCoreApplication::translate("QingYing", "复制")); });
     connect(m_open, &QPushButton::clicked, this, [this] {
-        if (QMessageBox::question(this, QStringLiteral("打开链接"),
-                                  QStringLiteral("确定在浏览器中打开以下链接？\n\n%1").arg(m_url)) == QMessageBox::Yes)
+        if (QMessageBox::question(this, QCoreApplication::translate("QingYing", "打开链接"),
+                                  QCoreApplication::translate("QingYing", "确定在浏览器中打开以下链接？\n\n%1").arg(m_url)) == QMessageBox::Yes)
             QDesktopServices::openUrl(QUrl(m_url));
     });
 }

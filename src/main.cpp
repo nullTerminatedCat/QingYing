@@ -1,8 +1,11 @@
+#include <QCoreApplication>
 #include "App.h"
 #include "Theme.h"
 
 #include <QApplication>
 #include <QFont>
+#include <QTranslator>
+#include "Settings.h"
 #include <windows.h>
 
 int main(int argc, char* argv[])
@@ -19,7 +22,13 @@ int main(int argc, char* argv[])
     QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
     QApplication a(argc, argv);
     QApplication::setApplicationName(QStringLiteral("QingYing"));
-    QApplication::setApplicationDisplayName(QStringLiteral("青影"));
+    QApplication::setOrganizationName(QStringLiteral("QingYing"));
+    // 源码文字为简体中文；其他语言加载内置 .qm（语言切换需重启生效）
+    QTranslator translator;
+    const QString lang = Settings::effectiveLanguage();
+    if (lang != QLatin1String("zh_CN") && translator.load(QStringLiteral(":/i18n/qingying_%1.qm").arg(lang)))
+        QApplication::installTranslator(&translator);
+    QApplication::setApplicationDisplayName(QCoreApplication::translate("QingYing", "青影"));
     QApplication::setOrganizationName(QStringLiteral("QingYing"));
     QApplication::setApplicationVersion(QStringLiteral(QINGYING_VERSION));
     QApplication::setQuitOnLastWindowClosed(false);

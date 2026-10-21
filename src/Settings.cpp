@@ -1,3 +1,4 @@
+#include <QLocale>
 #include "Settings.h"
 
 #include <QCoreApplication>
@@ -114,6 +115,23 @@ QString theme()
     return (t == QLatin1String("light") || t == QLatin1String("dark")) ? t : QStringLiteral("system");
 }
 void setTheme(const QString& t) { store().setValue("theme", t); }
+
+QString language()
+{
+    const QString l = store().value("language", QStringLiteral("system")).toString();
+    return (l == QLatin1String("zh_CN") || l == QLatin1String("en_US")) ? l : QStringLiteral("system");
+}
+void setLanguage(const QString& l) { store().setValue("language", l); }
+QString effectiveLanguage()
+{
+    QString l = language();
+    if (l == QLatin1String("system")) {
+        const QByteArray env = qgetenv("QINGYING_LANG");
+        if (!env.isEmpty()) return QString::fromLatin1(env);
+        l = QLocale::system().language() == QLocale::Chinese ? QStringLiteral("zh_CN") : QStringLiteral("en_US");
+    }
+    return l;
+}
 
 QString colorFormat() { return store().value("colorFormat", QStringLiteral("hex")).toString(); }
 void setColorFormat(const QString& f) { store().setValue("colorFormat", f); }

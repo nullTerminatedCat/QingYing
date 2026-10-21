@@ -1,3 +1,4 @@
+#include <QCoreApplication>
 #include "Uploader.h"
 #include "Notify.h"
 #include "Settings.h"
@@ -54,7 +55,7 @@ public:
     QString parseUrl(const QByteArray& reply, QString* error) const override
     {
         const QString url = Uploads::jsonValue(reply, m_path);
-        if (url.isEmpty() && error) *error = QStringLiteral("返回内容中找不到 %1：%2").arg(m_path, QString::fromUtf8(reply.left(200)));
+        if (url.isEmpty() && error) *error = QCoreApplication::translate("QingYing", "返回内容中找不到 %1：%2").arg(m_path, QString::fromUtf8(reply.left(200)));
         return url;
     }
 
@@ -94,8 +95,8 @@ std::unique_ptr<UploadProvider> create(const Config& c)
                                               QStringLiteral("image"), QStringLiteral("data.link"),
                                               QList<QPair<QByteArray, QByteArray>>{{"Authorization", "Client-ID " + c.secret.trimmed().toUtf8()}},
                                               false, QStringLiteral("Imgur Client ID"));
-    return std::make_unique<HttpProvider>(QStringLiteral("custom"), QStringLiteral("自定义 HTTP"), QUrl(c.url), c.field.isEmpty() ? QStringLiteral("file") : c.field,
-                                          c.jsonPath, parseHeaders(c.secret), true, QStringLiteral("请求头，每行一个“名称: 值”"));
+    return std::make_unique<HttpProvider>(QStringLiteral("custom"), QCoreApplication::translate("QingYing", "自定义 HTTP"), QUrl(c.url), c.field.isEmpty() ? QStringLiteral("file") : c.field,
+                                          c.jsonPath, parseHeaders(c.secret), true, QCoreApplication::translate("QingYing", "请求头，每行一个“名称: 值”"));
 }
 
 QString jsonValue(const QByteArray& json, const QString& path)
@@ -116,7 +117,7 @@ void upload(const QImage& image, const Config& cfg, std::function<void(QString, 
 {
     auto provider = std::shared_ptr<UploadProvider>(create(cfg));
     if (!provider->request().url().isValid() || provider->request().url().scheme().isEmpty()) {
-        done({}, QStringLiteral("上传地址无效"));
+        done({}, QCoreApplication::translate("QingYing", "上传地址无效"));
         return;
     }
     QImage img = image;
@@ -144,17 +145,17 @@ void upload(const QImage& image, const Config& cfg, std::function<void(QString, 
 void uploadWithSettings(const QImage& image)
 {
     if (!Settings::uploadEnabled()) {
-        Notify::warn(QStringLiteral("上传未启用"), QStringLiteral("请先在设置 → 上传中启用并配置"));
+        Notify::warn(QCoreApplication::translate("QingYing", "上传未启用"), QCoreApplication::translate("QingYing", "请先在设置 → 上传中启用并配置"));
         return;
     }
-    Notify::info(QStringLiteral("正在上传…"), QString());
+    Notify::info(QCoreApplication::translate("QingYing", "正在上传…"), QString());
     upload(image, Settings::uploadConfig(), [](const QString& url, const QString& err) {
         if (url.isEmpty()) {
-            Notify::warn(QStringLiteral("上传失败"), err);
+            Notify::warn(QCoreApplication::translate("QingYing", "上传失败"), err);
             return;
         }
         QGuiApplication::clipboard()->setText(url);
-        Notify::info(QStringLiteral("上传成功，链接已复制"), url);
+        Notify::info(QCoreApplication::translate("QingYing", "上传成功，链接已复制"), url);
     });
 }
 }

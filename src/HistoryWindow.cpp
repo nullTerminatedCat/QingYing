@@ -1,3 +1,4 @@
+#include <QCoreApplication>
 #include "Theme.h"
 #include "HistoryWindow.h"
 #include "History.h"
@@ -20,7 +21,7 @@
 
 HistoryWindow::HistoryWindow(QWidget* parent) : QDialog(parent)
 {
-    setWindowTitle(QStringLiteral("青影 截图历史"));
+    setWindowTitle(QCoreApplication::translate("QingYing", "青影 截图历史"));
     setWindowIcon(appIcon());
     setWindowFlag(Qt::WindowContextHelpButtonHint, false);
     resize(760, 520);
@@ -37,7 +38,7 @@ HistoryWindow::HistoryWindow(QWidget* parent) : QDialog(parent)
     auto* root = new QVBoxLayout(this);
     root->setContentsMargins(24, 20, 24, 20);
     root->setSpacing(12);
-    auto* title = new QLabel(QStringLiteral("截图历史"), this);
+    auto* title = new QLabel(QCoreApplication::translate("QingYing", "截图历史"), this);
     title->setObjectName(QStringLiteral("title"));
     root->addWidget(title);
     m_list = new QListWidget(this);
@@ -49,10 +50,10 @@ HistoryWindow::HistoryWindow(QWidget* parent) : QDialog(parent)
     m_list->setSpacing(4);
     root->addWidget(m_list, 1);
     auto* row = new QHBoxLayout;
-    auto* folder = new QPushButton(QStringLiteral("打开文件夹"), this);
-    auto* clear = new QPushButton(QStringLiteral("清空"), this);
-    auto* copy = new QPushButton(QStringLiteral("复制"), this);
-    auto* pin = new QPushButton(QStringLiteral("钉在桌面"), this);
+    auto* folder = new QPushButton(QCoreApplication::translate("QingYing", "打开文件夹"), this);
+    auto* clear = new QPushButton(QCoreApplication::translate("QingYing", "清空"), this);
+    auto* copy = new QPushButton(QCoreApplication::translate("QingYing", "复制"), this);
+    auto* pin = new QPushButton(QCoreApplication::translate("QingYing", "钉在桌面"), this);
     pin->setObjectName(QStringLiteral("primary"));
     row->addWidget(folder);
     row->addWidget(clear);
@@ -66,7 +67,7 @@ HistoryWindow::HistoryWindow(QWidget* parent) : QDialog(parent)
         QDesktopServices::openUrl(QUrl::fromLocalFile(History::dir()));
     });
     connect(clear, &QPushButton::clicked, this, [this] {
-        if (QMessageBox::question(this, QStringLiteral("清空历史"), QStringLiteral("确定删除全部截图历史？")) == QMessageBox::Yes) {
+        if (QMessageBox::question(this, QCoreApplication::translate("QingYing", "清空历史"), QCoreApplication::translate("QingYing", "确定删除全部截图历史？")) == QMessageBox::Yes) {
             History::clear();
             reload();
         }

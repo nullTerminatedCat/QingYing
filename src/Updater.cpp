@@ -1,3 +1,4 @@
+#include <QCoreApplication>
 #include "Updater.h"
 #include "Icons.h"
 #include "Notify.h"
@@ -79,27 +80,27 @@ void Updater::check(bool manual)
         Settings::setLastUpdateCheck(QDateTime::currentDateTime());
         Release r;
         if (reply->error() != QNetworkReply::NoError || !parse(reply->readAll(), &r)) {
-            if (manual) Notify::warn(QStringLiteral("检查更新失败"), reply->errorString());
+            if (manual) Notify::warn(QCoreApplication::translate("QingYing", "检查更新失败"), reply->errorString());
             return;
         }
         const QVersionNumber current = QVersionNumber::fromString(QCoreApplication::applicationVersion());
         if (r.version > current) offer(r);
-        else if (manual) Notify::info(QStringLiteral("已是最新版本"), QStringLiteral("当前版本 %1").arg(current.toString()));
+        else if (manual) Notify::info(QCoreApplication::translate("QingYing", "已是最新版本"), QCoreApplication::translate("QingYing", "当前版本 %1").arg(current.toString()));
     });
 }
 
 void Updater::offer(const Release& r)
 {
     QMessageBox box;
-    box.setWindowTitle(QStringLiteral("青影 · 发现新版本"));
+    box.setWindowTitle(QCoreApplication::translate("QingYing", "青影 · 发现新版本"));
     box.setWindowIcon(appIcon());
     box.setIconPixmap(appIcon().pixmap(48, 48));
-    box.setText(QStringLiteral("<b>青影 %1 已发布</b>（当前 %2）").arg(r.tag, QCoreApplication::applicationVersion()));
-    box.setInformativeText(isPortable() ? QStringLiteral("你正在使用免安装版，将打开发布页下载新版本。")
-                                        : QStringLiteral("将下载安装包并校验 SHA-256，校验通过后启动安装程序并退出青影。"));
+    box.setText(QCoreApplication::translate("QingYing", "<b>青影 %1 已发布</b>（当前 %2）").arg(r.tag, QCoreApplication::applicationVersion()));
+    box.setInformativeText(isPortable() ? QCoreApplication::translate("QingYing", "你正在使用免安装版，将打开发布页下载新版本。")
+                                        : QCoreApplication::translate("QingYing", "将下载安装包并校验 SHA-256，校验通过后启动安装程序并退出青影。"));
     box.setDetailedText(r.notes);
-    QPushButton* go = box.addButton(isPortable() ? QStringLiteral("打开发布页") : QStringLiteral("立即更新"), QMessageBox::AcceptRole);
-    box.addButton(QStringLiteral("稍后"), QMessageBox::RejectRole);
+    QPushButton* go = box.addButton(isPortable() ? QCoreApplication::translate("QingYing", "打开发布页") : QCoreApplication::translate("QingYing", "立即更新"), QMessageBox::AcceptRole);
+    box.addButton(QCoreApplication::translate("QingYing", "稍后"), QMessageBox::RejectRole);
     box.setWindowFlag(Qt::WindowStaysOnTopHint);
     box.exec();
     if (box.clickedButton() != go) return;
@@ -109,8 +110,8 @@ void Updater::offer(const Release& r)
 
 void Updater::download(const Release& r)
 {
-    auto* progress = new QProgressDialog(QStringLiteral("正在下载 %1 …").arg(r.setupName), QStringLiteral("取消"), 0, 100);
-    progress->setWindowTitle(QStringLiteral("青影 · 更新"));
+    auto* progress = new QProgressDialog(QCoreApplication::translate("QingYing", "正在下载 %1 …").arg(r.setupName), QCoreApplication::translate("QingYing", "取消"), 0, 100);
+    progress->setWindowTitle(QCoreApplication::translate("QingYing", "青影 · 更新"));
     progress->setWindowIcon(appIcon());
     progress->setAttribute(Qt::WA_DeleteOnClose);
     progress->setMinimumDuration(0);
@@ -129,7 +130,7 @@ void Updater::download(const Release& r)
         setup->deleteLater();
         if (setup->error() != QNetworkReply::NoError) {
             if (setup->error() != QNetworkReply::OperationCanceledError)
-                Notify::warn(QStringLiteral("下载更新失败"), setup->errorString());
+                Notify::warn(QCoreApplication::translate("QingYing", "下载更新失败"), setup->errorString());
             return;
         }
         const QByteArray data = setup->readAll();
@@ -140,23 +141,23 @@ void Updater::download(const Release& r)
             if (parts.size() >= 2 && parts.last() == r.setupName) expected = parts.first().toLower();
         }
         if (expected.isEmpty() || expected != actual) {
-            QMessageBox::warning(nullptr, QStringLiteral("青影 · 更新"),
-                                 QStringLiteral("安装包 SHA-256 校验失败，已放弃安装。\n期望：%1\n实际：%2")
-                                     .arg(expected.isEmpty() ? QStringLiteral("（未找到）") : expected, actual));
+            QMessageBox::warning(nullptr, QCoreApplication::translate("QingYing", "青影 · 更新"),
+                                 QCoreApplication::translate("QingYing", "安装包 SHA-256 校验失败，已放弃安装。\n期望：%1\n实际：%2")
+                                     .arg(expected.isEmpty() ? QCoreApplication::translate("QingYing", "（未找到）") : expected, actual));
             return;
         }
         const QString path = QDir::temp().filePath(r.setupName);
         QFile f(path);
         if (!f.open(QIODevice::WriteOnly) || f.write(data) != data.size()) {
-            Notify::warn(QStringLiteral("下载更新失败"), QStringLiteral("无法写入 %1").arg(path));
+            Notify::warn(QCoreApplication::translate("QingYing", "下载更新失败"), QCoreApplication::translate("QingYing", "无法写入 %1").arg(path));
             return;
         }
         f.close();
-        if (QMessageBox::question(nullptr, QStringLiteral("青影 · 更新"),
-                                  QStringLiteral("安装包已下载并通过校验。现在启动安装程序并退出青影吗？")) != QMessageBox::Yes)
+        if (QMessageBox::question(nullptr, QCoreApplication::translate("QingYing", "青影 · 更新"),
+                                  QCoreApplication::translate("QingYing", "安装包已下载并通过校验。现在启动安装程序并退出青影吗？")) != QMessageBox::Yes)
             return;
         if (QProcess::startDetached(path, {})) qApp->quit();
-        else Notify::warn(QStringLiteral("无法启动安装程序"), path);
+        else Notify::warn(QCoreApplication::translate("QingYing", "无法启动安装程序"), path);
     };
     connect(sums, &QNetworkReply::finished, this, finish);
     connect(setup, &QNetworkReply::finished, this, finish);

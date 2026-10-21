@@ -1,3 +1,4 @@
+#include <QCoreApplication>
 #include "Theme.h"
 #include "App.h"
 #include "CaptureOverlay.h"
@@ -65,34 +66,34 @@ App::App()
         "QMenu::item:selected{background:rgba(79,107,255,31);color:#1C1C1E;}"
         "QMenu::separator{height:1px;background:rgba(0,0,0,15);margin:5px 8px;}"
         "QMenu::icon{padding-left:8px;}"));
-    m_captureAct = m_menu->addAction(menuIcon(Icon::Capture), QStringLiteral("截图"));
+    m_captureAct = m_menu->addAction(menuIcon(Icon::Capture), QCoreApplication::translate("QingYing", "截图"));
     connect(m_captureAct, &QAction::triggered, this, [this] { QTimer::singleShot(180, this, [this] { startCapture(); }); });
-    QMenu* delay = m_menu->addMenu(menuIcon(Icon::Clock), QStringLiteral("延时截图"));
+    QMenu* delay = m_menu->addMenu(menuIcon(Icon::Clock), QCoreApplication::translate("QingYing", "延时截图"));
     for (int s : {3, 5, 10})
-        delay->addAction(QStringLiteral("%1 秒后").arg(s), this, [this, s] { startDelayedCapture(s); });
-    m_menu->addAction(menuIcon(Icon::Scroll), QStringLiteral("长截图（滚动）"), this,
+        delay->addAction(QCoreApplication::translate("QingYing", "%1 秒后").arg(s), this, [this, s] { startDelayedCapture(s); });
+    m_menu->addAction(menuIcon(Icon::Scroll), QCoreApplication::translate("QingYing", "长截图（滚动）"), this,
                       [this] { QTimer::singleShot(180, this, [this] { startCapture(int(CaptureMode::LongShot)); }); });
-    m_menu->addAction(menuIcon(Icon::Picker), QStringLiteral("取色"), this,
+    m_menu->addAction(menuIcon(Icon::Picker), QCoreApplication::translate("QingYing", "取色"), this,
                       [this] { QTimer::singleShot(180, this, [this] { startCapture(int(CaptureMode::Pick)); }); });
-    QMenu* rec = m_menu->addMenu(menuIcon(Icon::Record), QStringLiteral("录屏"));
-    rec->addAction(QStringLiteral("录制 MP4"), this, [this] { m_recordGif = false; QTimer::singleShot(180, this, [this] { startCapture(int(CaptureMode::Record)); }); });
-    rec->addAction(QStringLiteral("录制 GIF"), this, [this] { m_recordGif = true; QTimer::singleShot(180, this, [this] { startCapture(int(CaptureMode::Record)); }); });
+    QMenu* rec = m_menu->addMenu(menuIcon(Icon::Record), QCoreApplication::translate("QingYing", "录屏"));
+    rec->addAction(QCoreApplication::translate("QingYing", "录制 MP4"), this, [this] { m_recordGif = false; QTimer::singleShot(180, this, [this] { startCapture(int(CaptureMode::Record)); }); });
+    rec->addAction(QCoreApplication::translate("QingYing", "录制 GIF"), this, [this] { m_recordGif = true; QTimer::singleShot(180, this, [this] { startCapture(int(CaptureMode::Record)); }); });
     m_menu->addSeparator();
-    m_pinMenu = m_menu->addMenu(menuIcon(Icon::Pin), QStringLiteral("钉图"));
-    m_pinMenu->addAction(QStringLiteral("全部显示"), this, [] { PinWindow::showAll(); });
-    m_pinMenu->addAction(QStringLiteral("全部隐藏"), this, [] { PinWindow::hideAll(); });
-    m_pinMenu->addAction(QStringLiteral("全部关闭"), this, [] { PinWindow::closeAll(); });
-    m_recentMenu = m_menu->addMenu(menuIcon(Icon::History), QStringLiteral("最近截图"));
+    m_pinMenu = m_menu->addMenu(menuIcon(Icon::Pin), QCoreApplication::translate("QingYing", "钉图"));
+    m_pinMenu->addAction(QCoreApplication::translate("QingYing", "全部显示"), this, [] { PinWindow::showAll(); });
+    m_pinMenu->addAction(QCoreApplication::translate("QingYing", "全部隐藏"), this, [] { PinWindow::hideAll(); });
+    m_pinMenu->addAction(QCoreApplication::translate("QingYing", "全部关闭"), this, [] { PinWindow::closeAll(); });
+    m_recentMenu = m_menu->addMenu(menuIcon(Icon::History), QCoreApplication::translate("QingYing", "最近截图"));
     connect(m_recentMenu, &QMenu::aboutToShow, this, &App::rebuildRecentMenu);
     m_menu->addSeparator();
-    m_menu->addAction(menuIcon(Icon::Settings), QStringLiteral("设置…"), this, &App::openSettings);
-    m_autoAct = m_menu->addAction(QStringLiteral("开机自启"));
+    m_menu->addAction(menuIcon(Icon::Settings), QCoreApplication::translate("QingYing", "设置…"), this, &App::openSettings);
+    m_autoAct = m_menu->addAction(QCoreApplication::translate("QingYing", "开机自启"));
     m_autoAct->setCheckable(true);
     connect(m_autoAct, &QAction::toggled, this, [](bool on) { Settings::setAutostart(on); });
-    m_menu->addAction(QStringLiteral("检查更新"), this, [this] { m_updater->check(true); });
-    m_menu->addAction(QStringLiteral("关于青影"), this, &App::showAbout);
+    m_menu->addAction(QCoreApplication::translate("QingYing", "检查更新"), this, [this] { m_updater->check(true); });
+    m_menu->addAction(QCoreApplication::translate("QingYing", "关于青影"), this, &App::showAbout);
     m_menu->addSeparator();
-    m_menu->addAction(QStringLiteral("退出"), qApp, &QApplication::quit);
+    m_menu->addAction(QCoreApplication::translate("QingYing", "退出"), qApp, &QApplication::quit);
     connect(m_menu, &QMenu::aboutToShow, this, &App::updateMenu);
 
     m_tray = new QSystemTrayIcon(appIcon(), this);
@@ -117,11 +118,11 @@ App::App()
     updateMenu();
     const QString hkText = hk.toString(QKeySequence::NativeText);
     if (ok)
-        m_tray->showMessage(QStringLiteral("青影已在后台运行"), QStringLiteral("按 %1 开始截图").arg(hkText),
+        m_tray->showMessage(QCoreApplication::translate("QingYing", "青影已在后台运行"), QCoreApplication::translate("QingYing", "按 %1 开始截图").arg(hkText),
                             appIcon(), 3000);
     else
-        m_tray->showMessage(QStringLiteral("快捷键冲突"),
-                            QStringLiteral("%1 已被其他程序占用，请在设置中更换。也可单击托盘图标截图。").arg(hkText),
+        m_tray->showMessage(QCoreApplication::translate("QingYing", "快捷键冲突"),
+                            QCoreApplication::translate("QingYing", "%1 已被其他程序占用，请在设置中更换。也可单击托盘图标截图。").arg(hkText),
                             QSystemTrayIcon::Warning, 6000);
     writeSmokeReport();
 }
@@ -218,6 +219,7 @@ void App::writeSmokeReport()
         loop.exec();
         f.write(QStringLiteral("upload_url=%1 err=%2\n").arg(url, err).toUtf8());
     }
+    f.write(QStringLiteral("lang=%1 sample=%2\n").arg(Settings::effectiveLanguage(), QCoreApplication::translate("QingYing", "设置")).toUtf8());
     f.write(QStringLiteral("theme=%1 dark=%2 system_dark=%3\n").arg(Settings::theme()).arg(Theme::isDark()).arg(Theme::systemIsDark()).toUtf8());
     const QString qrPath = qEnvironmentVariable("QINGYING_SMOKE_QR");
     if (!qrPath.isEmpty()) {
@@ -231,13 +233,13 @@ void App::writeSmokeReport()
 
 void App::updateMenu()
 {
-    m_captureAct->setText(QStringLiteral("截图\t%1").arg(Settings::hotkey().toString(QKeySequence::NativeText)));
+    m_captureAct->setText(QCoreApplication::translate("QingYing", "截图\t%1").arg(Settings::hotkey().toString(QKeySequence::NativeText)));
     const int pins = PinWindow::all().size();
-    m_pinMenu->setTitle(pins ? QStringLiteral("钉图（%1）").arg(pins) : QStringLiteral("钉图"));
+    m_pinMenu->setTitle(pins ? QCoreApplication::translate("QingYing", "钉图（%1）").arg(pins) : QCoreApplication::translate("QingYing", "钉图"));
     m_pinMenu->setEnabled(pins > 0);
     const QSignalBlocker b(m_autoAct);
     m_autoAct->setChecked(Settings::autostart());
-    m_tray->setToolTip(QStringLiteral("青影 截图 · %1").arg(Settings::hotkey().toString(QKeySequence::NativeText)));
+    m_tray->setToolTip(QCoreApplication::translate("QingYing", "青影 截图 · %1").arg(Settings::hotkey().toString(QKeySequence::NativeText)));
 }
 
 bool App::applyHotkey(const QKeySequence& seq)
@@ -254,7 +256,7 @@ bool App::applyHotkey(const QKeySequence& seq)
 
 void App::startDelayedCapture(int seconds)
 {
-    m_tray->showMessage(QStringLiteral("延时截图"), QStringLiteral("%1 秒后开始截图").arg(seconds), appIcon(), 1500);
+    m_tray->showMessage(QCoreApplication::translate("QingYing", "延时截图"), QCoreApplication::translate("QingYing", "%1 秒后开始截图").arg(seconds), appIcon(), 1500);
     QTimer::singleShot(seconds * 1000, this, [this] { startCapture(); });
 }
 
@@ -277,15 +279,15 @@ void App::startRecording(const QRect& region)
     connect(s, &RecordSession::finished, this, [this](bool ok, const QString& path, const QString& err) {
         if (ok) {
             m_lastRecording = path;
-            m_tray->showMessage(QStringLiteral("录制完成"), QStringLiteral("%1\n点击打开所在文件夹").arg(QDir::toNativeSeparators(path)),
+            m_tray->showMessage(QCoreApplication::translate("QingYing", "录制完成"), QCoreApplication::translate("QingYing", "%1\n点击打开所在文件夹").arg(QDir::toNativeSeparators(path)),
                                 appIcon(), 4000);
         } else {
-            m_tray->showMessage(QStringLiteral("录制失败"), err, QSystemTrayIcon::Warning, 5000);
+            m_tray->showMessage(QCoreApplication::translate("QingYing", "录制失败"), err, QSystemTrayIcon::Warning, 5000);
         }
     });
     QString err;
     if (!s->begin(&err)) {
-        m_tray->showMessage(QStringLiteral("无法开始录制"), err, QSystemTrayIcon::Warning, 5000);
+        m_tray->showMessage(QCoreApplication::translate("QingYing", "无法开始录制"), err, QSystemTrayIcon::Warning, 5000);
         s->close();
     }
 }
@@ -294,7 +296,7 @@ void App::onDelivered(const QImage& image, const QString& path)
 {
     History::add(image);
     if (!path.isEmpty())
-        m_tray->showMessage(QStringLiteral("截图已保存"), QDir::toNativeSeparators(path), appIcon(), 2500);
+        m_tray->showMessage(QCoreApplication::translate("QingYing", "截图已保存"), QDir::toNativeSeparators(path), appIcon(), 2500);
     if (m_history) m_history->reload();
 }
 
@@ -309,15 +311,15 @@ void App::rebuildRecentMenu()
         r.setScaledSize(full.scaled(QSize(48, 32), Qt::KeepAspectRatio));
         const QString stamp = QFileInfo(path).baseName();
         auto* act = m_recentMenu->addAction(QIcon(QPixmap::fromImage(r.read())),
-                                            QStringLiteral("%1:%2:%3  %4×%5  复制")
+                                            QCoreApplication::translate("QingYing", "%1:%2:%3  %4×%5  复制")
                                                 .arg(stamp.mid(9, 2), stamp.mid(11, 2), stamp.mid(13, 2))
                                                 .arg(full.width()).arg(full.height()));
         connect(act, &QAction::triggered, this, [path] { QGuiApplication::clipboard()->setImage(QImage(path)); });
     }
-    if (list.isEmpty()) m_recentMenu->addAction(QStringLiteral("暂无记录"))->setEnabled(false);
+    if (list.isEmpty()) m_recentMenu->addAction(QCoreApplication::translate("QingYing", "暂无记录"))->setEnabled(false);
     m_recentMenu->addSeparator();
-    m_recentMenu->addAction(QStringLiteral("历史记录…"), this, &App::openHistory);
-    m_recentMenu->addAction(QStringLiteral("打开保存文件夹"), this, [] {
+    m_recentMenu->addAction(QCoreApplication::translate("QingYing", "历史记录…"), this, &App::openHistory);
+    m_recentMenu->addAction(QCoreApplication::translate("QingYing", "打开保存文件夹"), this, [] {
         QDir().mkpath(Settings::saveDir());
         QDesktopServices::openUrl(QUrl::fromLocalFile(Settings::saveDir()));
     });
@@ -362,7 +364,7 @@ void App::startCapture(int mode)
         connect(o, &CaptureOverlay::finished, this, &App::endCapture, Qt::QueuedConnection);
         o->setMode(CaptureMode(mode));
         connect(o, &CaptureOverlay::colorPicked, this, [this](const QString& t) {
-            m_tray->showMessage(QStringLiteral("已复制颜色"), t, appIcon(), 1500);
+            m_tray->showMessage(QCoreApplication::translate("QingYing", "已复制颜色"), t, appIcon(), 1500);
         });
         connect(o, &CaptureOverlay::delivered, this, &App::onDelivered);
         connect(o, &CaptureOverlay::recordRequested, this, [this](const QRect& r) {
@@ -419,10 +421,10 @@ void App::openSettings()
 void App::showAbout()
 {
     QMessageBox box;
-    box.setWindowTitle(QStringLiteral("关于青影"));
+    box.setWindowTitle(QCoreApplication::translate("QingYing", "关于青影"));
     box.setIconPixmap(appIcon().pixmap(64, 64));
-    box.setText(QStringLiteral("<h3>青影 QingYing %1</h3>").arg(QApplication::applicationVersion()));
-    box.setInformativeText(QStringLiteral("简洁好看的 Windows 截图工具。<br>区域截图 · 标注 · 钉图<br><br>"
+    box.setText(QCoreApplication::translate("QingYing", "<h3>青影 QingYing %1</h3>").arg(QApplication::applicationVersion()));
+    box.setInformativeText(QCoreApplication::translate("QingYing", "简洁好看的 Windows 截图工具。<br>区域截图 · 标注 · 钉图<br><br>"
                                           "基于 Qt %1 · MIT 许可证").arg(QString::fromLatin1(qVersion())));
     box.exec();
 }

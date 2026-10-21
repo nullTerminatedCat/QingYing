@@ -25,7 +25,7 @@ FetchContent_Declare(zxing
     GIT_SHALLOW TRUE)
 FetchContent_MakeAvailable(zxing)
 
-find_package(Qt6 6.7 REQUIRED COMPONENTS Widgets Network)
+find_package(Qt6 6.7 REQUIRED COMPONENTS Widgets Network LinguistTools)
 qt_standard_project_setup()
 
 qt_add_executable(QingYing WIN32
@@ -58,6 +58,11 @@ qt_add_executable(QingYing WIN32
     src/Uploader.cpp src/Uploader.h
     resources/QingYing.rc
 )
+# 界面翻译：源码为简体中文，en_US 编译为 .qm 嵌入资源 :/i18n
+qt_add_translations(QingYing
+    TS_FILES i18n/qingying_zh_CN.ts i18n/qingying_en_US.ts
+    RESOURCE_PREFIX /i18n
+    LUPDATE_OPTIONS -no-obsolete)
 qt_add_resources(QingYing "app_icons" PREFIX "/" FILES resources/QingYing.ico resources/QingYing.png)
 
 target_compile_definitions(QingYing PRIVATE

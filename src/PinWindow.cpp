@@ -1,3 +1,4 @@
+#include <QCoreApplication>
 #include "PinWindow.h"
 #include "Icons.h"
 #include "Recognize.h"
@@ -30,7 +31,7 @@ PinWindow::PinWindow(const QImage& image)
     setAttribute(Qt::WA_TranslucentBackground);
     setAttribute(Qt::WA_DeleteOnClose);
     setMouseTracking(true);
-    setWindowTitle(QStringLiteral("青影 钉图"));
+    setWindowTitle(QCoreApplication::translate("QingYing", "青影 钉图"));
     m_base = QSizeF(m_img.width() / m_img.devicePixelRatio(), m_img.height() / m_img.devicePixelRatio());
     updateSize();
     registry().append(this);
@@ -217,22 +218,22 @@ void PinWindow::leaveEvent(QEvent*)
 void PinWindow::contextMenuEvent(QContextMenuEvent* e)
 {
     QMenu menu(this);
-    menu.addAction(menuIcon(Icon::Copy), QStringLiteral("复制"), this, &PinWindow::copy);
-    menu.addAction(menuIcon(Icon::Save), QStringLiteral("另存为…"), this, &PinWindow::save);
-    menu.addAction(menuIcon(Icon::Ocr), QStringLiteral("识别文字（OCR）"), this, [this] { Recognize::ocr(m_img); });
-    menu.addAction(menuIcon(Icon::Qr), QStringLiteral("识别二维码 / 条码"), this, [this] { Recognize::qr(m_img); });
+    menu.addAction(menuIcon(Icon::Copy), QCoreApplication::translate("QingYing", "复制"), this, &PinWindow::copy);
+    menu.addAction(menuIcon(Icon::Save), QCoreApplication::translate("QingYing", "另存为…"), this, &PinWindow::save);
+    menu.addAction(menuIcon(Icon::Ocr), QCoreApplication::translate("QingYing", "识别文字（OCR）"), this, [this] { Recognize::ocr(m_img); });
+    menu.addAction(menuIcon(Icon::Qr), QCoreApplication::translate("QingYing", "识别二维码 / 条码"), this, [this] { Recognize::qr(m_img); });
     if (Settings::uploadEnabled())
-        menu.addAction(menuIcon(Icon::Upload), QStringLiteral("上传并复制链接"), this, [this] { Uploads::uploadWithSettings(m_img); });
+        menu.addAction(menuIcon(Icon::Upload), QCoreApplication::translate("QingYing", "上传并复制链接"), this, [this] { Uploads::uploadWithSettings(m_img); });
     menu.addSeparator();
-    menu.addAction(menuIcon(Icon::Rotate), QStringLiteral("顺时针旋转 90°\tR"), this, [this] { rotate(90); });
-    menu.addAction(QStringLiteral("逆时针旋转 90°\tShift+R"), this, [this] { rotate(-90); });
-    menu.addAction(QStringLiteral("水平翻转\tH"), this, &PinWindow::flip);
-    menu.addAction(QStringLiteral("原始大小"), this, [this] {
+    menu.addAction(menuIcon(Icon::Rotate), QCoreApplication::translate("QingYing", "顺时针旋转 90°\tR"), this, [this] { rotate(90); });
+    menu.addAction(QCoreApplication::translate("QingYing", "逆时针旋转 90°\tShift+R"), this, [this] { rotate(-90); });
+    menu.addAction(QCoreApplication::translate("QingYing", "水平翻转\tH"), this, &PinWindow::flip);
+    menu.addAction(QCoreApplication::translate("QingYing", "原始大小"), this, [this] {
         m_scale = 1;
         updateSize();
     });
     menu.addSeparator();
-    menu.addAction(menuIcon(Icon::Close), QStringLiteral("关闭"), this, &QWidget::close);
+    menu.addAction(menuIcon(Icon::Close), QCoreApplication::translate("QingYing", "关闭"), this, &QWidget::close);
     menu.exec(e->globalPos());
 }
 
@@ -245,11 +246,11 @@ void PinWindow::copy()
 
 void PinWindow::save()
 {
-    const QString png = QStringLiteral("PNG 图片 (*.png)"), jpg = QStringLiteral("JPG 图片 (*.jpg *.jpeg)");
+    const QString png = QCoreApplication::translate("QingYing", "PNG 图片 (*.png)"), jpg = QCoreApplication::translate("QingYing", "JPG 图片 (*.jpg *.jpeg)");
     QString filter = Settings::format() == QLatin1String("jpg") ? jpg : png;
     QDir().mkpath(Settings::saveDir());
-    const QString path = QFileDialog::getSaveFileName(this, QStringLiteral("保存钉图"), Settings::defaultFilePath(),
+    const QString path = QFileDialog::getSaveFileName(this, QCoreApplication::translate("QingYing", "保存钉图"), Settings::defaultFilePath(),
                                                       png + QStringLiteral(";;") + jpg, &filter);
     if (!path.isEmpty() && !Settings::saveImage(m_img, path))
-        QMessageBox::warning(this, QStringLiteral("青影"), QStringLiteral("保存失败：%1").arg(path));
+        QMessageBox::warning(this, QCoreApplication::translate("QingYing", "青影"), QCoreApplication::translate("QingYing", "保存失败：%1").arg(path));
 }

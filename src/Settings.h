@@ -32,6 +32,9 @@ bool recordCursor();
 void setRecordCursor(bool on);
 QString theme(); // system / light / dark
 void setTheme(const QString& t);
+QString language(); // system / zh_CN / en_US
+void setLanguage(const QString& l);
+QString effectiveLanguage(); // zh_CN 或 en_US
 bool autoUpdate();
 void setAutoUpdate(bool on);
 QDateTime lastUpdateCheck();

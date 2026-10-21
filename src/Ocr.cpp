@@ -1,3 +1,4 @@
+#include <QCoreApplication>
 #include "Ocr.h"
 
 #include <QRegularExpression>
@@ -42,7 +43,7 @@ Result recognize(const QImage& input)
         if (OcrEngine::IsLanguageSupported(zh)) engine = OcrEngine::TryCreateFromLanguage(zh);
         if (!engine) engine = OcrEngine::TryCreateFromUserProfileLanguages();
         if (!engine) {
-            r.error = QStringLiteral("系统没有可用的 OCR 语言包。请在“设置 → 时间和语言 → 语言和区域”中添加“中文(简体)”，"
+            r.error = QCoreApplication::translate("QingYing", "系统没有可用的 OCR 语言包。请在“设置 → 时间和语言 → 语言和区域”中添加“中文(简体)”，"
                                      "并在语言选项里安装“光学字符识别”功能后重试。");
             return r;
         }
@@ -66,9 +67,9 @@ Result recognize(const QImage& input)
         r.language = fromH(engine.RecognizerLanguage().DisplayName());
         r.ok = true;
     } catch (const hresult_error& e) {
-        r.error = QStringLiteral("OCR 失败：%1").arg(fromH(e.message()));
+        r.error = QCoreApplication::translate("QingYing", "OCR 失败：%1").arg(fromH(e.message()));
     } catch (...) {
-        r.error = QStringLiteral("OCR 失败：未知错误");
+        r.error = QCoreApplication::translate("QingYing", "OCR 失败：未知错误");
     }
     return r;
 }

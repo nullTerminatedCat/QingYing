@@ -1,3 +1,4 @@
+#include <QCoreApplication>
 #include "Theme.h"
 #include "ScrollCapture.h"
 #include "HotkeyManager.h"
@@ -76,7 +77,7 @@ ScrollCapture::ScrollCapture(const QRect& region)
 {
     setAttribute(Qt::WA_DeleteOnClose);
     setAttribute(Qt::WA_TranslucentBackground);
-    setWindowTitle(QStringLiteral("青影 长截图"));
+    setWindowTitle(QCoreApplication::translate("QingYing", "青影 长截图"));
     Theme::setSheet(this, QStringLiteral(R"(
         QLabel { color: #1C1C1E; font-size: 12px; }
         QLabel#status { color: #6E6E73; }
@@ -87,7 +88,7 @@ ScrollCapture::ScrollCapture(const QRect& region)
     auto* root = new QVBoxLayout(this);
     root->setContentsMargins(22, 22, 22, 22);
     root->setSpacing(8);
-    m_status = new QLabel(QStringLiteral("正在滚动截取…"), this);
+    m_status = new QLabel(QCoreApplication::translate("QingYing", "正在滚动截取…"), this);
     m_status->setObjectName(QStringLiteral("status"));
     m_status->setWordWrap(true);
     root->addWidget(m_status);
@@ -95,20 +96,20 @@ ScrollCapture::ScrollCapture(const QRect& region)
     m_preview->setFixedSize(180, 320);
     m_preview->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
     root->addWidget(m_preview);
-    m_stop = makeButton(QStringLiteral("停止（单击 / Esc）"), this, true);
+    m_stop = makeButton(QCoreApplication::translate("QingYing", "停止（单击 / Esc）"), this, true);
     root->addWidget(m_stop);
     m_actions = new QWidget(this);
     auto* grid = new QHBoxLayout(m_actions);
     grid->setContentsMargins(0, 0, 0, 0);
     grid->setSpacing(6);
-    auto* copy = makeButton(QStringLiteral("复制"), m_actions, true);
-    auto* save = makeButton(QStringLiteral("保存"), m_actions);
-    auto* pin = makeButton(QStringLiteral("钉图"), m_actions);
-    auto* cancel = makeButton(QStringLiteral("取消"), m_actions);
+    auto* copy = makeButton(QCoreApplication::translate("QingYing", "复制"), m_actions, true);
+    auto* save = makeButton(QCoreApplication::translate("QingYing", "保存"), m_actions);
+    auto* pin = makeButton(QCoreApplication::translate("QingYing", "钉图"), m_actions);
+    auto* cancel = makeButton(QCoreApplication::translate("QingYing", "取消"), m_actions);
     for (auto* b : {copy, save, pin, cancel}) grid->addWidget(b);
     m_actions->hide();
     root->addWidget(m_actions);
-    connect(m_stop, &QPushButton::clicked, this, [this] { stop(QStringLiteral("已停止")); });
+    connect(m_stop, &QPushButton::clicked, this, [this] { stop(QCoreApplication::translate("QingYing", "已停止")); });
     connect(copy, &QPushButton::clicked, this, [this] { finish(QStringLiteral("copy")); });
     connect(save, &QPushButton::clicked, this, [this] { finish(QStringLiteral("save")); });
     connect(pin, &QPushButton::clicked, this, [this] { finish(QStringLiteral("pin")); });
@@ -116,7 +117,7 @@ ScrollCapture::ScrollCapture(const QRect& region)
 
     m_esc = new HotkeyManager(this);
     connect(m_esc, &HotkeyManager::activated, this, [this] {
-        if (m_running) stop(QStringLiteral("已停止"));
+        if (m_running) stop(QCoreApplication::translate("QingYing", "已停止"));
         else close();
     });
 
@@ -159,7 +160,7 @@ void ScrollCapture::step()
 {
     if (!m_running) return;
     if (GetAsyncKeyState(VK_LBUTTON) & 0x8000) {
-        stop(QStringLiteral("已停止"));
+        stop(QCoreApplication::translate("QingYing", "已停止"));
         return;
     }
     if (!m_waitRender) {
@@ -178,12 +179,12 @@ void ScrollCapture::step()
     const QImage cur = ScreenGrabber::grab(m_region);
     const int dy = findShift(m_last, cur);
     if (dy == 0) {
-        if (++m_stillCount >= 3) stop(QStringLiteral("已到底部"));
+        if (++m_stillCount >= 3) stop(QCoreApplication::translate("QingYing", "已到底部"));
         return;
     }
     m_stillCount = 0;
     if (dy < 0) {
-        if (++m_failCount >= 4) stop(QStringLiteral("无法对齐画面，已停止（内容可能在变化）"));
+        if (++m_failCount >= 4) stop(QCoreApplication::translate("QingYing", "无法对齐画面，已停止（内容可能在变化）"));
         return;
     }
     m_failCount = 0;
@@ -197,7 +198,7 @@ void ScrollCapture::step()
     m_result = merged;
     m_last = cur;
     updatePreview();
-    if (m_result.height() >= kMaxHeight) stop(QStringLiteral("已达到最大高度"));
+    if (m_result.height() >= kMaxHeight) stop(QCoreApplication::translate("QingYing", "已达到最大高度"));
 }
 
 int ScrollCapture::findShift(const QImage& a, const QImage& b)
@@ -296,7 +297,7 @@ void ScrollCapture::paintEvent(QPaintEvent*)
 void ScrollCapture::keyPressEvent(QKeyEvent* e)
 {
     if (e->key() == Qt::Key_Escape) {
-        if (m_running) stop(QStringLiteral("已停止"));
+        if (m_running) stop(QCoreApplication::translate("QingYing", "已停止"));
         else close();
     }
 }
