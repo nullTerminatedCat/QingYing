@@ -139,6 +139,8 @@ RecordSession::RecordSession(const QRect& region, Recorder::Format format)
     connect(m_esc, &HotkeyManager::activated, this, &RecordSession::finish);
     m_tick.setInterval(250);
     connect(&m_tick, &QTimer::timeout, this, &RecordSession::refresh);
+    // 退出程序时结束录制并写完文件，避免录制线程在析构阶段仍在运行
+    connect(qApp, &QCoreApplication::aboutToQuit, this, &RecordSession::finish);
 }
 
 RecordSession::~RecordSession()
