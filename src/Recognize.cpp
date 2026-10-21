@@ -7,7 +7,7 @@
 #include <QPointer>
 #include <QStringList>
 #include <QUrl>
-#include <thread>
+#include <QThreadPool>
 
 namespace Recognize {
 void ocr(const QImage& image)
@@ -18,7 +18,8 @@ void ocr(const QImage& image)
     dlg->raise();
     dlg->activateWindow();
     QPointer<ResultDialog> guard(dlg);
-    std::thread([image, guard] {
+    // 在全局线程池中识别：退出时 main() 会等待其结束，避免分离线程在 QApplication 析构后回调
+    QThreadPool::globalInstance()->start([image, guard] {
         const Ocr::Result r = Ocr::recognize(image);
         QMetaObject::invokeMethod(qApp, [guard, r] {
             if (!guard) return;
@@ -31,7 +32,7 @@ void ocr(const QImage& image)
                                               : QCoreApplication::translate("QingYing", "识别语言：%1 · 共 %2 行，可直接编辑后复制")
                                                     .arg(r.language).arg(r.text.count(QLatin1Char('\n')) + 1));
         }, Qt::QueuedConnection);
-    }).detach();
+    });
 }
 }
 
