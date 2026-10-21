@@ -1,0 +1,47 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  windows-x64:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.9.1'
+          arch: win64_msvc2022_64
+          cache: true
+
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Collect artifact
+        shell: pwsh
+        run: |
+          $out = "dist/QingYing-windows-x64"
+          New-Item -ItemType Directory -Force $out | Out-Null
+          Copy-Item build/QingYing.exe, build/*.dll $out
+          foreach ($d in 'platforms','styles','imageformats','iconengines','generic','tls','networkinformation') {
+            if (Test-Path "build/$d") { Copy-Item "build/$d" $out -Recurse }
+          }
+          Copy-Item LICENSE, README.md $out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: QingYing-windows-x64
+          path: dist/QingYing-windows-x64
