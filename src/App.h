@@ -13,6 +13,7 @@ class QImage;
 class QMenu;
 class QSystemTrayIcon;
 class SettingsDialog;
+class Updater;
 
 class App : public QObject {
     Q_OBJECT
@@ -48,6 +49,7 @@ private:
     QPointer<SettingsDialog> m_settings;
     QPointer<HistoryWindow> m_history;
     bool m_busy = false;
+    Updater* m_updater = nullptr;
     bool m_recordGif = false;
     QString m_lastRecording;
 };

@@ -4,6 +4,7 @@
 
 class QImage;
 class QColor;
+class QDateTime;
 
 namespace Settings {
 QKeySequence defaultHotkey();
@@ -30,6 +31,10 @@ bool recordCursor();
 void setRecordCursor(bool on);
 QString theme(); // system / light / dark
 void setTheme(const QString& t);
+bool autoUpdate();
+void setAutoUpdate(bool on);
+QDateTime lastUpdateCheck();
+void setLastUpdateCheck(const QDateTime& t);
 QString expandPattern(const QString& pattern);
 QString defaultFilePath();
 bool saveImage(const QImage& img, const QString& path);

@@ -208,6 +208,9 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, Q
     m_autostart = new QCheckBox(QStringLiteral("开机时自动启动青影"), this);
     m_autostart->setChecked(Settings::autostart());
     b->addWidget(m_autostart);
+    m_autoUpdate = new QCheckBox(QStringLiteral("启动时自动检查更新（每天最多一次）"), this);
+    m_autoUpdate->setChecked(Settings::autoUpdate());
+    b->addWidget(m_autoUpdate);
 
     root->addStretch();
     auto* btns = new QHBoxLayout;
@@ -252,6 +255,7 @@ void SettingsDialog::save()
                                                                     : m_pattern->text().trimmed());
     Settings::setFormat(m_jpg->isChecked() ? QStringLiteral("jpg") : QStringLiteral("png"));
     Settings::setAutostart(m_autostart->isChecked());
+    Settings::setAutoUpdate(m_autoUpdate->isChecked());
     static const char* keys[3] = {"copy", "save", "pin"};
     Settings::setDefaultAction(QString::fromLatin1(keys[qBound(0, m_action->checkedId(), 2)]));
     Settings::setHistorySize(m_history->value());

@@ -25,7 +25,7 @@ FetchContent_Declare(zxing
     GIT_SHALLOW TRUE)
 FetchContent_MakeAvailable(zxing)
 
-find_package(Qt6 6.7 REQUIRED COMPONENTS Widgets)
+find_package(Qt6 6.7 REQUIRED COMPONENTS Widgets Network)
 qt_standard_project_setup()
 
 qt_add_executable(QingYing WIN32
@@ -53,6 +53,7 @@ qt_add_executable(QingYing WIN32
     src/RecordSession.cpp src/RecordSession.h
     third_party/gif/gif.h
     src/Theme.cpp src/Theme.h
+    src/Updater.cpp src/Updater.h src/Notify.h
     resources/QingYing.rc
 )
 qt_add_resources(QingYing "app_icons" PREFIX "/" FILES resources/QingYing.ico resources/QingYing.png)
@@ -60,7 +61,7 @@ qt_add_resources(QingYing "app_icons" PREFIX "/" FILES resources/QingYing.ico re
 target_compile_definitions(QingYing PRIVATE
     UNICODE _UNICODE NOMINMAX WIN32_LEAN_AND_MEAN
     QINGYING_VERSION="${PROJECT_VERSION}")
-target_link_libraries(QingYing PRIVATE Qt6::Widgets ZXing::ZXing user32 gdi32 dwmapi windowsapp mfplat mfreadwrite mfuuid ole32)
+target_link_libraries(QingYing PRIVATE Qt6::Widgets Qt6::Network ZXing::ZXing user32 gdi32 dwmapi windowsapp mfplat mfreadwrite mfuuid ole32)
 if(MSVC)
     target_compile_options(QingYing PRIVATE /utf-8 /W3 /permissive- /bigobj)
 endif()

@@ -34,4 +34,5 @@ private:
     QButtonGroup* m_fps;
     QCheckBox* m_recCursor;
     QButtonGroup* m_theme;
+    QCheckBox* m_autoUpdate;
 };

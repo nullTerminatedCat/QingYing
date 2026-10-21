@@ -4,6 +4,8 @@
 #include "History.h"
 #include "HistoryWindow.h"
 #include "Icons.h"
+#include "Notify.h"
+#include "Updater.h"
 #include "Ocr.h"
 #include "QrDecoder.h"
 #include "PinWindow.h"
@@ -30,8 +32,27 @@
 #include <QScreen>
 #include <QSystemTrayIcon>
 #include <QTimer>
+#include <QEventLoop>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QSslSocket>
 #include <QPainter>
 #include <thread>
+
+namespace {
+QPointer<QSystemTrayIcon> g_tray;
+}
+
+namespace Notify {
+void info(const QString& title, const QString& text)
+{
+    if (g_tray) g_tray->showMessage(title, text, appIcon(), 3000);
+}
+void warn(const QString& title, const QString& text)
+{
+    if (g_tray) g_tray->showMessage(title, text, QSystemTrayIcon::Warning, 5000);
+}
+}
 
 App::App()
 {
@@ -66,6 +87,7 @@ App::App()
     m_autoAct = m_menu->addAction(QStringLiteral("开机自启"));
     m_autoAct->setCheckable(true);
     connect(m_autoAct, &QAction::toggled, this, [](bool on) { Settings::setAutostart(on); });
+    m_menu->addAction(QStringLiteral("检查更新"), this, [this] { m_updater->check(true); });
     m_menu->addAction(QStringLiteral("关于青影"), this, &App::showAbout);
     m_menu->addSeparator();
     m_menu->addAction(QStringLiteral("退出"), qApp, &QApplication::quit);
@@ -77,6 +99,10 @@ App::App()
         if (r == QSystemTrayIcon::Trigger) QTimer::singleShot(120, this, [this] { startCapture(); });
     });
     m_tray->show();
+    g_tray = m_tray;
+    m_updater = new Updater(this);
+    if (!qEnvironmentVariableIsSet("QINGYING_SMOKE_REPORT"))
+        QTimer::singleShot(8000, m_updater, &Updater::maybeAutoCheck);
 
     connect(m_tray, &QSystemTrayIcon::messageClicked, this, [this] {
         if (m_lastRecording.isEmpty()) return;
@@ -150,6 +176,24 @@ void App::writeSmokeReport()
                         .arg(fmt == Recorder::Format::Mp4 ? QStringLiteral("mp4") : QStringLiteral("gif"))
                         .arg(started).arg(rec.framesWritten()).arg(QFileInfo(out).size()).arg(err + rec.lastError()).toUtf8());
         }
+    }
+    if (qEnvironmentVariableIsSet("QINGYING_SMOKE_UPDATE")) {
+        QNetworkAccessManager net;
+        QNetworkRequest req(QUrl(QString::fromLatin1(Updater::kLatestApi)));
+        req.setHeader(QNetworkRequest::UserAgentHeader, QStringLiteral("QingYing-smoke"));
+        QNetworkReply* rep = net.get(req);
+        QEventLoop loop;
+        QObject::connect(rep, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+        QTimer::singleShot(20000, &loop, &QEventLoop::quit);
+        loop.exec();
+        Updater::Release rel;
+        const bool parsed = Updater::parse(rep->readAll(), &rel);
+        f.write(QStringLiteral("tls_backends=%1 active=%2\nupdate_http=%3 err=%4 parsed=%5 tag=%6 setup=%7 sums=%8 portable=%9\n")
+                    .arg(QSslSocket::availableBackends().join(QLatin1Char(',')), QSslSocket::activeBackend())
+                    .arg(rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt())
+                    .arg(rep->errorString()).arg(parsed).arg(rel.tag, rel.setupName)
+                    .arg(!rel.sumsUrl.isEmpty()).arg(Updater::isPortable()).toUtf8());
+        rep->deleteLater();
     }
     f.write(QStringLiteral("theme=%1 dark=%2 system_dark=%3\n").arg(Settings::theme()).arg(Theme::isDark()).arg(Theme::systemIsDark()).toUtf8());
     const QString qrPath = qEnvironmentVariable("QINGYING_SMOKE_QR");

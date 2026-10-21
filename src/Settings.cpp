@@ -80,6 +80,11 @@ void setRecordFps(int fps) { store().setValue("recordFps", fps); }
 bool recordCursor() { return store().value("recordCursor", true).toBool(); }
 void setRecordCursor(bool on) { store().setValue("recordCursor", on); }
 
+bool autoUpdate() { return store().value("autoUpdate", true).toBool(); }
+void setAutoUpdate(bool on) { store().setValue("autoUpdate", on); }
+QDateTime lastUpdateCheck() { return store().value("lastUpdateCheck").toDateTime(); }
+void setLastUpdateCheck(const QDateTime& t) { store().setValue("lastUpdateCheck", t); }
+
 QString theme()
 {
     const QString t = store().value("theme", QStringLiteral("system")).toString();
