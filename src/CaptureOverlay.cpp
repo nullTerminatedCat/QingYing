@@ -44,7 +44,7 @@ CaptureOverlay::CaptureOverlay(QScreen* screen, const QImage& shot, const QRect&
     const int block = qMax(6, int(10 * m_dpr));
     m_mosaic = m_raw.scaled(qMax(1, m_raw.width() / block), qMax(1, m_raw.height() / block),
                             Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    m_color = Style::annotationColors().first();
+    m_color = Style::annotationColors().value(Settings::defaultColor(), Style::annotationColors().first());
 
     setAttribute(Qt::WA_DeleteOnClose, false);
     setMouseTracking(true);
@@ -424,12 +424,31 @@ void CaptureOverlay::doSave(bool saveAs)
     emit finished();
 }
 
+void CaptureOverlay::presetSelection(const QRect& local, bool pinResult)
+{
+    m_pinResult = pinResult;
+    m_sel = QRectF(local.x() / m_dpr, local.y() / m_dpr, local.width() / m_dpr, local.height() / m_dpr).toAlignedRect().intersected(rect());
+    m_state = State::Selected;
+    m_hover = {};
+    emit selectionStarted(this);
+    placeBars();
+    applyDefaultTool();
+    update();
+}
+
+void CaptureOverlay::applyDefaultTool()
+{
+    const int t = Settings::defaultTool();
+    if (t > 0 && m_tool == Tool::None && (m_mode == CaptureMode::Normal)) setTool(Tool(t));
+}
+
 void CaptureOverlay::doPin()
 {
     if (m_state != State::Selected) return;
     if (m_editing) commitText();
     const QImage img = renderResult();
     emit delivered(img, QString());
+    emit pinned();
     auto* pin = new PinWindow(img);
     pin->placeImageAt(mapToGlobal(m_sel.topLeft()));
     pin->show();
@@ -450,6 +469,7 @@ void CaptureOverlay::doDefault()
         emit finished();
         return;
     }
+    if (m_pinResult) return doPin();
     const QString a = Settings::defaultAction();
     if (a == QLatin1String("save")) doSave(false);
     else if (a == QLatin1String("pin")) doPin();
@@ -643,6 +663,7 @@ void CaptureOverlay::mouseReleaseEvent(QMouseEvent* e)
         m_state = State::Selected;
         m_hover = {};
         placeBars();
+        applyDefaultTool();
     } else if (m_drawing) {
         m_drawing = false;
         if (m_cur.isValid()) pushAnnotation(m_cur);

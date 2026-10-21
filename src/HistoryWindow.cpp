@@ -16,6 +16,7 @@
 #include <QListWidget>
 #include <QMessageBox>
 #include <QPushButton>
+#include "EditRequest.h"
 #include <QUrl>
 #include <QVBoxLayout>
 
@@ -52,12 +53,14 @@ HistoryWindow::HistoryWindow(QWidget* parent) : QDialog(parent)
     auto* row = new QHBoxLayout;
     auto* folder = new QPushButton(QCoreApplication::translate("QingYing", "打开文件夹"), this);
     auto* clear = new QPushButton(QCoreApplication::translate("QingYing", "清空"), this);
+    auto* edit = new QPushButton(QCoreApplication::translate("QingYing", "编辑标注"), this);
     auto* copy = new QPushButton(QCoreApplication::translate("QingYing", "复制"), this);
     auto* pin = new QPushButton(QCoreApplication::translate("QingYing", "钉在桌面"), this);
     pin->setObjectName(QStringLiteral("primary"));
     row->addWidget(folder);
     row->addWidget(clear);
     row->addStretch();
+    row->addWidget(edit);
     row->addWidget(copy);
     row->addWidget(pin);
     root->addLayout(row);
@@ -75,6 +78,12 @@ HistoryWindow::HistoryWindow(QWidget* parent) : QDialog(parent)
     connect(copy, &QPushButton::clicked, this, [this] {
         const QString p = currentPath();
         if (!p.isEmpty()) QGuiApplication::clipboard()->setImage(QImage(p));
+    });
+    connect(edit, &QPushButton::clicked, this, [this] {
+        const QString p = currentPath();
+        if (p.isEmpty()) return;
+        hide(); // 不让历史窗口挡住编辑
+        EditRequest::request(QImage(p), QPoint(), false, nullptr);
     });
     auto doPin = [this] {
         const QString p = currentPath();

@@ -57,6 +57,7 @@ qt_add_executable(QingYing WIN32
     src/Secret.cpp src/Secret.h
     src/Uploader.cpp src/Uploader.h
     src/Logic.cpp src/Logic.h
+    src/EditRequest.cpp src/EditRequest.h
     resources/QingYing.rc
 )
 # 界面翻译：源码为简体中文，en_US 编译为 .qm 嵌入资源 :/i18n

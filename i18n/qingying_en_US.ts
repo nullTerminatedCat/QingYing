@@ -38,6 +38,10 @@
 Click to open the containing folder</translation>
     </message>
     <message>
+        <source>%1保存一次全屏截图到 %2</source>
+        <translation>%1, a full-screen capture is saved to %2</translation>
+    </message>
+    <message>
         <source>&lt;b&gt;青影 %1 已发布&lt;/b&gt;（当前 %2）</source>
         <translation>&lt;b&gt;QingYing %1 is available&lt;/b&gt; (current %2)</translation>
     </message>
@@ -136,6 +140,10 @@ Click to open the containing folder</translation>
     <message>
         <source>保存钉图</source>
         <translation>Save pin</translation>
+    </message>
+    <message>
+        <source>停止定时截图</source>
+        <translation>Stop timed capture</translation>
     </message>
     <message>
         <source>停止并保存（Esc）</source>
@@ -250,6 +258,14 @@ Actual: %2</translation>
         <translation>Done  Enter (default action in Settings)</translation>
     </message>
     <message>
+        <source>定时截图</source>
+        <translation>Timed capture</translation>
+    </message>
+    <message>
+        <source>定时截图已开始</source>
+        <translation>Timed capture started</translation>
+    </message>
+    <message>
         <source>密钥使用 Windows DPAPI 加密保存，仅当前用户可解密</source>
         <translation>Secrets are encrypted with Windows DPAPI and can only be decrypted by the current user</translation>
     </message>
@@ -288,6 +304,10 @@ Actual: %2</translation>
     <message>
         <source>常规</source>
         <translation>General</translation>
+    </message>
+    <message>
+        <source>序号</source>
+        <translation>Number</translation>
     </message>
     <message>
         <source>序号  N</source>
@@ -430,12 +450,20 @@ Actual: %2</translation>
         <translation>File field</translation>
     </message>
     <message>
+        <source>文字</source>
+        <translation>Text</translation>
+    </message>
+    <message>
         <source>文字  T</source>
         <translation>Text  T</translation>
     </message>
     <message>
         <source>文字识别</source>
         <translation>Text recognition</translation>
+    </message>
+    <message>
+        <source>无</source>
+        <translation>None</translation>
     </message>
     <message>
         <source>无法写入 %1</source>
@@ -498,6 +526,10 @@ Actual: %2</translation>
         <translation>Update check failed</translation>
     </message>
     <message>
+        <source>椭圆</source>
+        <translation>Ellipse</translation>
+    </message>
+    <message>
         <source>椭圆  E</source>
         <translation>Ellipse  E</translation>
     </message>
@@ -516,6 +548,14 @@ Actual: %2</translation>
     <message>
         <source>正在识别…</source>
         <translation>Recognizing…</translation>
+    </message>
+    <message>
+        <source>每 %1 分钟</source>
+        <translation>Every %1 min</translation>
+    </message>
+    <message>
+        <source>每 %1 秒</source>
+        <translation>Every %1 s</translation>
     </message>
     <message>
         <source>每行一个，如 Authorization: Bearer xxx</source>
@@ -554,8 +594,16 @@ Actual: %2</translation>
         <translation>Click the box and press a new combination, e.g. Ctrl+Alt+A</translation>
     </message>
     <message>
+        <source>画笔</source>
+        <translation>Pen</translation>
+    </message>
+    <message>
         <source>画笔  P</source>
         <translation>Pen  P</translation>
+    </message>
+    <message>
+        <source>矩形</source>
+        <translation>Rectangle</translation>
     </message>
     <message>
         <source>矩形  R</source>
@@ -594,6 +642,10 @@ Actual: %2</translation>
         <translation>A simple, good-looking screenshot tool for Windows.&lt;br&gt;Region capture · Annotation · Pins&lt;br&gt;&lt;br&gt;Built with Qt %1 · MIT License</translation>
     </message>
     <message>
+        <source>箭头</source>
+        <translation>Arrow</translation>
+    </message>
+    <message>
         <source>箭头  A</source>
         <translation>Arrow  A</translation>
     </message>
@@ -604,6 +656,14 @@ Actual: %2</translation>
     <message>
         <source>继续</source>
         <translation>Resume</translation>
+    </message>
+    <message>
+        <source>编辑标注</source>
+        <translation>Annotate</translation>
+    </message>
+    <message>
+        <source>编辑标注	E</source>
+        <translation>Annotate	E</translation>
     </message>
     <message>
         <source>自定义 HTTP</source>
@@ -754,6 +814,10 @@ Actual: %2</translation>
         <translation>QingYing · Update available</translation>
     </message>
     <message>
+        <source>青影 · 定时截图（%1）</source>
+        <translation>QingYing · Timed capture (%1)</translation>
+    </message>
+    <message>
         <source>青影 · 更新</source>
         <translation>QingYing · Update</translation>
     </message>
@@ -790,12 +854,20 @@ Actual: %2</translation>
         <translation>Preview: %1%2    {} holds a date format, e.g. {yyyyMMdd_HHmmss}</translation>
     </message>
     <message>
+        <source>马赛克</source>
+        <translation>Mosaic</translation>
+    </message>
+    <message>
         <source>马赛克  M</source>
         <translation>Mosaic  M</translation>
     </message>
     <message>
         <source>默认动作</source>
         <translation>Default action</translation>
+    </message>
+    <message>
+        <source>默认工具</source>
+        <translation>Default tool</translation>
     </message>
     <message>
         <source>（未找到）</source>

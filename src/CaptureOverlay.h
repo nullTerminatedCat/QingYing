@@ -79,6 +79,13 @@ private:
     void doUpload();
 public:
     void setMode(CaptureMode m) { m_mode = m; }
+    // 编辑模式：预先选中 localPhysical（相对本显示器的物理像素），pinResult=true 时完成动作改为钉图
+    void presetSelection(const QRect& localPhysical, bool pinResult);
+signals:
+    void pinned();
+private:
+    bool m_pinResult = false;
+    void applyDefaultTool();
 private:
     CaptureMode m_mode = CaptureMode::Normal;
     void copyHex();

@@ -12,6 +12,7 @@
 #include <QFileDialog>
 #include <QGuiApplication>
 #include <QMenu>
+#include "EditRequest.h"
 #include <QMessageBox>
 #include <QPainter>
 #include <QPainterPath>
@@ -200,6 +201,7 @@ void PinWindow::keyPressEvent(QKeyEvent* e)
     else if (e->matches(QKeySequence::Save)) save();
     else if (e->key() == Qt::Key_R) rotate((e->modifiers() & Qt::ShiftModifier) ? -90 : 90);
     else if (e->key() == Qt::Key_H) flip();
+    else if (e->key() == Qt::Key_E) EditRequest::request(m_img, mapToGlobal(imageRect().topLeft().toPoint()), true, this);
 }
 
 void PinWindow::enterEvent(QEnterEvent*)
@@ -220,6 +222,10 @@ void PinWindow::contextMenuEvent(QContextMenuEvent* e)
     QMenu menu(this);
     menu.addAction(menuIcon(Icon::Copy), QCoreApplication::translate("QingYing", "复制"), this, &PinWindow::copy);
     menu.addAction(menuIcon(Icon::Save), QCoreApplication::translate("QingYing", "另存为…"), this, &PinWindow::save);
+    if (EditRequest::available())
+        menu.addAction(menuIcon(Icon::Pen), QCoreApplication::translate("QingYing", "编辑标注\tE"), this, [this] {
+            EditRequest::request(m_img, mapToGlobal(imageRect().topLeft().toPoint()), true, this);
+        });
     menu.addAction(menuIcon(Icon::Ocr), QCoreApplication::translate("QingYing", "识别文字（OCR）"), this, [this] { Recognize::ocr(m_img); });
     menu.addAction(menuIcon(Icon::Qr), QCoreApplication::translate("QingYing", "识别二维码 / 条码"), this, [this] { Recognize::qr(m_img); });
     if (Settings::uploadEnabled())

@@ -32,6 +32,10 @@ bool recordCursor();
 void setRecordCursor(bool on);
 QString theme(); // system / light / dark
 void setTheme(const QString& t);
+int defaultTool(); // 0 无，1-7 对应 Tool 枚举
+void setDefaultTool(int t);
+int defaultColor(); // 调色板下标
+void setDefaultColor(int i);
 QString language(); // system / zh_CN / en_US
 void setLanguage(const QString& l);
 QString effectiveLanguage(); // zh_CN 或 en_US

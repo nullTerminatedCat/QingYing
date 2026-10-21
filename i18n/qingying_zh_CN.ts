@@ -37,6 +37,10 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>%1保存一次全屏截图到 %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>&lt;b&gt;青影 %1 已发布&lt;/b&gt;（当前 %2）</source>
         <translation type="unfinished"></translation>
     </message>
@@ -134,6 +138,10 @@
     </message>
     <message>
         <source>保存钉图</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>停止定时截图</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -247,6 +255,14 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>定时截图</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>定时截图已开始</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>密钥使用 Windows DPAPI 加密保存，仅当前用户可解密</source>
         <translation type="unfinished"></translation>
     </message>
@@ -284,6 +300,10 @@
     </message>
     <message>
         <source>常规</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>序号</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -427,11 +447,19 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>文字</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>文字  T</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>文字识别</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>无</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -495,6 +523,10 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>椭圆</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>椭圆  E</source>
         <translation type="unfinished"></translation>
     </message>
@@ -512,6 +544,14 @@
     </message>
     <message>
         <source>正在识别…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>每 %1 分钟</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>每 %1 秒</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -551,7 +591,15 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>画笔</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>画笔  P</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>矩形</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -589,6 +637,10 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>箭头</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>箭头  A</source>
         <translation type="unfinished"></translation>
     </message>
@@ -598,6 +650,14 @@
     </message>
     <message>
         <source>继续</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>编辑标注</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>编辑标注	E</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -749,6 +809,10 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>青影 · 定时截图（%1）</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>青影 · 更新</source>
         <translation type="unfinished"></translation>
     </message>
@@ -785,11 +849,19 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>马赛克</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>马赛克  M</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>默认动作</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>默认工具</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

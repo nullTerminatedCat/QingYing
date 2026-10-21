@@ -1,6 +1,7 @@
 #include <QCoreApplication>
 #include "Theme.h"
 #include "App.h"
+#include "EditRequest.h"
 #include "CaptureOverlay.h"
 #include "History.h"
 #include "HistoryWindow.h"
@@ -71,6 +72,20 @@ App::App()
     QMenu* delay = m_menu->addMenu(menuIcon(Icon::Clock), QCoreApplication::translate("QingYing", "延时截图"));
     for (int s : {3, 5, 10})
         delay->addAction(QCoreApplication::translate("QingYing", "%1 秒后").arg(s), this, [this, s] { startDelayedCapture(s); });
+    m_timedMenu = m_menu->addMenu(menuIcon(Icon::Clock), QCoreApplication::translate("QingYing", "定时截图"));
+    for (int s : {10, 30, 60, 300}) {
+        QAction* a = m_timedMenu->addAction(s < 60 ? QCoreApplication::translate("QingYing", "每 %1 秒").arg(s) : QCoreApplication::translate("QingYing", "每 %1 分钟").arg(s / 60), this, [this, s] { startTimedCapture(s); });
+        a->setCheckable(true);
+        a->setData(s);
+    }
+    m_timedMenu->addSeparator();
+    m_timedMenu->addAction(QCoreApplication::translate("QingYing", "停止定时截图"), this, [this] { startTimedCapture(0); })->setData(0);
+    connect(m_timedMenu, &QMenu::aboutToShow, this, [this] {
+        for (QAction* a : m_timedMenu->actions()) {
+            if (a->isCheckable()) a->setChecked(a->data().toInt() == m_timedSeconds);
+            else if (!a->isSeparator()) a->setEnabled(m_timedSeconds > 0);
+        }
+    });
     m_menu->addAction(menuIcon(Icon::Scroll), QCoreApplication::translate("QingYing", "长截图（滚动）"), this,
                       [this] { QTimer::singleShot(180, this, [this] { startCapture(int(CaptureMode::LongShot)); }); });
     m_menu->addAction(menuIcon(Icon::Picker), QCoreApplication::translate("QingYing", "取色"), this,
@@ -95,6 +110,8 @@ App::App()
     m_menu->addSeparator();
     m_menu->addAction(QCoreApplication::translate("QingYing", "退出"), qApp, &QApplication::quit);
     connect(m_menu, &QMenu::aboutToShow, this, &App::updateMenu);
+
+    EditRequest::setHandler([this](const QImage& img, const QPoint& pos, bool hasPos, QWidget* src) { editImage(img, pos, hasPos, src); });
 
     m_tray = new QSystemTrayIcon(appIcon(), this);
     m_tray->setContextMenu(m_menu);
@@ -137,6 +154,26 @@ void App::writeSmokeReport()
 {
     const QString path = qEnvironmentVariable("QINGYING_SMOKE_REPORT");
     if (path.isEmpty()) return;
+    if (qEnvironmentVariableIsSet("QINGYING_SMOKE_EDIT")) {
+        // 钉图编辑流程自检：编辑 → 原钉图隐藏、出现预选遮罩 → 取消 → 原钉图恢复
+        QImage img(240, 160, QImage::Format_RGB32);
+        img.fill(QColor(0x4F, 0x6B, 0xFF));
+        auto* pin = new PinWindow(img);
+        pin->placeImageAt(QPoint(200, 200));
+        pin->show();
+        QTimer::singleShot(600, this, [this, pin, path] {
+            EditRequest::request(pin->grab().toImage(), QPoint(200, 200), true, pin);
+            QTimer::singleShot(1200, this, [this, pin, path] {
+                QFile f(path);
+                const bool during = !m_overlays.isEmpty() && !pin->isVisible();
+                const QString dbg = QStringLiteral("overlays=%1 pin_visible=%2 busy=%3 handler=%4").arg(m_overlays.size()).arg(pin->isVisible()).arg(m_busy).arg(EditRequest::available());
+                endCapture();
+                if (f.open(QIODevice::Append | QIODevice::Text))
+                    f.write(QStringLiteral("edit_overlay=%1 edit_restored=%2 %3\n").arg(during).arg(pin->isVisible()).arg(dbg).toUtf8());
+                pin->close();
+            });
+        });
+    }
     QFile f(path);
     if (f.open(QIODevice::WriteOnly | QIODevice::Text))
         f.write(QStringLiteral("tray_available=%1\ntray_visible=%2\nhotkey=%3\nhotkey_registered=%4\nscreens=%5\n")
@@ -373,8 +410,41 @@ void App::startCapture(int mode)
         img.setDevicePixelRatio(qreal(mon.width()) / s->geometry().width());
         shots.append({s, mon, img});
     }
+    // 编辑模式：把待编辑图片画到目标屏幕的冻结画面上，并预先选中该区域
+    int editIndex = -1;
+    QRect editLocal;
+    if (m_edit.pending) {
+        m_edit.pending = false;
+        const QPoint anchor = m_edit.hasPos ? m_edit.pos : QCursor::pos();
+        for (int i = 0; i < shots.size(); ++i)
+            if (shots[i].screen->geometry().contains(anchor)) editIndex = i;
+        if (editIndex < 0 && !shots.isEmpty()) editIndex = 0;
+        if (editIndex >= 0) {
+            Shot& sh = shots[editIndex];
+            const qreal dpr = sh.image.devicePixelRatio();
+            QImage img = m_edit.image.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+            img.setDevicePixelRatio(1);
+            const QSize monSize = sh.image.size();
+            if (img.width() > monSize.width() || img.height() > monSize.height()) // 比屏幕大：缩小到可完整显示
+                img = img.scaled(monSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            QPoint local = m_edit.hasPos ? ((anchor - sh.screen->geometry().topLeft()) * dpr)
+                                         : QPoint((monSize.width() - img.width()) / 2, (monSize.height() - img.height()) / 2);
+            local.setX(qBound(0, local.x(), monSize.width() - img.width()));
+            local.setY(qBound(0, local.y(), monSize.height() - img.height()));
+            editLocal = QRect(local, img.size());
+            QImage canvas = sh.image;
+            canvas.setDevicePixelRatio(1);
+            {
+                QPainter p(&canvas);
+                p.drawImage(local, img);
+            }
+            canvas.setDevicePixelRatio(dpr);
+            sh.image = canvas;
+        }
+    }
     CaptureOverlay* under = nullptr;
-    for (const Shot& sh : shots) {
+    for (int idx = 0; idx < shots.size(); ++idx) {
+        const Shot& sh = shots[idx];
         auto* o = new CaptureOverlay(sh.screen, sh.image, sh.monitor, &m_detector);
         connect(o, &CaptureOverlay::finished, this, &App::endCapture, Qt::QueuedConnection);
         o->setMode(CaptureMode(mode));
@@ -398,14 +468,84 @@ void App::startCapture(int mode)
         });
         m_overlays.append(o);
         o->show();
-        if (sh.screen->geometry().contains(QCursor::pos())) under = o;
+        if (editIndex >= 0) {
+            if (idx == editIndex) {
+                connect(o, &CaptureOverlay::pinned, this, [this] { m_edit.pinned = true; });
+                o->presetSelection(editLocal, !m_edit.source.isNull());
+                under = o;
+            }
+        } else if (sh.screen->geometry().contains(QCursor::pos())) {
+            under = o;
+        }
     }
     if (!under && !m_overlays.isEmpty()) under = m_overlays.first();
     if (under) under->activate();
 }
 
+void App::editImage(const QImage& image, const QPoint& pos, bool hasPos, QWidget* source)
+{
+    if (!m_overlays.isEmpty() || m_busy || image.isNull()) return;
+    m_edit = Edit();
+    m_edit.pending = true;
+    m_edit.image = image;
+    m_edit.pos = pos;
+    m_edit.hasPos = hasPos;
+    m_edit.source = source;
+    if (source) source->hide(); // 冻结画面前先隐藏原钉图
+    QTimer::singleShot(source ? 200 : 120, this, [this] {
+        startCapture();
+        if (m_overlays.isEmpty()) { // 未能进入编辑（如设置窗口打开中）：恢复原状
+            if (m_edit.source) m_edit.source->show();
+            m_edit = Edit();
+        }
+    });
+}
+
+void App::startTimedCapture(int seconds)
+{
+    m_timedSeconds = seconds;
+    if (!m_timed) {
+        m_timed = new QTimer(this);
+        connect(m_timed, &QTimer::timeout, this, &App::timedTick);
+    }
+    if (seconds <= 0) {
+        m_timed->stop();
+        m_tray->setToolTip(QCoreApplication::translate("QingYing", "青影"));
+        return;
+    }
+    m_timed->start(seconds * 1000);
+    const QString every = seconds < 60 ? QCoreApplication::translate("QingYing", "每 %1 秒").arg(seconds)
+                                       : QCoreApplication::translate("QingYing", "每 %1 分钟").arg(seconds / 60);
+    m_tray->setToolTip(QCoreApplication::translate("QingYing", "青影 · 定时截图（%1）").arg(every));
+    m_tray->showMessage(QCoreApplication::translate("QingYing", "定时截图已开始"),
+                        QCoreApplication::translate("QingYing", "%1保存一次全屏截图到 %2").arg(every, QDir::toNativeSeparators(Settings::saveDir())),
+                        appIcon(), 3000);
+}
+
+void App::timedTick()
+{
+    if (!m_overlays.isEmpty()) return; // 正在截图时跳过本次
+    const QList<QScreen*> screens = QGuiApplication::screens();
+    const QString base = Settings::defaultFilePath();
+    for (int i = 0; i < screens.size(); ++i) {
+        const QImage img = ScreenGrabber::grab(ScreenGrabber::monitorRect(screens[i]));
+        if (img.isNull()) continue;
+        QFileInfo fi(base);
+        QString path = screens.size() > 1 ? fi.dir().filePath(QStringLiteral("%1_%2.%3").arg(fi.completeBaseName()).arg(i + 1).arg(fi.suffix())) : base;
+        for (int n = 2; QFileInfo::exists(path); ++n) // 同一秒内多次截图不覆盖
+            path = fi.dir().filePath(QStringLiteral("%1 (%2).%3").arg(QFileInfo(path).completeBaseName().section(QStringLiteral(" ("), 0, 0)).arg(n).arg(fi.suffix()));
+        if (Settings::saveImage(img, path)) History::add(img);
+    }
+    if (m_history) m_history->reload();
+}
+
 void App::endCapture()
 {
+    if (m_edit.source) { // 编辑钉图结束：钉了新图则关闭旧钉图，否则恢复显示
+        if (m_edit.pinned) m_edit.source->close();
+        else m_edit.source->show();
+    }
+    m_edit = Edit();
     const auto list = m_overlays;
     m_overlays.clear();
     for (const auto& o : list)

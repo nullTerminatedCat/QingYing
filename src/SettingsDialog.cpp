@@ -1,3 +1,7 @@
+#include "Style.h"
+#include <QIcon>
+#include <QPixmap>
+#include <QPainter>
 #include <QCoreApplication>
 #include "Theme.h"
 #include "SettingsDialog.h"
@@ -168,6 +172,33 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, Q
     m_colorFmt->addItem(QStringLiteral("79, 107, 255"), QStringLiteral("rgbplain"));
     m_colorFmt->setCurrentIndex(qMax(0, m_colorFmt->findData(Settings::colorFormat())));
     h->addWidget(m_colorFmt);
+    h->addStretch();
+    h = row(b, QCoreApplication::translate("QingYing", "默认工具"));
+    m_defTool = new QComboBox(this);
+    {
+        const QStringList names = {QCoreApplication::translate("QingYing", "无"), QCoreApplication::translate("QingYing", "矩形"),
+                                   QCoreApplication::translate("QingYing", "椭圆"), QCoreApplication::translate("QingYing", "箭头"),
+                                   QCoreApplication::translate("QingYing", "画笔"), QCoreApplication::translate("QingYing", "文字"),
+                                   QCoreApplication::translate("QingYing", "马赛克"), QCoreApplication::translate("QingYing", "序号")};
+        for (const QString& n : names) m_defTool->addItem(n);
+    }
+    m_defTool->setCurrentIndex(Settings::defaultTool());
+    h->addWidget(m_defTool);
+    m_defColor = new QComboBox(this);
+    const QList<QColor> palette = Style::annotationColors();
+    for (int i = 0; i < palette.size(); ++i) {
+        QPixmap sw(14, 14);
+        sw.fill(Qt::transparent);
+        QPainter sp(&sw);
+        sp.setRenderHint(QPainter::Antialiasing);
+        sp.setPen(QColor(0, 0, 0, 60));
+        sp.setBrush(palette[i]);
+        sp.drawEllipse(QRectF(1, 1, 12, 12));
+        sp.end();
+        m_defColor->addItem(QIcon(sw), palette[i].name().toUpper());
+    }
+    m_defColor->setCurrentIndex(qBound(0, Settings::defaultColor(), int(palette.size()) - 1));
+    h->addWidget(m_defColor);
     h->addStretch();
     h = row(b, QCoreApplication::translate("QingYing", "历史记录"));
     m_history = new QSpinBox(this);
@@ -350,6 +381,8 @@ void SettingsDialog::save()
                                      QCoreApplication::translate("QingYing", "语言设置将在重启青影后生效。"));
     }
     Settings::setColorFormat(m_colorFmt->currentData().toString());
+    Settings::setDefaultTool(m_defTool->currentIndex());
+    Settings::setDefaultColor(m_defColor->currentIndex());
     Settings::setRecordFps(m_fps->checkedId() > 0 ? m_fps->checkedId() : 15);
     Settings::setRecordCursor(m_recCursor->isChecked());
     accept();

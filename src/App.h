@@ -2,6 +2,7 @@
 #include "HotkeyManager.h"
 #include "WindowDetector.h"
 
+#include <QImage>
 #include <QList>
 #include <QObject>
 #include <QPointer>
@@ -9,7 +10,8 @@
 class CaptureOverlay;
 class HistoryWindow;
 class QAction;
-class QImage;
+class QTimer;
+class QWidget;
 class QMenu;
 class QSystemTrayIcon;
 class SettingsDialog;
@@ -22,6 +24,9 @@ public:
     ~App() override;
 
     void startCapture(int mode = 0);
+    // 在编辑器中重新标注图片（钉图 / 历史记录）
+    void editImage(const QImage& image, const QPoint& logicalTopLeft, bool hasPosition, QWidget* source);
+    void startTimedCapture(int seconds); // 0 停止
     void startDelayedCapture(int seconds);
     void startLongShot(const QRect& physicalRegion);
     void startRecording(const QRect& physicalRegion);
@@ -52,4 +57,16 @@ private:
     Updater* m_updater = nullptr;
     bool m_recordGif = false;
     QString m_lastRecording;
+    struct Edit {
+        bool pending = false;
+        QImage image;
+        QPoint pos;
+        bool hasPos = false;
+        QPointer<QWidget> source;
+        bool pinned = false;
+    } m_edit;
+    QTimer* m_timed = nullptr;
+    int m_timedSeconds = 0;
+    QMenu* m_timedMenu = nullptr;
+    void timedTick();
 };
