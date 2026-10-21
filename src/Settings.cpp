@@ -1,0 +1,97 @@
+#include "Settings.h"
+
+#include <QCoreApplication>
+#include <QDateTime>
+#include <QDir>
+#include <QFileInfo>
+#include <QImage>
+#include <QRegularExpression>
+#include <QSettings>
+#include <QStandardPaths>
+
+namespace {
+QSettings& store()
+{
+    static QSettings s(QStringLiteral("QingYing"), QStringLiteral("QingYing"));
+    return s;
+}
+const char* kRunKey = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run";
+}
+
+namespace Settings {
+QKeySequence defaultHotkey() { return QKeySequence(QStringLiteral("Ctrl+Alt+A")); }
+
+QKeySequence hotkey()
+{
+    const QString s = store().value("hotkey", defaultHotkey().toString()).toString();
+    QKeySequence k(s);
+    return k.isEmpty() ? defaultHotkey() : k;
+}
+void setHotkey(const QKeySequence& seq) { store().setValue("hotkey", seq.toString()); }
+
+QString saveDir()
+{
+    const QString def = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation) + QStringLiteral("/QingYing");
+    return store().value("saveDir", def).toString();
+}
+void setSaveDir(const QString& dir) { store().setValue("saveDir", dir); }
+
+QString filePattern() { return store().value("filePattern", QStringLiteral("QingYing_{yyyyMMdd_HHmmss}")).toString(); }
+void setFilePattern(const QString& p) { store().setValue("filePattern", p); }
+
+QString format()
+{
+    const QString f = store().value("format", QStringLiteral("png")).toString().toLower();
+    return f == QLatin1String("jpg") ? f : QStringLiteral("png");
+}
+void setFormat(const QString& fmt) { store().setValue("format", fmt.toLower()); }
+
+bool autostart()
+{
+    QSettings run(QString::fromLatin1(kRunKey), QSettings::NativeFormat);
+    return run.contains(QStringLiteral("QingYing"));
+}
+void setAutostart(bool on)
+{
+    QSettings run(QString::fromLatin1(kRunKey), QSettings::NativeFormat);
+    if (on)
+        run.setValue(QStringLiteral("QingYing"),
+                     QStringLiteral("\"%1\"").arg(QDir::toNativeSeparators(QCoreApplication::applicationFilePath())));
+    else
+        run.remove(QStringLiteral("QingYing"));
+}
+
+QString expandPattern(const QString& pattern)
+{
+    const QDateTime now = QDateTime::currentDateTime();
+    QString out = pattern;
+    static const QRegularExpression re(QStringLiteral("\\{([^}]*)\\}"));
+    auto it = re.globalMatch(pattern);
+    QList<QPair<QString, QString>> reps;
+    while (it.hasNext()) {
+        const auto m = it.next();
+        reps.append({m.captured(0), now.toString(m.captured(1))});
+    }
+    for (const auto& r : reps) out.replace(r.first, r.second);
+    static const QRegularExpression bad(QStringLiteral("[\\\\/:*?\"<>|]"));
+    out.replace(bad, QStringLiteral("_"));
+    out = out.trimmed();
+    return out.isEmpty() ? now.toString(QStringLiteral("'QingYing_'yyyyMMdd_HHmmss")) : out;
+}
+
+QString defaultFilePath()
+{
+    return QDir(saveDir()).filePath(expandPattern(filePattern()) + QLatin1Char('.') + format());
+}
+
+bool saveImage(const QImage& img, const QString& path)
+{
+    QDir().mkpath(QFileInfo(path).absolutePath());
+    const QString suffix = QFileInfo(path).suffix().toLower();
+    const bool jpg = suffix == QLatin1String("jpg") || suffix == QLatin1String("jpeg");
+    QImage out = img;
+    out.setDevicePixelRatio(1);
+    if (jpg) out = out.convertToFormat(QImage::Format_RGB32);
+    return out.save(path, jpg ? "JPG" : "PNG", jpg ? 95 : -1);
+}
+}
