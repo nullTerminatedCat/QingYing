@@ -4,7 +4,7 @@
 
 简洁、好看的 Windows 桌面截图工具。靛蓝主色、悬浮圆角工具条，只在需要时出现二级选项。
 
-> 当前版本：0.4.1（第一至四期：截图、效率、智能、打磨，以及稳定性与体验改进）。完整规划见 [PRODUCT_PLAN.md](PRODUCT_PLAN.md)，界面设计稿见 [docs/design](docs/design)。
+> 当前版本：0.5.0（第一至四期：截图、效率、智能、打磨；另含 OCR 结果翻译）。完整规划见 [PRODUCT_PLAN.md](PRODUCT_PLAN.md)，界面设计稿见 [docs/design](docs/design)。
 
 ## 功能
 
@@ -26,6 +26,7 @@
 - **长截图（滚动）**：框选后点工具条「长截图」或按 `L`（或托盘「长截图」后框选再按 Enter），自动向选区发送滚轮并按重叠区域拼接；单击鼠标或 `Esc` 停止，到底自动停止，然后选择复制 / 保存 / 钉图
 - **截图历史**：每次复制 / 保存 / 钉图都会存入历史（默认保留 20 张）；托盘「最近截图」快速复制，「历史记录…」窗口可复制、钉图、打开文件夹、清空
 - **文字识别（OCR）**：框选后点工具条「识别文字」或按 `O`，也可在钉图右键菜单中识别；基于 Windows 自带的离线 OCR（Windows.Media.Ocr），优先简体中文，结果可编辑、保留换行、一键复制
+- **OCR 结果翻译**：识别面板可一键译成中文或英文（自动判断方向），使用 MyMemory 公开接口、无需密钥；设置 → 截图中可关闭；支持还原原文与失败提示
 - **二维码 / 条码识别**：框选后点「识别二维码」或按 `Q`（钉图右键菜单同样可用）；支持 QR、Data Matrix、PDF417、EAN、Code128 等；识别到网址时可确认后在浏览器打开
 - **取色器**：托盘「取色」，在冻结屏幕上用放大镜定位，单击或按 `C` 复制颜色；格式可选 `#4F6BFF` / `#4f6bff` / `rgb(79, 107, 255)` / `79, 107, 255`
 - **录屏 / GIF**：托盘「录屏」→「录制 MP4」或「录制 GIF」，框选区域后按 Enter 开始；悬浮迷你控制条可暂停 / 继续 / 停止并显示计时，控制条和虚线框不会被录进画面；`Esc` 停止；帧率 10 / 15 / 30 可设，可选录制鼠标指针；优先使用 Desktop Duplication（DXGI）抓帧，CPU 占用低，不可用时自动回退 GDI；录制指针按 DXGI 帧信息绘制（形状、热点与位置均为物理像素）；GIF 在后台线程编码、合并静止帧，使用中位切分自适应调色板（约每 2 秒或场景切换时重建），可在设置中开启 Floyd–Steinberg 抖动减少色带；控制条显示文件大小估计；文件保存到设置的保存位置
@@ -116,7 +117,7 @@ src/
   PinWindow.*         钉图窗口与钉图管理
   ScrollCapture.*     滚动长截图与拼接
   History.* HistoryWindow.*  截图历史
-  Ocr.* QrDecoder.* Recognize.* ResultDialog.*  OCR / 二维码识别与结果面板
+  Ocr.* QrDecoder.* Recognize.* ResultDialog.* Translator.*  OCR / 二维码 / 翻译与结果面板
   Recorder.* RecordSession.*  录屏（MP4 / GIF）与控制条
 third_party/gif/      gif.h（公有领域）
   SettingsDialog.*    设置窗口（侧栏导航、即时生效）
@@ -146,7 +147,7 @@ QingYing (青影) is a simple, good-looking screenshot tool for Windows: an indi
 - Annotations: rectangle, ellipse, arrow, pen, text, mosaic, and numbered steps, with undo and redo
 - Output: copy, quick save (`Ctrl+S`), save as, and pin to desktop (`F3`); pins can be zoomed, made translucent, rotated, and flipped
 - Scrolling capture (`L`), delayed capture, and capture history
-- Offline OCR (`O`, via Windows.Media.Ocr) and QR / barcode scanning (`Q`, via ZXing-cpp)
+- Offline OCR (`O`, via Windows.Media.Ocr) with optional online translation (MyMemory, no API key; toggle in Settings), and QR / barcode scanning (`Q`, via ZXing-cpp)
 - Color picker, plus MP4 / GIF screen recording (Desktop Duplication with GDI fallback)
 - Re-annotate a pin (`E`) or a history item; default tool and color; timed full-screen capture
 - Light, dark, or follow-system themes

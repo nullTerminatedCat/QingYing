@@ -30,3 +30,7 @@ Source code for Qt is available at https://download.qt.io.
 ## gif.h
 
 gif.h by Charlie Tangora is released into the public domain.
+
+## MyMemory Translation API
+
+OCR 结果的可选联网翻译默认调用 [MyMemory](https://mymemory.translated.net/) 的公开 HTTP 接口（`api.mymemory.translated.net`），无需 API Key。该服务有免费额度限制；可在设置 → 截图 →「联网翻译 OCR 结果」中关闭。请求仅发送用户选中的识别文本，不上传截图图片。

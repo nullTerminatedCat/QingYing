@@ -220,6 +220,18 @@ private slots:
         QCOMPARE(int(dst[4]), 155); // 掩码 FF：异或
     }
 
+
+    void mostlyCjk()
+    {
+        // 用 UTF-8 字面量，避免源文件编码导致中文损坏；用例保证 CJK/拉丁数量不暧昧
+        QVERIFY(Logic::mostlyCjk(QString::fromUtf8(u8"你好世界")));
+        QVERIFY(Logic::mostlyCjk(QString::fromUtf8(u8"简体中文测试文本")));
+        QVERIFY(Logic::mostlyCjk(QString::fromUtf8(u8"中文主体内容 with ok")));
+        QVERIFY(!Logic::mostlyCjk(QStringLiteral("Hello World")));
+        QVERIFY(!Logic::mostlyCjk(QStringLiteral("ABC 123")));
+        QVERIFY(!Logic::mostlyCjk(QString()));
+        QVERIFY(!Logic::mostlyCjk(QString::fromUtf8(u8"Hello 你好"))); // 5 latin vs 2 cjk
+    }
 };
 
 QTEST_GUILESS_MAIN(TestLogic)

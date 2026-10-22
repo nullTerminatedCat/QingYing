@@ -20,4 +20,6 @@ QString expectedSha256(const QString& sums, const QString& fileName);
 QString sha256Hex(const QByteArray& data);
 // 按 a.b.0.c 路径取 JSON 字符串值
 QString jsonValue(const QByteArray& json, const QString& path);
+// 字母数字中中日韩占比是否更高（用于翻译方向建议）
+bool mostlyCjk(const QString& text);
 }

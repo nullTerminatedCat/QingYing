@@ -86,6 +86,8 @@ void setRecordCursor(bool on) { store().setValue("recordCursor", on); }
 
 bool uploadEnabled() { return store().value("upload/enabled", false).toBool(); }
 void setUploadEnabled(bool on) { store().setValue("upload/enabled", on); }
+bool translateEnabled() { return store().value("translate/enabled", true).toBool(); }
+void setTranslateEnabled(bool on) { store().setValue("translate/enabled", on); }
 Uploads::Config uploadConfig()
 {
     Uploads::Config c;

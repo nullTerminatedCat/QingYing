@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(QingYing VERSION 0.4.2 LANGUAGES CXX)
+project(QingYing VERSION 0.5.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -47,6 +47,7 @@ qt_add_executable(QingYing WIN32
     src/HistoryWindow.cpp src/HistoryWindow.h
     src/ScrollCapture.cpp src/ScrollCapture.h
     src/ResultDialog.cpp src/ResultDialog.h
+    src/Translator.cpp src/Translator.h
     src/Ocr.cpp src/Ocr.h
     src/Recognize.cpp src/Recognize.h
     src/QrDecoder.cpp src/QrDecoder.h

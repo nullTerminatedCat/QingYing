@@ -49,6 +49,8 @@ QDateTime lastUpdateCheck();
 void setLastUpdateCheck(const QDateTime& t);
 bool uploadEnabled();
 void setUploadEnabled(bool on);
+bool translateEnabled(); // OCR 结果联网翻译，默认开
+void setTranslateEnabled(bool on);
 Uploads::Config uploadConfig(); // 密钥经 DPAPI 解密
 void setUploadConfig(const Uploads::Config& c); // 密钥经 DPAPI 加密后保存
 QString expandPattern(const QString& pattern);

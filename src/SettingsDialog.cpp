@@ -451,6 +451,15 @@ QWidget* SettingsDialog::buildCapture()
         Settings::setColorFormat(cf->currentData().toString());
         emit changed();
     });
+
+    c = addCard(b, QCoreApplication::translate("QingYing", "识别与翻译"));
+    addRow(c, QCoreApplication::translate("QingYing", "联网翻译 OCR 结果"),
+           QCoreApplication::translate("QingYing", "识别面板提供译成中文 / 英文；使用 MyMemory 公开接口，无需密钥，可随时关闭"),
+           toggle(Settings::translateEnabled(), [this](bool on) {
+               Settings::setTranslateEnabled(on);
+               emit changed();
+           }));
+
     b->addStretch();
     updatePreview();
     return w;

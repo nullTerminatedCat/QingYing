@@ -13,6 +13,7 @@ namespace Recognize {
 void ocr(const QImage& image)
 {
     auto* dlg = new ResultDialog(QCoreApplication::translate("QingYing", "文字识别"));
+    dlg->setTranslateEnabled(true);
     dlg->setStatus(QCoreApplication::translate("QingYing", "正在识别…"));
     dlg->show();
     dlg->raise();

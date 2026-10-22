@@ -139,4 +139,18 @@ QString jsonValue(const QByteArray& json, const QString& path)
     return v.isString() ? v.toString() : QString();
 }
 
+bool mostlyCjk(const QString& text)
+{
+    int cjk = 0, latin = 0;
+    for (QChar ch : text) {
+        const uint u = ch.unicode();
+        if ((u >= 0x2E80 && u <= 0x9FFF) || (u >= 0xF900 && u <= 0xFAFF) || (u >= 0xFF00 && u <= 0xFFEF)
+            || (u >= 0x3000 && u <= 0x303F))
+            ++cjk;
+        else if ((u >= 'A' && u <= 'Z') || (u >= 'a' && u <= 'z'))
+            ++latin;
+    }
+    if (cjk == 0 && latin == 0) return false;
+    return cjk >= latin;
+}
 }
