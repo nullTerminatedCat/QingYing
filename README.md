@@ -4,7 +4,7 @@
 
 简洁、好看的 Windows 桌面截图工具。靛蓝主色、悬浮圆角工具条，只在需要时出现二级选项。
 
-> 当前版本：0.5.2（第一至四期 + OCR 翻译；本版修复检查更新无反馈）。完整规划见 [PRODUCT_PLAN.md](PRODUCT_PLAN.md)，界面设计稿见 [docs/design](docs/design)。
+> 当前版本：0.6.0（长截图固定栏拼接、分段缓冲、保存失败恢复与结果快捷键）。完整规划见 [PRODUCT_PLAN.md](PRODUCT_PLAN.md)，界面设计稿见 [docs/design](docs/design)。
 
 ## 功能
 
@@ -23,7 +23,7 @@
 - **历史再编辑**：历史记录窗口「编辑标注」，在屏幕中央打开编辑器
 - **延时截图**：托盘「延时截图」→ 3 / 5 / 10 秒
 - **定时截图**：托盘「定时截图」→ 每 10 秒 / 30 秒 / 1 分钟 / 5 分钟自动保存全屏截图（多显示器各存一张）到保存位置，再选「停止定时截图」结束
-- **长截图（滚动）**：框选后点工具条「长截图」或按 `L`（或托盘「长截图」后框选再按 Enter），自动向选区发送滚轮并按重叠区域拼接；单击鼠标或 `Esc` 停止，到底自动停止，然后选择复制 / 保存 / 钉图
+- **长截图（滚动）**：框选后点工具条「长截图」或按 `L`（或托盘「长截图」后框选再按 Enter），自动向选区发送滚轮并按重叠区域拼接；识别静态固定顶栏 / 底栏，最终各保留一份；单击鼠标或 `Esc` 停止，到底自动停止。分段存储新增内容，预览只绘制最新部分，并显示帧数与像素尺寸。停止后支持复制（`Ctrl+C` / `Enter`）、保存（`Ctrl+S`）、另存为（`Ctrl+Shift+S`）和钉图（`F3`）；保存失败会保留窗口与长图，可重试或更换位置
 - **截图历史**：每次复制 / 保存 / 钉图都会存入历史（默认保留 20 张）；托盘「最近截图」快速复制，「历史记录…」窗口可复制、钉图、打开文件夹、清空
 - **文字识别（OCR）**：框选后点工具条「识别文字」或按 `O`，也可在钉图右键菜单中识别；基于 Windows 自带的离线 OCR（Windows.Media.Ocr），优先简体中文，结果可编辑、保留换行、一键复制
 - **OCR 结果翻译**：识别面板可一键译成中文或英文（自动判断方向），使用 MyMemory 公开接口、无需密钥；设置 → 截图中可关闭；支持还原原文与失败提示
@@ -71,7 +71,7 @@
 - 选区暂不支持跨显示器：每块屏幕独立冻结并按各自 DPI 显示。若把各屏拼成一张物理像素虚拟桌面，混合 DPI（如 100% + 150%）下遮罩在其中一块屏幕上必然被缩放，放大镜与标注无法做到像素精确，因此保留按屏选区。需要跨屏内容时可分别截图，或使用定时截图保存每块屏幕。
 - 录屏：Desktop Duplication 不支持旋转屏、跨显示器选区及部分远程桌面场景，这些情况自动使用 GDI（CPU 占用较高）；GIF 最多 256 色，大面积渐变即使开启抖动也会有颗粒感，适合短小片段；暂不录音。
 - 钉图 / 历史再编辑时，比屏幕大的图片会先缩小到屏幕大小。
-- 长截图依赖目标程序响应鼠标滚轮；带固定底栏、动画或视差效果的页面可能拼接不准。
+- 长截图依赖目标程序响应鼠标滚轮；支持保持静止且不透明的固定顶栏 / 底栏，动态或半透明悬浮栏、动画、视差和大量重复内容仍可能无法对齐。匹配失败时先等待当前画面稳定，连续失败后停止并保留已捕获内容。输出上限为 30,000 像素高或 64 Mi 像素（RGB32 图像约 256 MiB）；达到上限时保留当前结果，不再追加。
 
 ## 诊断
 
@@ -98,6 +98,8 @@ GitHub Actions 会在每次推送时于 windows-latest 构建并上传 `QingYing
 
 单元测试：`ctest --test-dir build`（QtTest，覆盖拼接位移、文件名规则、取色格式、版本比较、SHA256SUMS 解析、JSON 路径），CI 每次推送都会运行。
 
+长图性能基准：`build/qingying_scroll_bench.exe`（需要 Qt DLL 在可执行文件目录或 PATH 中）。对比 v0.5.2 的整图拷贝 / 缩放循环与分段缓冲 / 局部预览，包含最终合成并验证像素一致，不包含屏幕抓取、滚动等待与位移匹配；耗时受机器负载影响。
+
 打包（需要 Inno Setup 6）：`powershell -ExecutionPolicy Bypass -File scripts/package.ps1`，产物在 `dist/`。推送 `v*` 标签时 GitHub Actions 会自动构建并发布 Release。
 
 产物：`build/QingYing.exe`（构建后自动运行 windeployqt 部署 Qt 运行库）。
@@ -116,6 +118,7 @@ src/
   ToolBars.*          悬浮工具条与样式条
   PinWindow.*         钉图窗口与钉图管理
   ScrollCapture.*     滚动长截图与拼接
+  ScrollStitcher.*    固定栏匹配、分段长图缓冲与局部预览
   History.* HistoryWindow.*  截图历史
   Ocr.* QrDecoder.* Recognize.* ResultDialog.* Translator.*  OCR / 二维码 / 翻译与结果面板
   Recorder.* RecordSession.*  录屏（MP4 / GIF）与控制条
@@ -146,7 +149,7 @@ QingYing (青影) is a simple, good-looking screenshot tool for Windows: an indi
 - Region capture that freezes every monitor at native DPI, detects windows and controls (`Tab`), and shows a pixel magnifier
 - Annotations: rectangle, ellipse, arrow, pen, text, mosaic, and numbered steps, with undo and redo
 - Output: copy, quick save (`Ctrl+S`), save as, and pin to desktop (`F3`); pins can be zoomed, made translucent, rotated, and flipped
-- Scrolling capture (`L`), delayed capture, and capture history
+- Scrolling capture (`L`) with static fixed header/footer handling, incremental image buffering and a live size/frame counter; copy (`Ctrl+C` / Enter), save (`Ctrl+S`), save as (`Ctrl+Shift+S`) or pin (`F3`) after capture. Failed saves keep the image available for retry. Delayed capture and capture history are also supported.
 - Offline OCR (`O`, via Windows.Media.Ocr) with optional online translation (MyMemory, no API key; toggle in Settings), and QR / barcode scanning (`Q`, via ZXing-cpp)
 - Color picker, plus MP4 / GIF screen recording (Desktop Duplication with GDI fallback)
 - Re-annotate a pin (`E`) or a history item; default tool and color; timed full-screen capture

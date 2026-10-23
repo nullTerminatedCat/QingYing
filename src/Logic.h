@@ -8,7 +8,7 @@
 
 // 不依赖界面与设置的纯逻辑，便于单元测试（tests/）
 namespace Logic {
-// 长截图：返回 cur 相对 prev 向上滚动的像素数；无法可靠匹配返回 -1，完全相同返回 0
+// 长截图：忽略固定顶 / 底栏返回滚动位移；无法可靠匹配返回 -1，内容未变返回 0
 int findShift(const QImage& prev, const QImage& cur);
 // 文件名规则：{} 内按 QDateTime 格式展开，并替换 Windows 文件名非法字符
 QString expandPattern(const QString& pattern, const QDateTime& now);

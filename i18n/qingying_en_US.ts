@@ -73,6 +73,7 @@ Click to open the containing folder</translation>
     <message>
         <location filename="../src/CaptureOverlay.cpp" line="-450"/>
         <location filename="../src/PinWindow.cpp" line="+255"/>
+        <location filename="../src/ScrollCapture.cpp" line="+265"/>
         <source>JPG 图片 (*.jpg *.jpeg)</source>
         <translation>JPG image (*.jpg *.jpeg)</translation>
     </message>
@@ -94,6 +95,7 @@ Click to open the containing folder</translation>
     <message>
         <location filename="../src/CaptureOverlay.cpp" line="+0"/>
         <location filename="../src/PinWindow.cpp" line="+0"/>
+        <location filename="../src/ScrollCapture.cpp" line="-1"/>
         <source>PNG 图片 (*.png)</source>
         <translation>PNG image (*.png)</translation>
     </message>
@@ -165,7 +167,7 @@ Click to open the containing folder</translation>
         <translation>QR / barcode</translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="+107"/>
+        <location filename="../src/ScrollCapture.cpp" line="-157"/>
         <location filename="../src/SettingsDialog.cpp" line="+14"/>
         <location line="+65"/>
         <source>保存</source>
@@ -265,7 +267,7 @@ Click to open the containing folder</translation>
         <translation>Original size</translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="+9"/>
+        <location filename="../src/ScrollCapture.cpp" line="+10"/>
         <location filename="../src/Updater.cpp" line="-35"/>
         <source>取消</source>
         <translation>Cancel</translation>
@@ -292,6 +294,8 @@ Click to open the containing folder</translation>
     </message>
     <message>
         <location line="-384"/>
+        <location filename="../src/ScrollCapture.cpp" line="-2"/>
+        <location line="+160"/>
         <source>另存为</source>
         <translation>Save as</translation>
     </message>
@@ -307,7 +311,7 @@ Click to open the containing folder</translation>
         <location filename="../src/ResultDialog.cpp" line="-52"/>
         <location line="+11"/>
         <location line="+42"/>
-        <location filename="../src/ScrollCapture.cpp" line="-3"/>
+        <location filename="../src/ScrollCapture.cpp" line="-162"/>
         <location filename="../src/SettingsDialog.cpp" line="-13"/>
         <source>复制</source>
         <translation>Copy</translation>
@@ -387,17 +391,47 @@ Actual: %2</translation>
         <translation>The installer will be downloaded and its SHA-256 verified; then it will launch and QingYing will quit.</translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="+7"/>
-        <location line="+8"/>
-        <location line="+43"/>
-        <location line="+93"/>
+        <location filename="../src/ScrollCapture.cpp" line="+18"/>
+        <location line="+19"/>
+        <location line="+46"/>
+        <location line="+115"/>
         <source>已停止</source>
         <translation>Stopped</translation>
     </message>
     <message>
-        <location line="-74"/>
+        <location line="-127"/>
+        <source>无法截取选区，请重新选择或缩小范围</source>
+        <translation>Could not capture this region. Select a smaller area and try again.</translation>
+    </message>
+    <message>
+        <location line="+32"/>
         <source>已到底部</source>
         <translation>Reached the bottom</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>已达到长图大小上限，已保留当前结果</source>
+        <translation>Image size limit reached. Your captured content has been kept.</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>无法继续拼接，已保留当前结果</source>
+        <translation>Could not continue stitching. Your captured content has been kept.</translation>
+    </message>
+    <message>
+        <location line="+30"/>
+        <source>内存不足，请关闭其他程序后重试；当前长图仍保留</source>
+        <translation>Not enough memory. Close other programs and retry. Your capture is still available.</translation>
+    </message>
+    <message>
+        <location line="+18"/>
+        <source>保存失败，长图已保留。请重试或使用“另存为”更换位置。</source>
+        <translation>Save failed. Your capture is still available. Retry or choose a different location with Save as.</translation>
+    </message>
+    <message>
+        <location line="+18"/>
+        <source>正在滚动截取 · %1 帧 · %2×%3</source>
+        <translation>Capturing · %1 frames · %2×%3</translation>
     </message>
     <message>
         <location filename="../src/ResultDialog.cpp" line="-5"/>
@@ -470,11 +504,6 @@ Actual: %2</translation>
         <location filename="../src/Updater.cpp" line="-125"/>
         <source>已是最新版本</source>
         <translation>You&apos;re up to date</translation>
-    </message>
-    <message>
-        <location filename="../src/ScrollCapture.cpp" line="+19"/>
-        <source>已达到最大高度</source>
-        <translation>Maximum height reached</translation>
     </message>
     <message>
         <location filename="../src/SettingsDialog.cpp" line="-128"/>
@@ -692,7 +721,7 @@ Actual: %2</translation>
         <translation>Cannot launch the installer</translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="-14"/>
+        <location filename="../src/ScrollCapture.cpp" line="-74"/>
         <source>无法对齐画面，已停止（内容可能在变化）</source>
         <translation>Could not align frames; stopped (content may be changing)</translation>
     </message>
@@ -767,7 +796,7 @@ Actual: %2</translation>
         <translation>Downloading %1 …</translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="-96"/>
+        <location filename="../src/ScrollCapture.cpp" line="-125"/>
         <source>正在滚动截取…</source>
         <translation>Scrolling capture…</translation>
     </message>
@@ -1032,7 +1061,7 @@ Actual: %2</translation>
     <message>
         <location filename="../src/App.cpp" line="-14"/>
         <location line="+199"/>
-        <location filename="../src/ScrollCapture.cpp" line="+16"/>
+        <location filename="../src/ScrollCapture.cpp" line="+17"/>
         <location filename="../src/SettingsDialog.cpp" line="+42"/>
         <source>钉图</source>
         <translation>Pin</translation>
@@ -1136,7 +1165,7 @@ Actual: %2</translation>
         <translation>QingYing pin</translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="-27"/>
+        <location filename="../src/ScrollCapture.cpp" line="-28"/>
         <source>青影 长截图</source>
         <translation>QingYing scrolling capture</translation>
     </message>

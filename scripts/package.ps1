@@ -74,7 +74,11 @@ if (!$Iscc) {
 if (!$Iscc) { throw 'Inno Setup 6 (ISCC.exe) not found' }
 & $Iscc "/DAppSourceDir=$payload" "/DAppVersion=$version" "/DAppArchitecture=$arch" "/DOutputDirectory=$out" installer/QingYing.iss | Out-Host
 if ($LASTEXITCODE -ne 0) { throw "ISCC failed: $LASTEXITCODE" }
-Remove-Item -Recurse -Force $stage
+$resolvedStage = (Resolve-Path -LiteralPath $stage).Path
+if ((Split-Path -Parent $resolvedStage) -ne $out -or (Split-Path -Leaf $resolvedStage) -notlike 'staging-*') {
+    throw "Refusing to clean a staging directory outside the output directory: $resolvedStage"
+}
+Remove-Item -LiteralPath $resolvedStage -Recurse -Force
 
 $sums = foreach ($f in @($setup, $zip)) { "{0}  {1}" -f (Get-FileHash $f -Algorithm SHA256).Hash.ToLower(), (Split-Path $f -Leaf) }
 $sums | Set-Content (Join-Path $out "SHA256SUMS-$version-$arch.txt") -Encoding ASCII

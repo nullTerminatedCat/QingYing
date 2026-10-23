@@ -72,6 +72,7 @@
     <message>
         <location filename="../src/CaptureOverlay.cpp" line="412"/>
         <location filename="../src/PinWindow.cpp" line="255"/>
+        <location filename="../src/ScrollCapture.cpp" line="265"/>
         <source>JPG 图片 (*.jpg *.jpeg)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -93,6 +94,7 @@
     <message>
         <location filename="../src/CaptureOverlay.cpp" line="412"/>
         <location filename="../src/PinWindow.cpp" line="255"/>
+        <location filename="../src/ScrollCapture.cpp" line="264"/>
         <source>PNG 图片 (*.png)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -264,7 +266,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="109"/>
+        <location filename="../src/ScrollCapture.cpp" line="110"/>
         <location filename="../src/Updater.cpp" line="244"/>
         <source>取消</source>
         <translation type="unfinished"></translation>
@@ -291,6 +293,8 @@
     </message>
     <message>
         <location filename="../src/CaptureOverlay.cpp" line="415"/>
+        <location filename="../src/ScrollCapture.cpp" line="108"/>
+        <location filename="../src/ScrollCapture.cpp" line="268"/>
         <source>另存为</source>
         <translation type="unfinished"></translation>
     </message>
@@ -384,16 +388,46 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="113"/>
-        <location filename="../src/ScrollCapture.cpp" line="121"/>
-        <location filename="../src/ScrollCapture.cpp" line="164"/>
-        <location filename="../src/ScrollCapture.cpp" line="257"/>
+        <location filename="../src/ScrollCapture.cpp" line="124"/>
+        <location filename="../src/ScrollCapture.cpp" line="143"/>
+        <location filename="../src/ScrollCapture.cpp" line="189"/>
+        <location filename="../src/ScrollCapture.cpp" line="304"/>
         <source>已停止</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="183"/>
+        <location filename="../src/ScrollCapture.cpp" line="177"/>
+        <source>无法截取选区，请重新选择或缩小范围</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ScrollCapture.cpp" line="209"/>
         <source>已到底部</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ScrollCapture.cpp" line="224"/>
+        <source>已达到长图大小上限，已保留当前结果</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ScrollCapture.cpp" line="225"/>
+        <source>无法继续拼接，已保留当前结果</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ScrollCapture.cpp" line="255"/>
+        <source>内存不足，请关闭其他程序后重试；当前长图仍保留</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ScrollCapture.cpp" line="273"/>
+        <source>保存失败，长图已保留。请重试或使用“另存为”更换位置。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ScrollCapture.cpp" line="291"/>
+        <source>正在滚动截取 · %1 帧 · %2×%3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -466,11 +500,6 @@
     <message>
         <location filename="../src/Updater.cpp" line="103"/>
         <source>已是最新版本</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ScrollCapture.cpp" line="202"/>
-        <source>已达到最大高度</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -689,7 +718,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="188"/>
+        <location filename="../src/ScrollCapture.cpp" line="217"/>
         <source>无法对齐画面，已停止（内容可能在变化）</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1027,7 +1056,7 @@
     <message>
         <location filename="../src/App.cpp" line="196"/>
         <location filename="../src/App.cpp" line="395"/>
-        <location filename="../src/ScrollCapture.cpp" line="108"/>
+        <location filename="../src/ScrollCapture.cpp" line="109"/>
         <location filename="../src/SettingsDialog.cpp" line="436"/>
         <source>钉图</source>
         <translation type="unfinished"></translation>

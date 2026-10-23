@@ -2,6 +2,7 @@
 #include <QImage>
 #include <QTimer>
 #include <QWidget>
+#include "ScrollStitcher.h"
 
 class QLabel;
 class QPushButton;
@@ -33,6 +34,7 @@ private:
     QRect m_region;
     QImage m_result;
     QImage m_last;
+    ScrollStitcher::Buffer m_buffer;
     QTimer m_timer;
     int m_stillCount = 0;
     int m_failCount = 0;
@@ -43,5 +45,6 @@ private:
     QLabel* m_status;
     QPushButton* m_stop;
     QWidget* m_actions;
+    QList<QPushButton*> m_exports;
     HotkeyManager* m_esc;
 };

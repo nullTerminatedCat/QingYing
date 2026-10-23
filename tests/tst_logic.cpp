@@ -1,9 +1,11 @@
 #include "../src/Logic.h"
 #include "../src/CursorBlend.h"
 #include "../src/GifPalette.h"
+#include "../src/ScrollStitcher.h"
 #include <cmath>
 
 #include <QTest>
+#include <QPainter>
 
 class TestLogic : public QObject {
     Q_OBJECT
@@ -14,6 +16,16 @@ private:
         for (int y = 0; y < h; ++y)
             for (int x = 0; x < w; ++x) img.setPixel(x, y, qRgb((x * 7 + y * 13) % 251, (y * y) % 253, (x ^ y) & 255));
         return img;
+    }
+
+    static QImage viewport(const QImage& page, int offset, int top, int bottom, int height = 400)
+    {
+        QImage frame(page.width(), height, QImage::Format_RGB32);
+        QPainter p(&frame);
+        if (top) p.drawImage(0, 0, texture(page.width(), top));
+        p.drawImage(0, top, page.copy(0, offset, page.width(), height - top - bottom));
+        if (bottom) p.drawImage(0, height - bottom, texture(page.width(), bottom).mirrored());
+        return frame;
     }
 
 private slots:
@@ -41,6 +53,132 @@ private slots:
         QImage flat(300, 400, QImage::Format_RGB32);
         flat.fill(Qt::white);
         QCOMPARE(Logic::findShift(flat, flat), -1); // 纯色无法判断
+    }
+
+    void fixedChrome_data()
+    {
+        QTest::addColumn<int>("top");
+        QTest::addColumn<int>("bottom");
+        QTest::newRow("no chrome") << 0 << 0;
+        QTest::newRow("fixed header") << 80 << 0;
+        QTest::newRow("fixed footer") << 0 << 70;
+        QTest::newRow("header and footer") << 80 << 70;
+        QTest::newRow("small scrolling body") << 150 << 160;
+    }
+    void fixedChrome()
+    {
+        QFETCH(int, top);
+        QFETCH(int, bottom);
+        const QImage page = texture(300, 3000);
+        QImage last = viewport(page, 0, top, bottom);
+        ScrollStitcher::Buffer buffer;
+        QVERIFY(buffer.reset(last));
+        int offset = 0;
+        for (const int shift : {37, 17, 1, 42, 5, 21}) {
+            offset += shift;
+            const QImage current = viewport(page, offset, top, bottom);
+            const auto m = ScrollStitcher::match(last, current);
+            QCOMPARE(m.shift, shift);
+            QCOMPARE(m.fixedTop, top);
+            QCOMPARE(m.fixedBottom, bottom);
+            QCOMPARE(buffer.append(current, m), ScrollStitcher::Buffer::AppendResult::Added);
+            // Compare every pixel, including seams and a single copy of each fixed bar.
+            QCOMPARE(buffer.image(), viewport(page, 0, top, bottom, 400 + offset));
+            last = current;
+        }
+        QCOMPARE(buffer.frameCount(), 7);
+        QCOMPARE(ScrollStitcher::match(last, last).shift, 0);
+        QCOMPARE(buffer.preview(QSize(300, 100)), buffer.image().copy(0, buffer.size().height() - 100, 300, 100));
+        QCOMPARE(buffer.preview(QSize(90, 120)).size(), QSize(90, 120));
+        QVERIFY(buffer.preview(QSize()).isNull());
+    }
+
+    void scrollingBlankMargins()
+    {
+        // White margins next to chrome can be detected as fixed; they must not drop text rows.
+        QImage page = texture(300, 1800);
+        {
+            QPainter p(&page);
+            for (int y = 0; y < page.height(); y += 100) p.fillRect(0, y, 300, 25, Qt::white);
+        }
+        QImage last = viewport(page, 0, 60, 40);
+        ScrollStitcher::Buffer buffer;
+        QVERIFY(buffer.reset(last));
+        for (int offset = 10; offset <= 500; offset += 10) {
+            const QImage current = viewport(page, offset, 60, 40);
+            const auto m = ScrollStitcher::match(last, current);
+            QCOMPARE(m.shift, 10);
+            QCOMPARE(buffer.append(current, m), ScrollStitcher::Buffer::AppendResult::Added);
+            QCOMPARE(buffer.image(), viewport(page, 0, 60, 40, 400 + offset));
+            last = current;
+        }
+    }
+
+    void scrollingLimitsPreserveResult()
+    {
+        const QImage page = texture(300, 900);
+        const QImage first = viewport(page, 0, 80, 70);
+        const QImage next = viewport(page, 37, 80, 70);
+        const auto m = ScrollStitcher::match(first, next);
+        using Result = ScrollStitcher::Buffer::AppendResult;
+        ScrollStitcher::Buffer heightLimited(420);
+        QVERIFY(heightLimited.reset(first));
+        QCOMPARE(heightLimited.append(next, m), Result::LimitReached);
+        QCOMPARE(heightLimited.image(), first);
+        QCOMPARE(heightLimited.frameCount(), 1);
+        ScrollStitcher::Buffer pixelLimited(30000, 300 * 436);
+        QVERIFY(pixelLimited.reset(first));
+        QCOMPARE(pixelLimited.append(next, m), Result::LimitReached);
+        QCOMPARE(pixelLimited.image(), first);
+        ScrollStitcher::Buffer exactLimit(437, 300 * 437);
+        QVERIFY(exactLimit.reset(first));
+        QCOMPARE(exactLimit.append(next, m), Result::Added);
+        QCOMPARE(exactLimit.image(), viewport(page, 0, 80, 70, 437));
+        QCOMPARE(exactLimit.append(next, m), Result::LimitReached);
+        QVERIFY(!exactLimit.reset(page));
+        QCOMPARE(exactLimit.size(), QSize(300, 437));
+    }
+
+    void scrollingInvalidInput()
+    {
+        using Result = ScrollStitcher::Buffer::AppendResult;
+        ScrollStitcher::Buffer buffer;
+        QVERIFY(buffer.isEmpty());
+        QVERIFY(buffer.image().isNull());
+        QVERIFY(!buffer.reset({}));
+        QCOMPARE(ScrollStitcher::match({}, {}).shift, -1);
+        QImage frame = texture(300, 400).convertToFormat(QImage::Format_RGBA8888);
+        frame.setDevicePixelRatio(2);
+        QVERIFY(buffer.reset(frame));
+        QCOMPARE(buffer.image().devicePixelRatio(), 1.0);
+        QCOMPARE(buffer.image().size(), QSize(300, 400));
+        QCOMPARE(buffer.append(frame, {-1, 0, 0}), Result::InvalidFrame);
+        QCOMPARE(buffer.append(frame, {0, 0, 0}), Result::InvalidFrame);
+        QCOMPARE(buffer.append(frame, {30, 0, -1}), Result::InvalidFrame);
+        QCOMPARE(buffer.append(frame, {30, 200, 200}), Result::InvalidFrame);
+        QCOMPARE(buffer.append(frame, {30, 0, 401}), Result::InvalidFrame);
+        QCOMPARE(buffer.append(frame.copy(0, 0, 299, 400), {30, 0, 0}), Result::InvalidFrame);
+        QCOMPARE(buffer.size(), QSize(300, 400));
+        QCOMPARE(buffer.frameCount(), 1);
+    }
+
+    void scrollingUnrelatedBody()
+    {
+        const QImage page = texture(300, 900);
+        const QImage a = viewport(page, 0, 100, 100);
+        QImage b = viewport(page, 0, 100, 100);
+        {
+            QPainter p(&b);
+            p.drawImage(0, 100, page.copy(0, 500, 300, 200).mirrored(true, false));
+        }
+        QCOMPARE(ScrollStitcher::match(a, b).shift, -1);
+        // A scrollbar moving independently is excluded from body matching.
+        b = viewport(page, 37, 100, 100);
+        {
+            QPainter p(&b);
+            p.fillRect(280, 0, 20, 400, Qt::red);
+        }
+        QCOMPARE(ScrollStitcher::match(a, b).shift, 37);
     }
 
     void expandPattern()

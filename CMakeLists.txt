@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(QingYing VERSION 0.5.2 LANGUAGES CXX)
+project(QingYing VERSION 0.6.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -46,6 +46,7 @@ qt_add_executable(QingYing WIN32
     src/History.cpp src/History.h
     src/HistoryWindow.cpp src/HistoryWindow.h
     src/ScrollCapture.cpp src/ScrollCapture.h
+    src/ScrollStitcher.cpp src/ScrollStitcher.h
     src/ResultDialog.cpp src/ResultDialog.h
     src/Translator.cpp src/Translator.h
     src/Ocr.cpp src/Ocr.h
@@ -107,7 +108,7 @@ option(QINGYING_BUILD_TESTS "Build unit tests" ON)
 if(QINGYING_BUILD_TESTS)
     find_package(Qt6 REQUIRED COMPONENTS Test)
     enable_testing()
-    qt_add_executable(qingying_tests tests/tst_logic.cpp src/Logic.cpp src/Logic.h src/CursorBlend.cpp src/CursorBlend.h src/GifPalette.cpp src/GifPalette.h)
+    qt_add_executable(qingying_tests tests/tst_logic.cpp src/Logic.cpp src/Logic.h src/ScrollStitcher.cpp src/ScrollStitcher.h src/CursorBlend.cpp src/CursorBlend.h src/GifPalette.cpp src/GifPalette.h)
     set_target_properties(qingying_tests PROPERTIES WIN32_EXECUTABLE OFF)
     target_link_libraries(qingying_tests PRIVATE Qt6::Gui Qt6::Test)
     if(MSVC)
@@ -115,4 +116,7 @@ if(QINGYING_BUILD_TESTS)
     endif()
     add_test(NAME logic COMMAND qingying_tests)
     set_tests_properties(logic PROPERTIES ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:${_qtbin}")
+    qt_add_executable(qingying_scroll_bench tests/bench_scroll.cpp src/ScrollStitcher.cpp src/ScrollStitcher.h)
+    set_target_properties(qingying_scroll_bench PROPERTIES WIN32_EXECUTABLE OFF)
+    target_link_libraries(qingying_scroll_bench PRIVATE Qt6::Gui)
 endif()
