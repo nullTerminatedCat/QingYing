@@ -80,6 +80,8 @@ private slots:
         QTest::newRow("build metadata") << "v0.4.0+ci.5" << "0.4.0" << false;
         QTest::newRow("garbage") << "nightly" << "0.4.0" << false;
         QTest::newRow("major") << "V2.0.0" << "1.9.9" << true;
+        QTest::newRow("from042") << "v0.5.1" << "0.4.2" << true;
+        QTest::newRow("from042to052") << "v0.5.2" << "0.4.2" << true;
     }
     void isNewerVersion()
     {
@@ -220,6 +222,17 @@ private slots:
         QCOMPARE(int(dst[4]), 155); // 掩码 FF：异或
     }
 
+
+
+    void tagFromReleaseUrl()
+    {
+        QCOMPARE(Logic::releaseTagFromUrl(QUrl(QStringLiteral("https://github.com/nullTerminatedCat/QingYing/releases/tag/v0.5.1"))),
+                 QStringLiteral("v0.5.1"));
+        QCOMPARE(Logic::releaseTagFromUrl(QUrl(QStringLiteral("https://github.com/a/b/releases/tag/0.5.2/"))),
+                 QStringLiteral("0.5.2"));
+        QVERIFY(Logic::releaseTagFromUrl(QUrl(QStringLiteral("https://github.com/a/b/releases"))).isEmpty());
+        QVERIFY(Logic::releaseTagFromUrl(QUrl(QStringLiteral("https://example.com/tag/v1"))).isEmpty());
+    }
 
     void mostlyCjk()
     {

@@ -4,6 +4,7 @@
 #include <QDateTime>
 #include <QImage>
 #include <QString>
+#include <QUrl>
 
 // 不依赖界面与设置的纯逻辑，便于单元测试（tests/）
 namespace Logic {
@@ -15,6 +16,8 @@ QString expandPattern(const QString& pattern, const QDateTime& now);
 QString formatColor(const QColor& c, const QString& format);
 // 语义化版本比较：tag 可带 v 前缀；预发布（-beta 等）低于同号正式版
 bool isNewerVersion(const QString& remoteTag, const QString& current);
+// 从 GitHub /releases/tag/vX.Y.Z URL 解析标签；失败返回空
+QString releaseTagFromUrl(const QUrl& url);
 // SHA256SUMS 文本中查找文件对应的哈希（小写）；找不到返回空
 QString expectedSha256(const QString& sums, const QString& fileName);
 QString sha256Hex(const QByteArray& data);

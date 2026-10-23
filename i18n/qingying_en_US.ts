@@ -51,7 +51,7 @@ Click to open the containing folder</translation>
         <translation>%1, a full-screen capture is saved to %2</translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="+113"/>
+        <location filename="../src/Updater.cpp" line="+223"/>
         <source>&lt;b&gt;青影 %1 已发布&lt;/b&gt;（当前 %2）</source>
         <translation>&lt;b&gt;QingYing %1 is available&lt;/b&gt; (current %2)</translation>
     </message>
@@ -139,7 +139,7 @@ Click to open the containing folder</translation>
         <translation>Upload is disabled</translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="+35"/>
+        <location filename="../src/Updater.cpp" line="+41"/>
         <location line="+15"/>
         <source>下载更新失败</source>
         <translation>Failed to download the update</translation>
@@ -163,11 +163,6 @@ Click to open the containing folder</translation>
         <location line="+13"/>
         <source>二维码 / 条码识别</source>
         <translation>QR / barcode</translation>
-    </message>
-    <message>
-        <location filename="../src/Updater.cpp" line="-49"/>
-        <source>你正在使用免安装版，将打开发布页下载新版本。</source>
-        <translation>You are using the portable build. The release page will open so you can download the new version.</translation>
     </message>
     <message>
         <location filename="../src/ScrollCapture.cpp" line="+107"/>
@@ -271,7 +266,7 @@ Click to open the containing folder</translation>
     </message>
     <message>
         <location filename="../src/ScrollCapture.cpp" line="+9"/>
-        <location filename="../src/Updater.cpp" line="+14"/>
+        <location filename="../src/Updater.cpp" line="-35"/>
         <source>取消</source>
         <translation>Cancel</translation>
     </message>
@@ -323,17 +318,42 @@ Click to open the containing folder</translation>
         <translation>Appearance</translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="-36"/>
-        <source>GitHub 接口调用过于频繁，请稍后再试（未登录时每小时约 60 次）</source>
-        <translation>GitHub API rate limit reached. Try again later (about 60 requests/hour when not signed in).</translation>
+        <location filename="../src/Updater.cpp" line="-140"/>
+        <source>当前版本 %1，无需更新。</source>
+        <translation>You are on version %1. No update needed.</translation>
     </message>
     <message>
-        <location line="+4"/>
-        <source>无法连接 GitHub，请检查网络</source>
-        <translation>Cannot reach GitHub. Check your network.</translation>
+        <location line="+30"/>
+        <source>无法连接 GitHub，请检查网络或稍后重试</source>
+        <translation>Cannot reach GitHub. Check your network or try again later.</translation>
     </message>
     <message>
-        <location line="+60"/>
+        <location line="+2"/>
+        <source>无法解析最新版本，请打开 GitHub 发布页手动下载</source>
+        <translation>Could not resolve the latest version. Open the GitHub Releases page to download manually.</translation>
+    </message>
+    <message>
+        <location line="+40"/>
+        <source>无法解析更新信息，请稍后重试或打开 GitHub 发布页</source>
+        <translation>Could not parse update info. Try again later or open the GitHub Releases page.</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>正在检查更新，请稍候…</source>
+        <translation>Already checking for updates, please wait…</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>正在检查更新…</source>
+        <translation>Checking for updates…</translation>
+    </message>
+    <message>
+        <location line="+30"/>
+        <source>将打开发布页下载新版本。</source>
+        <translation>The Releases page will open so you can download the new version.</translation>
+    </message>
+    <message>
+        <location line="+45"/>
         <source>安装包 SHA-256 校验失败，已放弃安装。
 期望：%1
 实际：%2</source>
@@ -342,7 +362,7 @@ Expected: %1
 Actual: %2</translation>
     </message>
     <message>
-        <location line="+12"/>
+        <location line="+13"/>
         <source>安装包已下载并通过校验。现在启动安装程序并退出青影吗？</source>
         <translation>The installer was downloaded and verified. Launch it and quit QingYing now?</translation>
     </message>
@@ -362,7 +382,7 @@ Actual: %2</translation>
         <translation>Timed capture started</translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="-53"/>
+        <location filename="../src/Updater.cpp" line="-57"/>
         <source>将下载安装包并校验 SHA-256，校验通过后启动安装程序并退出青影。</source>
         <translation>The installer will be downloaded and its SHA-256 verified; then it will launch and QingYing will quit.</translation>
     </message>
@@ -447,7 +467,7 @@ Actual: %2</translation>
         <translation>Color copied</translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="-12"/>
+        <location filename="../src/Updater.cpp" line="-125"/>
         <source>已是最新版本</source>
         <translation>You&apos;re up to date</translation>
     </message>
@@ -494,12 +514,7 @@ Actual: %2</translation>
         <translation>Start with Windows</translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="+0"/>
-        <source>当前版本 %1</source>
-        <translation>Current version %1</translation>
-    </message>
-    <message>
-        <location filename="../src/App.cpp" line="-10"/>
+        <location line="-10"/>
         <source>录制 GIF</source>
         <translation>Record GIF</translation>
     </message>
@@ -594,7 +609,7 @@ Actual: %2</translation>
         <translation>Open save folder</translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="+14"/>
+        <location filename="../src/Updater.cpp" line="+127"/>
         <source>打开发布页</source>
         <translation>Open release page</translation>
     </message>
@@ -657,7 +672,7 @@ Actual: %2</translation>
     </message>
     <message>
         <location filename="../src/Recorder.cpp" line="-302"/>
-        <location filename="../src/Updater.cpp" line="+46"/>
+        <location filename="../src/Updater.cpp" line="+50"/>
         <source>无法写入 %1</source>
         <translation>Cannot write %1</translation>
     </message>
@@ -672,7 +687,7 @@ Actual: %2</translation>
         <translation>Cannot create the MP4 file (0x%1)</translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="+11"/>
+        <location filename="../src/Updater.cpp" line="+12"/>
         <source>无法启动安装程序</source>
         <translation>Cannot launch the installer</translation>
     </message>
@@ -714,10 +729,6 @@ Actual: %2</translation>
         <translation>No QR code or barcode found. Select only the code area and make sure it is sharp.</translation>
     </message>
     <message>
-        <source>未识别到文字（语言：%1）</source>
-        <translation type="vanished">No text recognized (language: %1)</translation>
-    </message>
-    <message>
         <location filename="../src/SettingsDialog.cpp" line="-131"/>
         <source>格式</source>
         <translation>Format</translation>
@@ -725,11 +736,13 @@ Actual: %2</translation>
     <message>
         <location filename="../src/App.cpp" line="+7"/>
         <location filename="../src/SettingsDialog.cpp" line="+272"/>
+        <location filename="../src/Updater.cpp" line="-104"/>
         <source>检查更新</source>
         <translation>Check for updates</translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="-77"/>
+        <location filename="../src/Updater.cpp" line="-51"/>
+        <location line="+38"/>
         <source>检查更新失败</source>
         <translation>Update check failed</translation>
     </message>
@@ -749,7 +762,7 @@ Actual: %2</translation>
         <translation>Uploading…</translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="+31"/>
+        <location filename="../src/Updater.cpp" line="+68"/>
         <source>正在下载 %1 …</source>
         <translation>Downloading %1 …</translation>
     </message>
@@ -757,10 +770,6 @@ Actual: %2</translation>
         <location filename="../src/ScrollCapture.cpp" line="-96"/>
         <source>正在滚动截取…</source>
         <translation>Scrolling capture…</translation>
-    </message>
-    <message>
-        <source>正在识别…</source>
-        <translation type="vanished">Recognizing…</translation>
     </message>
     <message>
         <location filename="../src/App.cpp" line="-31"/>
@@ -864,7 +873,7 @@ Actual: %2</translation>
         <translation>Window/control</translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="-1"/>
+        <location filename="../src/Updater.cpp" line="-2"/>
         <source>立即更新</source>
         <translation>Update now</translation>
     </message>
@@ -1088,7 +1097,7 @@ Actual: %2</translation>
         <translation>QingYing · %1</translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="-7"/>
+        <location filename="../src/Updater.cpp" line="-11"/>
         <source>青影 · 发现新版本</source>
         <translation>QingYing · Update available</translation>
     </message>
@@ -1098,9 +1107,10 @@ Actual: %2</translation>
         <translation>QingYing · Timed capture (%1)</translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="+19"/>
+        <location filename="../src/Updater.cpp" line="-22"/>
+        <location line="+47"/>
         <location line="+26"/>
-        <location line="+12"/>
+        <location line="+13"/>
         <source>青影 · 更新</source>
         <translation>QingYing · Update</translation>
     </message>
@@ -1161,7 +1171,7 @@ Actual: %2</translation>
         <translation>Default tool</translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="-10"/>
+        <location filename="../src/Updater.cpp" line="-11"/>
         <source>（未找到）</source>
         <translation>(not found)</translation>
     </message>
@@ -1514,7 +1524,7 @@ Press the capture hotkey or click the tray icon to take one</translation>
     </message>
     <message>
         <location line="+3"/>
-        <location filename="../src/Updater.cpp" line="-63"/>
+        <location filename="../src/Updater.cpp" line="-142"/>
         <source>连接超时，请检查网络后重试</source>
         <translation>Connection timed out. Check your network and try again.</translation>
     </message>

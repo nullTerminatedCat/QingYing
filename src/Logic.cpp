@@ -104,6 +104,14 @@ bool isNewerVersion(const QString& remoteTag, const QString& current)
     return QString::compare(rp, cp) > 0;
 }
 
+
+QString releaseTagFromUrl(const QUrl& url)
+{
+    static const QRegularExpression re(QStringLiteral(R"(/releases/tag/(v?[\w.-]+)/?$)"));
+    const QRegularExpressionMatch m = re.match(url.path());
+    return m.hasMatch() ? m.captured(1) : QString();
+}
+
 QString expectedSha256(const QString& sums, const QString& fileName)
 {
     for (const QString& line : sums.split(QLatin1Char('\n'))) {

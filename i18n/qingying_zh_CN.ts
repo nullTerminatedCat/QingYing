@@ -50,7 +50,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="100"/>
+        <location filename="../src/Updater.cpp" line="223"/>
         <source>&lt;b&gt;青影 %1 已发布&lt;/b&gt;（当前 %2）</source>
         <translation type="unfinished"></translation>
     </message>
@@ -138,8 +138,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="135"/>
-        <location filename="../src/Updater.cpp" line="150"/>
+        <location filename="../src/Updater.cpp" line="264"/>
+        <location filename="../src/Updater.cpp" line="279"/>
         <source>下载更新失败</source>
         <translation type="unfinished"></translation>
     </message>
@@ -149,19 +149,24 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Recognize.cpp" line="43"/>
+        <location filename="../src/Recognize.cpp" line="18"/>
+        <source>正在识别，请稍候…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/Recognize.cpp" line="35"/>
+        <source>未识别到文字（语言：%1）。可换更清晰的选区再试。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/Recognize.cpp" line="48"/>
         <source>二维码 / 条码识别</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="101"/>
-        <source>你正在使用免安装版，将打开发布页下载新版本。</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
+        <location filename="../src/ScrollCapture.cpp" line="107"/>
         <location filename="../src/SettingsDialog.cpp" line="371"/>
         <location filename="../src/SettingsDialog.cpp" line="436"/>
-        <location filename="../src/ScrollCapture.cpp" line="107"/>
         <source>保存</source>
         <translation type="unfinished"></translation>
     </message>
@@ -192,6 +197,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../src/RecordSession.cpp" line="172"/>
+        <source>暂停 %1  %2 MB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../src/ScrollCapture.cpp" line="100"/>
         <source>停止（单击 / Esc）</source>
         <translation type="unfinished"></translation>
@@ -219,7 +229,7 @@
     </message>
     <message>
         <location filename="../src/PinWindow.cpp" line="242"/>
-        <location filename="../src/ResultDialog.cpp" line="69"/>
+        <location filename="../src/ResultDialog.cpp" line="133"/>
         <source>关闭</source>
         <translation type="unfinished"></translation>
     </message>
@@ -255,7 +265,7 @@
     </message>
     <message>
         <location filename="../src/ScrollCapture.cpp" line="109"/>
-        <location filename="../src/Updater.cpp" line="115"/>
+        <location filename="../src/Updater.cpp" line="244"/>
         <source>取消</source>
         <translation type="unfinished"></translation>
     </message>
@@ -290,12 +300,14 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../src/HistoryWindow.cpp" line="63"/>
+        <location filename="../src/HistoryWindow.cpp" line="91"/>
         <location filename="../src/PinWindow.cpp" line="223"/>
-        <location filename="../src/SettingsDialog.cpp" line="436"/>
-        <location filename="../src/HistoryWindow.cpp" line="62"/>
+        <location filename="../src/ResultDialog.cpp" line="81"/>
+        <location filename="../src/ResultDialog.cpp" line="92"/>
+        <location filename="../src/ResultDialog.cpp" line="134"/>
         <location filename="../src/ScrollCapture.cpp" line="106"/>
-        <location filename="../src/ResultDialog.cpp" line="70"/>
-        <location filename="../src/ResultDialog.cpp" line="85"/>
+        <location filename="../src/SettingsDialog.cpp" line="436"/>
         <source>复制</source>
         <translation type="unfinished"></translation>
     </message>
@@ -305,14 +317,49 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="143"/>
+        <location filename="../src/Updater.cpp" line="104"/>
+        <source>当前版本 %1，无需更新。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/Updater.cpp" line="134"/>
+        <source>无法连接 GitHub，请检查网络或稍后重试</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/Updater.cpp" line="136"/>
+        <source>无法解析最新版本，请打开 GitHub 发布页手动下载</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/Updater.cpp" line="176"/>
+        <source>无法解析更新信息，请稍后重试或打开 GitHub 发布页</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/Updater.cpp" line="189"/>
+        <source>正在检查更新，请稍候…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/Updater.cpp" line="197"/>
+        <source>正在检查更新…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/Updater.cpp" line="227"/>
+        <source>将打开发布页下载新版本。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/Updater.cpp" line="272"/>
         <source>安装包 SHA-256 校验失败，已放弃安装。
 期望：%1
 实际：%2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="155"/>
+        <location filename="../src/Updater.cpp" line="285"/>
         <source>安装包已下载并通过校验。现在启动安装程序并退出青影吗？</source>
         <translation type="unfinished"></translation>
     </message>
@@ -332,7 +379,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="102"/>
+        <location filename="../src/Updater.cpp" line="228"/>
         <source>将下载安装包并校验 SHA-256，校验通过后启动安装程序并退出青影。</source>
         <translation type="unfinished"></translation>
     </message>
@@ -350,63 +397,64 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ResultDialog.cpp" line="57"/>
+        <location filename="../src/ResultDialog.cpp" line="129"/>
         <source>翻译</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ResultDialog.cpp" line="58"/>
+        <location filename="../src/ResultDialog.cpp" line="130"/>
         <source>译成中文</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ResultDialog.cpp" line="59"/>
+        <location filename="../src/ResultDialog.cpp" line="131"/>
         <source>译成英文</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ResultDialog.cpp" line="60"/>
+        <location filename="../src/ResultDialog.cpp" line="132"/>
         <source>还原原文</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ResultDialog.cpp" line="82"/>
+        <location filename="../src/HistoryWindow.cpp" line="89"/>
+        <location filename="../src/ResultDialog.cpp" line="145"/>
         <source>已复制</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ResultDialog.cpp" line="110"/>
+        <location filename="../src/ResultDialog.cpp" line="117"/>
         <source>已还原为识别原文，可继续编辑或重新翻译</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ResultDialog.cpp" line="141"/>
-        <location filename="../src/Translator.cpp" line="147"/>
+        <location filename="../src/ResultDialog.cpp" line="178"/>
+        <location filename="../src/Translator.cpp" line="172"/>
         <source>没有可翻译的文字</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ResultDialog.cpp" line="146"/>
+        <location filename="../src/ResultDialog.cpp" line="189"/>
         <source>正在翻译…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ResultDialog.cpp" line="153"/>
+        <location filename="../src/ResultDialog.cpp" line="196"/>
         <source>翻译失败：%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ResultDialog.cpp" line="159"/>
+        <location filename="../src/ResultDialog.cpp" line="202"/>
         <source>已译成%1 · 可编辑后复制，或点“还原原文”</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ResultDialog.cpp" line="160"/>
+        <location filename="../src/ResultDialog.cpp" line="203"/>
         <source>中文</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ResultDialog.cpp" line="161"/>
+        <location filename="../src/ResultDialog.cpp" line="204"/>
         <source>英文</source>
         <translation type="unfinished"></translation>
     </message>
@@ -416,7 +464,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="90"/>
+        <location filename="../src/Updater.cpp" line="103"/>
         <source>已是最新版本</source>
         <translation type="unfinished"></translation>
     </message>
@@ -460,11 +508,6 @@
     <message>
         <location filename="../src/App.cpp" line="204"/>
         <source>开机自启</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/Updater.cpp" line="90"/>
-        <source>当前版本 %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -543,7 +586,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/HistoryWindow.cpp" line="42"/>
+        <location filename="../src/HistoryWindow.cpp" line="43"/>
         <source>截图历史</source>
         <translation type="unfinished"></translation>
     </message>
@@ -563,19 +606,19 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="104"/>
+        <location filename="../src/Updater.cpp" line="230"/>
         <source>打开发布页</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../src/HistoryWindow.cpp" line="60"/>
         <location filename="../src/SettingsDialog.cpp" line="374"/>
-        <location filename="../src/HistoryWindow.cpp" line="59"/>
         <source>打开文件夹</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ResultDialog.cpp" line="55"/>
-        <location filename="../src/ResultDialog.cpp" line="95"/>
+        <location filename="../src/ResultDialog.cpp" line="102"/>
+        <location filename="../src/ResultDialog.cpp" line="128"/>
         <source>打开链接</source>
         <translation type="unfinished"></translation>
     </message>
@@ -626,7 +669,7 @@
     </message>
     <message>
         <location filename="../src/Recorder.cpp" line="190"/>
-        <location filename="../src/Updater.cpp" line="150"/>
+        <location filename="../src/Updater.cpp" line="280"/>
         <source>无法写入 %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -641,7 +684,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="161"/>
+        <location filename="../src/Updater.cpp" line="292"/>
         <source>无法启动安装程序</source>
         <translation type="unfinished"></translation>
     </message>
@@ -678,13 +721,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Recognize.cpp" line="46"/>
+        <location filename="../src/Recognize.cpp" line="51"/>
         <source>未识别到二维码或条码。请尽量只框选码的区域，并保证清晰。</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/Recognize.cpp" line="32"/>
-        <source>未识别到文字（语言：%1）</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -695,11 +733,13 @@
     <message>
         <location filename="../src/App.cpp" line="207"/>
         <location filename="../src/SettingsDialog.cpp" line="700"/>
+        <location filename="../src/Updater.cpp" line="188"/>
         <source>检查更新</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="85"/>
+        <location filename="../src/Updater.cpp" line="137"/>
+        <location filename="../src/Updater.cpp" line="175"/>
         <source>检查更新失败</source>
         <translation type="unfinished"></translation>
     </message>
@@ -719,18 +759,13 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="115"/>
+        <location filename="../src/Updater.cpp" line="243"/>
         <source>正在下载 %1 …</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/ScrollCapture.cpp" line="92"/>
         <source>正在滚动截取…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/Recognize.cpp" line="17"/>
-        <source>正在识别…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -756,7 +791,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/RecordSession.cpp" line="182"/>
+        <location filename="../src/RecordSession.cpp" line="187"/>
         <source>没有录到画面</source>
         <translation type="unfinished"></translation>
     </message>
@@ -776,12 +811,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/HistoryWindow.cpp" line="60"/>
+        <location filename="../src/HistoryWindow.cpp" line="61"/>
         <source>清空</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/HistoryWindow.cpp" line="79"/>
+        <location filename="../src/HistoryWindow.cpp" line="80"/>
         <source>清空历史</source>
         <translation type="unfinished"></translation>
     </message>
@@ -806,19 +841,19 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/HistoryWindow.cpp" line="79"/>
+        <location filename="../src/HistoryWindow.cpp" line="80"/>
         <source>确定删除全部截图历史？</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ResultDialog.cpp" line="96"/>
+        <location filename="../src/ResultDialog.cpp" line="103"/>
         <source>确定在浏览器中打开以下链接？
 
 %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="105"/>
+        <location filename="../src/Updater.cpp" line="233"/>
         <source>稍后</source>
         <translation type="unfinished"></translation>
     </message>
@@ -833,7 +868,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="104"/>
+        <location filename="../src/Updater.cpp" line="231"/>
         <source>立即更新</source>
         <translation type="unfinished"></translation>
     </message>
@@ -863,7 +898,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/HistoryWindow.cpp" line="61"/>
+        <location filename="../src/HistoryWindow.cpp" line="62"/>
         <source>编辑标注</source>
         <translation type="unfinished"></translation>
     </message>
@@ -909,7 +944,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Recognize.cpp" line="53"/>
+        <location filename="../src/Recognize.cpp" line="58"/>
         <source>识别到 %1 个：%2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -924,7 +959,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Recognize.cpp" line="33"/>
+        <location filename="../src/Recognize.cpp" line="37"/>
         <source>识别语言：%1 · 共 %2 行，可直接编辑后复制</source>
         <translation type="unfinished"></translation>
     </message>
@@ -992,8 +1027,8 @@
     <message>
         <location filename="../src/App.cpp" line="196"/>
         <location filename="../src/App.cpp" line="395"/>
-        <location filename="../src/SettingsDialog.cpp" line="436"/>
         <location filename="../src/ScrollCapture.cpp" line="108"/>
+        <location filename="../src/SettingsDialog.cpp" line="436"/>
         <source>钉图</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1003,7 +1038,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/HistoryWindow.cpp" line="63"/>
+        <location filename="../src/HistoryWindow.cpp" line="64"/>
         <source>钉在桌面</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1043,21 +1078,21 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="31"/>
         <location filename="../src/App.cpp" line="237"/>
         <location filename="../src/App.cpp" line="625"/>
         <location filename="../src/CaptureOverlay.cpp" line="420"/>
+        <location filename="../src/main.cpp" line="31"/>
         <location filename="../src/PinWindow.cpp" line="261"/>
         <source>青影</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ResultDialog.cpp" line="23"/>
+        <location filename="../src/ResultDialog.cpp" line="126"/>
         <source>青影 · %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="97"/>
+        <location filename="../src/Updater.cpp" line="220"/>
         <source>青影 · 发现新版本</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1067,9 +1102,10 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="116"/>
-        <location filename="../src/Updater.cpp" line="142"/>
-        <location filename="../src/Updater.cpp" line="154"/>
+        <location filename="../src/Updater.cpp" line="198"/>
+        <location filename="../src/Updater.cpp" line="245"/>
+        <location filename="../src/Updater.cpp" line="271"/>
+        <location filename="../src/Updater.cpp" line="284"/>
         <source>青影 · 更新</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1079,7 +1115,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/HistoryWindow.cpp" line="25"/>
+        <location filename="../src/HistoryWindow.cpp" line="26"/>
         <source>青影 截图历史</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1130,7 +1166,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="144"/>
+        <location filename="../src/Updater.cpp" line="273"/>
         <source>（未找到）</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1470,18 +1506,55 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/HistoryWindow.cpp" line="53"/>
+        <location filename="../src/HistoryWindow.cpp" line="54"/>
         <source>还没有截图记录
 按截图快捷键或单击托盘图标截一张试试</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Translator.cpp" line="90"/>
+        <location filename="../src/Translator.cpp" line="82"/>
+        <source>已取消</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/Translator.cpp" line="85"/>
+        <location filename="../src/Updater.cpp" line="131"/>
+        <source>连接超时，请检查网络后重试</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/Translator.cpp" line="89"/>
+        <source>无法连接翻译服务，请检查网络</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/Translator.cpp" line="93"/>
+        <source>网络暂时不可用，请稍后重试</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/Translator.cpp" line="96"/>
+        <source>安全连接失败，请检查系统时间或代理设置</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/Translator.cpp" line="100"/>
+        <source>翻译服务拒绝访问，可能已达免费额度，请稍后再试</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/Translator.cpp" line="115"/>
         <source>翻译服务未返回有效结果</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Translator.cpp" line="140"/>
+        <location filename="../src/Translator.cpp" line="122"/>
+        <source>翻译服务繁忙或已达免费额度，请稍后再试</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ResultDialog.cpp" line="183"/>
+        <location filename="../src/Translator.cpp" line="165"/>
         <source>已在设置中关闭联网翻译</source>
         <translation type="unfinished"></translation>
     </message>

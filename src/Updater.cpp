@@ -64,6 +64,7 @@ bool Updater::parse(const QByteArray& json, Release* out)
     return true;
 }
 
+
 void Updater::maybeAutoCheck()
 {
     if (!Settings::autoUpdate()) return;
@@ -72,35 +73,144 @@ void Updater::maybeAutoCheck()
     check(false);
 }
 
-void Updater::check(bool manual)
+void Updater::finishManualBusy()
 {
-    if (m_busy) return;
-    m_busy = true;
-    QNetworkReply* reply = m_net.get(request(QUrl(QString::fromLatin1(kLatestApi))));
+    if (m_busyDlg) {
+        m_busyDlg->close();
+        m_busyDlg->deleteLater();
+        m_busyDlg = nullptr;
+    }
+}
+
+void Updater::reportManual(const QString& title, const QString& text, bool warn)
+{
+    finishManualBusy();
+    QMessageBox box(warn ? QMessageBox::Warning : QMessageBox::Information, title, text);
+    box.setWindowIcon(appIcon());
+    box.setWindowFlag(Qt::WindowStaysOnTopHint);
+    box.setStandardButtons(QMessageBox::Ok);
+    box.exec();
+}
+
+void Updater::applyRelease(const Release& r, bool manual)
+{
+    const QString cur = QCoreApplication::applicationVersion();
+    Diagnostics::log(QStringLiteral("update compare remote=%1 current=%2").arg(r.tag, cur));
+    if (Logic::isNewerVersion(r.tag, cur)) {
+        finishManualBusy();
+        offer(r);
+    } else if (manual) {
+        reportManual(QCoreApplication::translate("QingYing", "已是最新版本"),
+                     QCoreApplication::translate("QingYing", "当前版本 %1，无需更新。").arg(cur), false);
+    } else {
+        finishManualBusy();
+    }
+}
+
+void Updater::tryHtmlFallback(bool manual)
+{
+    Diagnostics::log(QStringLiteral("update fallback: GET %1").arg(QString::fromLatin1(kLatestPage)));
+    QNetworkRequest req = request(QUrl(QString::fromLatin1(kLatestPage)));
+    req.setRawHeader("Accept", "text/html");
+    QNetworkReply* reply = m_net.get(req);
     connect(reply, &QNetworkReply::finished, this, [this, reply, manual] {
         reply->deleteLater();
         m_busy = false;
         Settings::setLastUpdateCheck(QDateTime::currentDateTime());
-        Release r;
-        const QByteArray body = reply->readAll();
         const int http = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-        if (reply->error() != QNetworkReply::NoError || !parse(body, &r)) {
+        const QUrl finalUrl = reply->url();
+        const QString tag = Logic::releaseTagFromUrl(finalUrl);
+        Diagnostics::log(QStringLiteral("update fallback http=%1 err=%2 url=%3 tag=%4")
+                             .arg(http)
+                             .arg(reply->errorString())
+                             .arg(finalUrl.toString(), tag));
+        if (reply->error() != QNetworkReply::NoError || tag.isEmpty()) {
             if (manual) {
                 QString detail = reply->errorString();
-                if (http == 403 || http == 429
-                    || QString::fromUtf8(body).contains(QLatin1String("rate limit"), Qt::CaseInsensitive))
-                    detail = QCoreApplication::translate("QingYing", "GitHub 接口调用过于频繁，请稍后再试（未登录时每小时约 60 次）");
-                else if (reply->error() == QNetworkReply::TimeoutError)
+                if (reply->error() == QNetworkReply::TimeoutError)
                     detail = QCoreApplication::translate("QingYing", "连接超时，请检查网络后重试");
-                else if (reply->error() == QNetworkReply::HostNotFoundError)
-                    detail = QCoreApplication::translate("QingYing", "无法连接 GitHub，请检查网络");
-                Notify::warn(QCoreApplication::translate("QingYing", "检查更新失败"), detail);
+                else if (reply->error() == QNetworkReply::HostNotFoundError
+                         || reply->error() == QNetworkReply::ConnectionRefusedError)
+                    detail = QCoreApplication::translate("QingYing", "无法连接 GitHub，请检查网络或稍后重试");
+                else if (detail.isEmpty())
+                    detail = QCoreApplication::translate("QingYing", "无法解析最新版本，请打开 GitHub 发布页手动下载");
+                reportManual(QCoreApplication::translate("QingYing", "检查更新失败"), detail, true);
+            } else {
+                finishManualBusy();
             }
             return;
         }
-        const QVersionNumber current = QVersionNumber::fromString(QCoreApplication::applicationVersion());
-        if (Logic::isNewerVersion(r.tag, QCoreApplication::applicationVersion())) offer(r);
-        else if (manual) Notify::info(QCoreApplication::translate("QingYing", "已是最新版本"), QCoreApplication::translate("QingYing", "当前版本 %1").arg(current.toString()));
+        Release r;
+        r.tag = tag;
+        r.version = QVersionNumber::fromString(tag.startsWith(QLatin1Char('v')) ? tag.mid(1) : tag);
+        r.page = finalUrl;
+        // 无 API 资源列表时，安装版也走发布页（避免误下错误包）
+        applyRelease(r, manual);
+    });
+}
+
+void Updater::handleApiResult(const QByteArray& body, int http, int err, const QString& errStr, bool manual)
+{
+    Release r;
+    const bool ok = (err == QNetworkReply::NoError) && parse(body, &r);
+    Diagnostics::log(QStringLiteral("update api http=%1 err=%2 parsed=%3 tag=%4")
+                         .arg(http)
+                         .arg(errStr)
+                         .arg(ok)
+                         .arg(r.tag));
+    if (ok) {
+        m_busy = false;
+        applyRelease(r, manual);
+        return;
+    }
+    const bool rateLimited = http == 403 || http == 429
+        || QString::fromUtf8(body).contains(QLatin1String("rate limit"), Qt::CaseInsensitive);
+    // API 失败时尝试网页跳转回退（限流、空 body、JSON 异常等）
+    if (rateLimited || err != QNetworkReply::NoError || body.isEmpty()) {
+        tryHtmlFallback(manual);
+        return;
+    }
+    m_busy = false;
+    if (manual) {
+        reportManual(QCoreApplication::translate("QingYing", "检查更新失败"),
+                     QCoreApplication::translate("QingYing", "无法解析更新信息，请稍后重试或打开 GitHub 发布页"), true);
+    } else {
+        finishManualBusy();
+    }
+}
+
+void Updater::check(bool manual)
+{
+    if (m_busy) {
+        if (manual) {
+            // 勿调用 reportManual：会关掉当前进度框
+            QMessageBox::information(nullptr,
+                                     QCoreApplication::translate("QingYing", "检查更新"),
+                                     QCoreApplication::translate("QingYing", "正在检查更新，请稍候…"));
+        }
+        return;
+    }
+    m_busy = true;
+    Diagnostics::log(QStringLiteral("update check manual=%1 ver=%2").arg(manual).arg(QCoreApplication::applicationVersion()));
+    if (manual) {
+        finishManualBusy();
+        m_busyDlg = new QProgressDialog(QCoreApplication::translate("QingYing", "正在检查更新…"), QString(), 0, 0);
+        m_busyDlg->setWindowTitle(QCoreApplication::translate("QingYing", "青影 · 更新"));
+        m_busyDlg->setWindowIcon(appIcon());
+        m_busyDlg->setWindowModality(Qt::ApplicationModal);
+        m_busyDlg->setMinimumDuration(0);
+        m_busyDlg->setCancelButton(nullptr);
+        m_busyDlg->setWindowFlag(Qt::WindowStaysOnTopHint);
+        m_busyDlg->show();
+        QApplication::processEvents();
+    }
+    QNetworkReply* reply = m_net.get(request(QUrl(QString::fromLatin1(kLatestApi))));
+    connect(reply, &QNetworkReply::finished, this, [this, reply, manual] {
+        reply->deleteLater();
+        Settings::setLastUpdateCheck(QDateTime::currentDateTime());
+        const QByteArray body = reply->readAll();
+        const int http = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        handleApiResult(body, http, int(reply->error()), reply->errorString(), manual);
     });
 }
 
@@ -110,22 +220,28 @@ void Updater::offer(const Release& r)
     box.setWindowTitle(QCoreApplication::translate("QingYing", "青影 · 发现新版本"));
     box.setWindowIcon(appIcon());
     box.setIconPixmap(appIcon().pixmap(48, 48));
-    box.setText(QCoreApplication::translate("QingYing", "<b>青影 %1 已发布</b>（当前 %2）").arg(r.tag, QCoreApplication::applicationVersion()));
-    box.setInformativeText(isPortable() ? QCoreApplication::translate("QingYing", "你正在使用免安装版，将打开发布页下载新版本。")
-                                        : QCoreApplication::translate("QingYing", "将下载安装包并校验 SHA-256，校验通过后启动安装程序并退出青影。"));
+    box.setText(QCoreApplication::translate("QingYing", "<b>青影 %1 已发布</b>（当前 %2）")
+                    .arg(r.tag, QCoreApplication::applicationVersion()));
+    const bool openPageOnly = isPortable() || r.setupUrl.isEmpty() || r.sumsUrl.isEmpty();
+    box.setInformativeText(openPageOnly
+                               ? QCoreApplication::translate("QingYing", "将打开发布页下载新版本。")
+                               : QCoreApplication::translate("QingYing", "将下载安装包并校验 SHA-256，校验通过后启动安装程序并退出青影。"));
     box.setDetailedText(r.notes);
-    QPushButton* go = box.addButton(isPortable() ? QCoreApplication::translate("QingYing", "打开发布页") : QCoreApplication::translate("QingYing", "立即更新"), QMessageBox::AcceptRole);
+    QPushButton* go = box.addButton(openPageOnly ? QCoreApplication::translate("QingYing", "打开发布页")
+                                                 : QCoreApplication::translate("QingYing", "立即更新"),
+                                    QMessageBox::AcceptRole);
     box.addButton(QCoreApplication::translate("QingYing", "稍后"), QMessageBox::RejectRole);
     box.setWindowFlag(Qt::WindowStaysOnTopHint);
     box.exec();
     if (box.clickedButton() != go) return;
-    if (isPortable() || r.setupUrl.isEmpty() || r.sumsUrl.isEmpty()) QDesktopServices::openUrl(r.page);
+    if (openPageOnly) QDesktopServices::openUrl(r.page.isValid() ? r.page : QUrl(QString::fromLatin1(kLatestPage)));
     else download(r);
 }
 
 void Updater::download(const Release& r)
 {
-    auto* progress = new QProgressDialog(QCoreApplication::translate("QingYing", "正在下载 %1 …").arg(r.setupName), QCoreApplication::translate("QingYing", "取消"), 0, 100);
+    auto* progress = new QProgressDialog(QCoreApplication::translate("QingYing", "正在下载 %1 …").arg(r.setupName),
+                                         QCoreApplication::translate("QingYing", "取消"), 0, 100);
     progress->setWindowTitle(QCoreApplication::translate("QingYing", "青影 · 更新"));
     progress->setWindowIcon(appIcon());
     progress->setAttribute(Qt::WA_DeleteOnClose);
@@ -145,7 +261,7 @@ void Updater::download(const Release& r)
         setup->deleteLater();
         if (setup->error() != QNetworkReply::NoError) {
             if (setup->error() != QNetworkReply::OperationCanceledError)
-                Notify::warn(QCoreApplication::translate("QingYing", "下载更新失败"), setup->errorString());
+                QMessageBox::warning(nullptr, QCoreApplication::translate("QingYing", "下载更新失败"), setup->errorString());
             return;
         }
         const QByteArray data = setup->readAll();
@@ -160,18 +276,21 @@ void Updater::download(const Release& r)
         const QString path = QDir::temp().filePath(r.setupName);
         QFile f(path);
         if (!f.open(QIODevice::WriteOnly) || f.write(data) != data.size()) {
-            Notify::warn(QCoreApplication::translate("QingYing", "下载更新失败"), QCoreApplication::translate("QingYing", "无法写入 %1").arg(path));
+            QMessageBox::warning(nullptr, QCoreApplication::translate("QingYing", "下载更新失败"),
+                                 QCoreApplication::translate("QingYing", "无法写入 %1").arg(path));
             return;
         }
         f.close();
         if (QMessageBox::question(nullptr, QCoreApplication::translate("QingYing", "青影 · 更新"),
-                                  QCoreApplication::translate("QingYing", "安装包已下载并通过校验。现在启动安装程序并退出青影吗？")) != QMessageBox::Yes)
+                                  QCoreApplication::translate("QingYing", "安装包已下载并通过校验。现在启动安装程序并退出青影吗？"))
+            != QMessageBox::Yes)
             return;
         if (QProcess::startDetached(path, {})) {
             Diagnostics::log(QStringLiteral("installer launched, quitting: %1").arg(path));
             qApp->quit();
+        } else {
+            QMessageBox::warning(nullptr, QCoreApplication::translate("QingYing", "无法启动安装程序"), path);
         }
-        else Notify::warn(QCoreApplication::translate("QingYing", "无法启动安装程序"), path);
     };
     connect(sums, &QNetworkReply::finished, this, finish);
     connect(setup, &QNetworkReply::finished, this, finish);
