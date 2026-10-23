@@ -77,7 +77,32 @@ void translateChunk(const QString& chunk, const QString& pair, std::function<voi
         Translator::Result r;
         r.pair = pair;
         if (reply->error() != QNetworkReply::NoError) {
-            r.error = reply->errorString();
+            switch (reply->error()) {
+            case QNetworkReply::OperationCanceledError:
+                r.error = QCoreApplication::translate("QingYing", "已取消");
+                break;
+            case QNetworkReply::TimeoutError:
+                r.error = QCoreApplication::translate("QingYing", "连接超时，请检查网络后重试");
+                break;
+            case QNetworkReply::HostNotFoundError:
+            case QNetworkReply::NetworkSessionFailedError:
+                r.error = QCoreApplication::translate("QingYing", "无法连接翻译服务，请检查网络");
+                break;
+            case QNetworkReply::ConnectionRefusedError:
+            case QNetworkReply::TemporaryNetworkFailureError:
+                r.error = QCoreApplication::translate("QingYing", "网络暂时不可用，请稍后重试");
+                break;
+            case QNetworkReply::SslHandshakeFailedError:
+                r.error = QCoreApplication::translate("QingYing", "安全连接失败，请检查系统时间或代理设置");
+                break;
+            case QNetworkReply::ContentAccessDenied:
+            case QNetworkReply::AuthenticationRequiredError:
+                r.error = QCoreApplication::translate("QingYing", "翻译服务拒绝访问，可能已达免费额度，请稍后再试");
+                break;
+            default:
+                r.error = reply->errorString();
+                break;
+            }
             done(r);
             return;
         }
@@ -94,7 +119,7 @@ void translateChunk(const QString& chunk, const QString& pair, std::function<voi
         // 配额用尽时接口常把说明写进 translatedText
         if (translated.contains(QLatin1String("MYMEMORY WARNING"), Qt::CaseInsensitive)
             || translated.contains(QLatin1String("QUERY LENGTH LIMIT"), Qt::CaseInsensitive)) {
-            r.error = translated;
+            r.error = QCoreApplication::translate("QingYing", "翻译服务繁忙或已达免费额度，请稍后再试");
             done(r);
             return;
         }

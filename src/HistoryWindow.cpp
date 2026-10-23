@@ -18,6 +18,7 @@
 #include <QPushButton>
 #include "EditRequest.h"
 #include <QUrl>
+#include <QTimer>
 #include <QVBoxLayout>
 
 HistoryWindow::HistoryWindow(QWidget* parent) : QDialog(parent)
@@ -53,7 +54,7 @@ HistoryWindow::HistoryWindow(QWidget* parent) : QDialog(parent)
     m_empty = new QLabel(QCoreApplication::translate("QingYing", "还没有截图记录\n按截图快捷键或单击托盘图标截一张试试"), this);
     m_empty->setAlignment(Qt::AlignCenter);
     m_empty->setObjectName(QStringLiteral("empty"));
-    m_empty->setStyleSheet(QStringLiteral("color: #8E8E93; font-size: 14px;"));
+    Theme::setSheet(m_empty, QStringLiteral("QLabel#empty { color: #8E8E93; font-size: 14px; }"));
     root->addWidget(m_empty, 1);
     auto* row = new QHBoxLayout;
     auto* folder = new QPushButton(QCoreApplication::translate("QingYing", "打开文件夹"), this);
@@ -81,9 +82,14 @@ HistoryWindow::HistoryWindow(QWidget* parent) : QDialog(parent)
             reload();
         }
     });
-    connect(copy, &QPushButton::clicked, this, [this] {
+    connect(copy, &QPushButton::clicked, this, [this, copy] {
         const QString p = currentPath();
-        if (!p.isEmpty()) QGuiApplication::clipboard()->setImage(QImage(p));
+        if (p.isEmpty()) return;
+        QGuiApplication::clipboard()->setImage(QImage(p));
+        copy->setText(QCoreApplication::translate("QingYing", "已复制"));
+        QTimer::singleShot(1500, copy, [copy] {
+            if (copy) copy->setText(QCoreApplication::translate("QingYing", "复制"));
+        });
     });
     connect(edit, &QPushButton::clicked, this, [this] {
         const QString p = currentPath();

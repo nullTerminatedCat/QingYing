@@ -122,6 +122,7 @@ RecordSession::RecordSession(const QRect& region, Recorder::Format format)
         m_pause->setToolTip(m_rec->isPaused() ? QCoreApplication::translate("QingYing", "继续") : QCoreApplication::translate("QingYing", "暂停"));
         static_cast<Frame*>(m_frame)->paused = m_rec->isPaused();
         m_frame->update();
+        refresh();
     });
     connect(m_stop, &QToolButton::clicked, this, &RecordSession::finish);
 
@@ -166,7 +167,11 @@ void RecordSession::refresh()
 {
     const qint64 s = m_rec->elapsedMs() / 1000;
     const double mb = m_rec->estimatedBytes() / 1048576.0;
-    m_time->setText(QStringLiteral("%1:%2  %3 MB").arg(s / 60, 2, 10, QLatin1Char('0')).arg(s % 60, 2, 10, QLatin1Char('0')).arg(mb, 0, 'f', 1));
+    const QString clock = QStringLiteral("%1:%2").arg(s / 60, 2, 10, QLatin1Char('0')).arg(s % 60, 2, 10, QLatin1Char('0'));
+    if (m_rec->isPaused())
+        m_time->setText(QCoreApplication::translate("QingYing", "暂停 %1  %2 MB").arg(clock).arg(mb, 0, 'f', 1));
+    else
+        m_time->setText(QStringLiteral("%1  %2 MB").arg(clock).arg(mb, 0, 'f', 1));
 }
 
 void RecordSession::finish()

@@ -7,6 +7,7 @@
 
 #include <QClipboard>
 #include <QDesktopServices>
+#include <QEvent>
 #include <QGuiApplication>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -14,13 +15,13 @@
 #include <QPlainTextEdit>
 #include <QPointer>
 #include <QPushButton>
+#include <QTimer>
 #include <QUrl>
 #include <QVBoxLayout>
 
-ResultDialog::ResultDialog(const QString& title, QWidget* parent) : QDialog(parent)
+ResultDialog::ResultDialog(const QString& title, QWidget* parent) : QDialog(parent), m_panelTitle(title)
 {
     setAttribute(Qt::WA_DeleteOnClose);
-    setWindowTitle(QCoreApplication::translate("QingYing", "青影 · %1").arg(title));
     setWindowIcon(appIcon());
     setWindowFlag(Qt::WindowContextHelpButtonHint, false);
     setWindowFlag(Qt::WindowStaysOnTopHint, true);
@@ -40,9 +41,9 @@ ResultDialog::ResultDialog(const QString& title, QWidget* parent) : QDialog(pare
     auto* root = new QVBoxLayout(this);
     root->setContentsMargins(24, 20, 24, 20);
     root->setSpacing(10);
-    auto* t = new QLabel(title, this);
-    t->setObjectName(QStringLiteral("title"));
-    root->addWidget(t);
+    m_titleLabel = new QLabel(title, this);
+    m_titleLabel->setObjectName(QStringLiteral("title"));
+    root->addWidget(m_titleLabel);
     m_status = new QLabel(this);
     m_status->setObjectName(QStringLiteral("status"));
     m_status->setWordWrap(true);
@@ -52,12 +53,12 @@ ResultDialog::ResultDialog(const QString& title, QWidget* parent) : QDialog(pare
 
     auto* tools = new QHBoxLayout;
     tools->setSpacing(8);
-    m_open = new QPushButton(QCoreApplication::translate("QingYing", "打开链接"), this);
+    m_open = new QPushButton(this);
     m_open->hide();
-    m_auto = new QPushButton(QCoreApplication::translate("QingYing", "翻译"), this);
-    m_toZh = new QPushButton(QCoreApplication::translate("QingYing", "译成中文"), this);
-    m_toEn = new QPushButton(QCoreApplication::translate("QingYing", "译成英文"), this);
-    m_restore = new QPushButton(QCoreApplication::translate("QingYing", "还原原文"), this);
+    m_auto = new QPushButton(this);
+    m_toZh = new QPushButton(this);
+    m_toEn = new QPushButton(this);
+    m_restore = new QPushButton(this);
     m_restore->hide();
     for (QPushButton* b : {m_open, m_auto, m_toZh, m_toEn, m_restore}) tools->addWidget(b);
     tools->addStretch();
@@ -66,24 +67,30 @@ ResultDialog::ResultDialog(const QString& title, QWidget* parent) : QDialog(pare
     auto* row = new QHBoxLayout;
     row->setSpacing(8);
     row->addStretch();
-    auto* close = new QPushButton(QCoreApplication::translate("QingYing", "关闭"), this);
-    m_copy = new QPushButton(QCoreApplication::translate("QingYing", "复制"), this);
+    m_close = new QPushButton(this);
+    m_copy = new QPushButton(this);
     m_copy->setObjectName(QStringLiteral("primary"));
     m_copy->setEnabled(false);
-    row->addWidget(close);
+    row->addWidget(m_close);
     row->addWidget(m_copy);
     root->addLayout(row);
 
-    connect(close, &QPushButton::clicked, this, &QDialog::close);
+    m_copyFlash = new QTimer(this);
+    m_copyFlash->setSingleShot(true);
+    connect(m_copyFlash, &QTimer::timeout, this, [this] {
+        if (m_copy) m_copy->setText(QCoreApplication::translate("QingYing", "复制"));
+    });
+
+    connect(m_close, &QPushButton::clicked, this, &QDialog::close);
     connect(m_copy, &QPushButton::clicked, this, [this] {
         QString sel = m_edit->textCursor().selectedText();
         QGuiApplication::clipboard()->setText(sel.isEmpty() ? m_edit->toPlainText()
                                                             : sel.replace(QChar(0x2029), QLatin1Char('\n')));
-        m_copy->setText(QCoreApplication::translate("QingYing", "已复制"));
+        flashCopyDone();
     });
     connect(m_edit, &QPlainTextEdit::textChanged, this, [this] {
-        m_copy->setText(QCoreApplication::translate("QingYing", "复制"));
-        m_copy->setEnabled(!m_edit->toPlainText().isEmpty());
+        if (!m_copyFlash->isActive()) m_copy->setText(QCoreApplication::translate("QingYing", "复制"));
+        m_copy->setEnabled(!m_busy && !m_edit->toPlainText().isEmpty());
         if (!m_busy) {
             const bool has = !m_edit->toPlainText().trimmed().isEmpty();
             m_auto->setEnabled(has);
@@ -110,17 +117,46 @@ ResultDialog::ResultDialog(const QString& title, QWidget* parent) : QDialog(pare
         setStatus(QCoreApplication::translate("QingYing", "已还原为识别原文，可继续编辑或重新翻译"));
     });
 
+    retranslateUi();
     setTranslateEnabled(false);
+}
+
+void ResultDialog::retranslateUi()
+{
+    setWindowTitle(QCoreApplication::translate("QingYing", "青影 · %1").arg(m_panelTitle));
+    if (m_titleLabel) m_titleLabel->setText(m_panelTitle);
+    m_open->setText(QCoreApplication::translate("QingYing", "打开链接"));
+    m_auto->setText(QCoreApplication::translate("QingYing", "翻译"));
+    m_toZh->setText(QCoreApplication::translate("QingYing", "译成中文"));
+    m_toEn->setText(QCoreApplication::translate("QingYing", "译成英文"));
+    m_restore->setText(QCoreApplication::translate("QingYing", "还原原文"));
+    m_close->setText(QCoreApplication::translate("QingYing", "关闭"));
+    if (!m_copyFlash->isActive()) m_copy->setText(QCoreApplication::translate("QingYing", "复制"));
+}
+
+void ResultDialog::changeEvent(QEvent* event)
+{
+    QDialog::changeEvent(event);
+    if (event->type() == QEvent::LanguageChange) retranslateUi();
+}
+
+void ResultDialog::flashCopyDone()
+{
+    m_copy->setText(QCoreApplication::translate("QingYing", "已复制"));
+    m_copyFlash->start(1500);
 }
 
 void ResultDialog::setTranslateEnabled(bool on)
 {
+    m_wantTranslate = on;
     const bool show = on && Settings::translateEnabled();
     m_auto->setVisible(show);
     m_toZh->setVisible(show);
     m_toEn->setVisible(show);
     if (!show) m_restore->hide();
 }
+
+void ResultDialog::setWorking(bool working) { setBusy(working); }
 
 void ResultDialog::setBusy(bool busy)
 {
@@ -132,6 +168,7 @@ void ResultDialog::setBusy(bool busy)
     m_toEn->setEnabled(!busy && has);
     m_restore->setEnabled(!busy && !m_original.isEmpty());
     m_copy->setEnabled(!busy && !m_edit->toPlainText().isEmpty());
+    m_open->setEnabled(!busy && !m_url.isEmpty());
 }
 
 void ResultDialog::startTranslate(bool toChinese)
@@ -141,13 +178,19 @@ void ResultDialog::startTranslate(bool toChinese)
         setStatus(QCoreApplication::translate("QingYing", "没有可翻译的文字"), true);
         return;
     }
+    if (!Settings::translateEnabled()) {
+        setTranslateEnabled(m_wantTranslate);
+        setStatus(QCoreApplication::translate("QingYing", "已在设置中关闭联网翻译"), true);
+        return;
+    }
     if (m_original.isEmpty()) m_original = src;
+    const int gen = ++m_translateGen;
     setBusy(true);
     setStatus(QCoreApplication::translate("QingYing", "正在翻译…"));
     QPointer<ResultDialog> guard(this);
     const auto target = toChinese ? Translator::Target::Chinese : Translator::Target::English;
-    Translator::translate(src, target, [guard, toChinese](Translator::Result r) {
-        if (!guard) return;
+    Translator::translate(src, target, [guard, toChinese, gen](Translator::Result r) {
+        if (!guard || gen != guard->m_translateGen) return;
         guard->setBusy(false);
         if (!r.ok) {
             guard->setStatus(QCoreApplication::translate("QingYing", "翻译失败：%1").arg(r.error), true);
@@ -174,12 +217,13 @@ void ResultDialog::setText(const QString& text)
     m_original.clear();
     m_restore->hide();
     m_edit->setPlainText(text);
-    m_copy->setEnabled(!text.isEmpty());
+    m_copy->setEnabled(!m_busy && !text.isEmpty());
 }
 
 void ResultDialog::setUrl(const QString& url)
 {
     m_url = url;
     m_open->setVisible(!url.isEmpty());
+    m_open->setEnabled(!m_busy && !url.isEmpty());
     m_open->setToolTip(url);
 }

@@ -18,6 +18,7 @@
 #include <QJsonObject>
 #include <QMessageBox>
 #include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QProcess>
 #include <QProgressDialog>
 #include <QPushButton>
@@ -81,8 +82,20 @@ void Updater::check(bool manual)
         m_busy = false;
         Settings::setLastUpdateCheck(QDateTime::currentDateTime());
         Release r;
-        if (reply->error() != QNetworkReply::NoError || !parse(reply->readAll(), &r)) {
-            if (manual) Notify::warn(QCoreApplication::translate("QingYing", "检查更新失败"), reply->errorString());
+        const QByteArray body = reply->readAll();
+        const int http = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        if (reply->error() != QNetworkReply::NoError || !parse(body, &r)) {
+            if (manual) {
+                QString detail = reply->errorString();
+                if (http == 403 || http == 429
+                    || QString::fromUtf8(body).contains(QLatin1String("rate limit"), Qt::CaseInsensitive))
+                    detail = QCoreApplication::translate("QingYing", "GitHub 接口调用过于频繁，请稍后再试（未登录时每小时约 60 次）");
+                else if (reply->error() == QNetworkReply::TimeoutError)
+                    detail = QCoreApplication::translate("QingYing", "连接超时，请检查网络后重试");
+                else if (reply->error() == QNetworkReply::HostNotFoundError)
+                    detail = QCoreApplication::translate("QingYing", "无法连接 GitHub，请检查网络");
+                Notify::warn(QCoreApplication::translate("QingYing", "检查更新失败"), detail);
+            }
             return;
         }
         const QVersionNumber current = QVersionNumber::fromString(QCoreApplication::applicationVersion());

@@ -14,7 +14,8 @@ void ocr(const QImage& image)
 {
     auto* dlg = new ResultDialog(QCoreApplication::translate("QingYing", "文字识别"));
     dlg->setTranslateEnabled(true);
-    dlg->setStatus(QCoreApplication::translate("QingYing", "正在识别…"));
+    dlg->setWorking(true);
+    dlg->setStatus(QCoreApplication::translate("QingYing", "正在识别，请稍候…"));
     dlg->show();
     dlg->raise();
     dlg->activateWindow();
@@ -24,14 +25,18 @@ void ocr(const QImage& image)
         const Ocr::Result r = Ocr::recognize(image);
         QMetaObject::invokeMethod(qApp, [guard, r] {
             if (!guard) return;
+            guard->setWorking(false);
             if (!r.ok) {
                 guard->setStatus(r.error, true);
                 return;
             }
             guard->setText(r.text);
-            guard->setStatus(r.text.isEmpty() ? QCoreApplication::translate("QingYing", "未识别到文字（语言：%1）").arg(r.language)
-                                              : QCoreApplication::translate("QingYing", "识别语言：%1 · 共 %2 行，可直接编辑后复制")
-                                                    .arg(r.language).arg(r.text.count(QLatin1Char('\n')) + 1));
+            guard->setStatus(r.text.isEmpty()
+                                 ? QCoreApplication::translate("QingYing", "未识别到文字（语言：%1）。可换更清晰的选区再试。")
+                                       .arg(r.language)
+                                 : QCoreApplication::translate("QingYing", "识别语言：%1 · 共 %2 行，可直接编辑后复制")
+                                       .arg(r.language)
+                                       .arg(r.text.count(QLatin1Char('\n')) + 1));
         }, Qt::QueuedConnection);
     });
 }
