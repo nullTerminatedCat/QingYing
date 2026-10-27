@@ -15,6 +15,7 @@ public:
     RecordSession(const QRect& physicalRegion, Recorder::Format format);
     ~RecordSession() override;
     bool begin(QString* error);
+    QString micWarning() const; // 请求麦克风但未能采集时的提示（可空）
 
 signals:
     void finished(bool ok, const QString& path, const QString& error);
@@ -31,8 +32,10 @@ private:
     QWidget* m_frame;
     QLabel* m_time;
     QToolButton* m_pause;
+    QToolButton* m_mic = nullptr; // 仅 MP4：显示/切换麦克风静音
     QToolButton* m_stop;
     QTimer m_tick;
+    Recorder::Format m_format;
     HotkeyManager* m_esc;
     QPoint m_drag;
     bool m_done = false;

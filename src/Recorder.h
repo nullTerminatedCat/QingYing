@@ -18,6 +18,11 @@ public:
     void stop(); // 阻塞直到文件写完
     void setPaused(bool p) { m_paused = p; }
     void setGifDither(bool on) { m_gifDither = on; } // start() 之前调用
+    void setRecordMic(bool on) { m_mic = on; }         // start() 之前；仅 MP4 生效
+    void setMicMuted(bool on) { m_micMuted = on; }     // 录制中可切换，静音丢弃采集
+    bool isMicMuted() const { return m_micMuted; }
+    bool micCapturing() const { return m_micCapturing; } // 是否真正在写音频轨
+    QString micWarning() const { return m_micWarning; }  // 请求了麦克风但失败时的提示
     bool isPaused() const { return m_paused; }
     qint64 elapsedMs() const { return m_elapsed; }
     QString outputPath() const { return m_path; }
@@ -33,8 +38,12 @@ private:
     int m_fps;
     bool m_cursor;
     bool m_gifDither = false;
+    bool m_mic = false;
+    std::atomic<bool> m_micMuted{false};
+    std::atomic<bool> m_micCapturing{false};
     QString m_path;
     QString m_error;
+    QString m_micWarning;
     QString m_backend;
     std::atomic<qint64> m_bytes{0};
     std::thread m_thread;

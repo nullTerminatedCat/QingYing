@@ -34,7 +34,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="471"/>
+        <location filename="../src/App.cpp" line="450"/>
+        <source>麦克风不可用</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/App.cpp" line="473"/>
         <source>%1:%2:%3  %4×%5  复制</source>
         <translation type="unfinished"></translation>
     </message>
@@ -45,7 +50,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="633"/>
+        <location filename="../src/App.cpp" line="635"/>
         <source>%1保存一次全屏截图到 %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -55,7 +60,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="710"/>
+        <location filename="../src/App.cpp" line="712"/>
         <source>&lt;h3&gt;青影 QingYing %1&lt;/h3&gt;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -65,19 +70,19 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Recorder.cpp" line="76"/>
+        <location filename="../src/Recorder.cpp" line="88"/>
         <source>H.264 编码器不支持该尺寸（0x%1）</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/CaptureOverlay.cpp" line="412"/>
         <location filename="../src/PinWindow.cpp" line="255"/>
-        <location filename="../src/ScrollCapture.cpp" line="265"/>
+        <location filename="../src/ScrollCapture.cpp" line="267"/>
         <source>JPG 图片 (*.jpg *.jpeg)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Recorder.cpp" line="55"/>
+        <location filename="../src/Recorder.cpp" line="67"/>
         <source>Media Foundation 初始化失败</source>
         <translation type="unfinished"></translation>
     </message>
@@ -94,18 +99,18 @@
     <message>
         <location filename="../src/CaptureOverlay.cpp" line="412"/>
         <location filename="../src/PinWindow.cpp" line="255"/>
-        <location filename="../src/ScrollCapture.cpp" line="264"/>
+        <location filename="../src/ScrollCapture.cpp" line="266"/>
         <source>PNG 图片 (*.png)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/SettingsDialog.cpp" line="244"/>
-        <location filename="../src/SettingsDialog.cpp" line="539"/>
+        <location filename="../src/SettingsDialog.cpp" line="543"/>
         <source>上传</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="568"/>
+        <location filename="../src/SettingsDialog.cpp" line="572"/>
         <source>上传地址</source>
         <translation type="unfinished"></translation>
     </message>
@@ -166,7 +171,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="107"/>
+        <location filename="../src/ScrollCapture.cpp" line="108"/>
         <location filename="../src/SettingsDialog.cpp" line="371"/>
         <location filename="../src/SettingsDialog.cpp" line="436"/>
         <source>保存</source>
@@ -194,17 +199,44 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/RecordSession.cpp" line="116"/>
+        <location filename="../src/RecordSession.cpp" line="142"/>
         <source>停止并保存（Esc）</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/RecordSession.cpp" line="172"/>
+        <location filename="../src/RecordSession.cpp" line="147"/>
+        <location filename="../src/RecordSession.cpp" line="162"/>
+        <location filename="../src/RecordSession.cpp" line="217"/>
+        <source>麦克风开启（点击静音）</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/RecordSession.cpp" line="148"/>
+        <source>麦克风已关（点击开启，需在设置中默认开启才有音轨）</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/RecordSession.cpp" line="154"/>
+        <source>已记住开启麦克风，下次 MP4 录制生效</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/RecordSession.cpp" line="161"/>
+        <source>已静音（点击恢复）</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/RecordSession.cpp" line="219"/>
+        <source>本次未录制麦克风</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/RecordSession.cpp" line="233"/>
         <source>暂停 %1  %2 MB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="100"/>
+        <location filename="../src/ScrollCapture.cpp" line="101"/>
         <source>停止（单击 / Esc）</source>
         <translation type="unfinished"></translation>
     </message>
@@ -225,7 +257,7 @@
     </message>
     <message>
         <location filename="../src/App.cpp" line="208"/>
-        <location filename="../src/App.cpp" line="708"/>
+        <location filename="../src/App.cpp" line="710"/>
         <source>关于青影</source>
         <translation type="unfinished"></translation>
     </message>
@@ -236,12 +268,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Recorder.cpp" line="120"/>
-        <source>写入 MP4 结尾失败（录制时间可能太短）</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/Recorder.cpp" line="543"/>
+        <location filename="../src/Recorder.cpp" line="652"/>
         <source>写入视频帧失败</source>
         <translation type="unfinished"></translation>
     </message>
@@ -256,7 +283,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="478"/>
+        <location filename="../src/App.cpp" line="480"/>
         <source>历史记录…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -266,7 +293,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="110"/>
+        <location filename="../src/ScrollCapture.cpp" line="111"/>
         <location filename="../src/Updater.cpp" line="244"/>
         <source>取消</source>
         <translation type="unfinished"></translation>
@@ -293,8 +320,8 @@
     </message>
     <message>
         <location filename="../src/CaptureOverlay.cpp" line="415"/>
-        <location filename="../src/ScrollCapture.cpp" line="108"/>
-        <location filename="../src/ScrollCapture.cpp" line="268"/>
+        <location filename="../src/ScrollCapture.cpp" line="109"/>
+        <location filename="../src/ScrollCapture.cpp" line="270"/>
         <source>另存为</source>
         <translation type="unfinished"></translation>
     </message>
@@ -310,13 +337,13 @@
         <location filename="../src/ResultDialog.cpp" line="81"/>
         <location filename="../src/ResultDialog.cpp" line="92"/>
         <location filename="../src/ResultDialog.cpp" line="134"/>
-        <location filename="../src/ScrollCapture.cpp" line="106"/>
+        <location filename="../src/ScrollCapture.cpp" line="107"/>
         <location filename="../src/SettingsDialog.cpp" line="436"/>
         <source>复制</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="646"/>
+        <location filename="../src/SettingsDialog.cpp" line="650"/>
         <source>外观</source>
         <translation type="unfinished"></translation>
     </message>
@@ -378,7 +405,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="632"/>
+        <location filename="../src/App.cpp" line="634"/>
         <source>定时截图已开始</source>
         <translation type="unfinished"></translation>
     </message>
@@ -388,45 +415,45 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="124"/>
-        <location filename="../src/ScrollCapture.cpp" line="143"/>
-        <location filename="../src/ScrollCapture.cpp" line="189"/>
-        <location filename="../src/ScrollCapture.cpp" line="304"/>
+        <location filename="../src/ScrollCapture.cpp" line="125"/>
+        <location filename="../src/ScrollCapture.cpp" line="144"/>
+        <location filename="../src/ScrollCapture.cpp" line="190"/>
+        <location filename="../src/ScrollCapture.cpp" line="308"/>
         <source>已停止</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="177"/>
+        <location filename="../src/ScrollCapture.cpp" line="178"/>
         <source>无法截取选区，请重新选择或缩小范围</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="209"/>
+        <location filename="../src/ScrollCapture.cpp" line="210"/>
         <source>已到底部</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="224"/>
+        <location filename="../src/ScrollCapture.cpp" line="225"/>
         <source>已达到长图大小上限，已保留当前结果</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="225"/>
+        <location filename="../src/ScrollCapture.cpp" line="226"/>
         <source>无法继续拼接，已保留当前结果</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="255"/>
+        <location filename="../src/ScrollCapture.cpp" line="256"/>
         <source>内存不足，请关闭其他程序后重试；当前长图仍保留</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="273"/>
+        <location filename="../src/ScrollCapture.cpp" line="275"/>
         <source>保存失败，长图已保留。请重试或使用“另存为”更换位置。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="291"/>
+        <location filename="../src/ScrollCapture.cpp" line="294"/>
         <source>正在滚动截取 · %1 帧 · %2×%3</source>
         <translation type="unfinished"></translation>
     </message>
@@ -493,7 +520,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="557"/>
+        <location filename="../src/App.cpp" line="559"/>
         <source>已复制颜色</source>
         <translation type="unfinished"></translation>
     </message>
@@ -530,7 +557,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Recorder.cpp" line="89"/>
+        <location filename="../src/Recorder.cpp" line="135"/>
         <source>开始写入失败</source>
         <translation type="unfinished"></translation>
     </message>
@@ -550,7 +577,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Recorder.cpp" line="492"/>
+        <location filename="../src/Recorder.cpp" line="584"/>
         <source>录制区域太小</source>
         <translation type="unfinished"></translation>
     </message>
@@ -625,12 +652,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="456"/>
+        <location filename="../src/App.cpp" line="458"/>
         <source>截图已保存</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="479"/>
+        <location filename="../src/App.cpp" line="481"/>
         <source>打开保存文件夹</source>
         <translation type="unfinished"></translation>
     </message>
@@ -672,7 +699,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="572"/>
+        <location filename="../src/SettingsDialog.cpp" line="576"/>
         <source>文件字段</source>
         <translation type="unfinished"></translation>
     </message>
@@ -697,19 +724,39 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Recorder.cpp" line="190"/>
+        <location filename="../src/Recorder.cpp" line="266"/>
         <location filename="../src/Updater.cpp" line="280"/>
         <source>无法写入 %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Recorder.cpp" line="161"/>
+        <location filename="../src/Recorder.cpp" line="237"/>
         <source>无法创建 GIF 临时文件</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Recorder.cpp" line="62"/>
+        <location filename="../src/Recorder.cpp" line="74"/>
         <source>无法创建 MP4 文件（0x%1）</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/Recorder.cpp" line="100"/>
+        <source>设置视频输入格式失败（0x%1）</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/Recorder.cpp" line="189"/>
+        <source>写入 MP4 收尾失败（录制时长可能太短）</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/Recorder.cpp" line="592"/>
+        <source>当前环境无法写入 AAC 音轨，已继续无声录制</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/Recorder.cpp" line="665"/>
+        <source>麦克风写入失败，已继续无声录制</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -718,7 +765,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="217"/>
+        <location filename="../src/ScrollCapture.cpp" line="218"/>
         <source>无法对齐画面，已停止（内容可能在变化）</source>
         <translation type="unfinished"></translation>
     </message>
@@ -728,13 +775,13 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/RecordSession.cpp" line="115"/>
-        <location filename="../src/RecordSession.cpp" line="122"/>
+        <location filename="../src/RecordSession.cpp" line="141"/>
+        <location filename="../src/RecordSession.cpp" line="169"/>
         <source>暂停</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="476"/>
+        <location filename="../src/App.cpp" line="478"/>
         <source>暂无记录</source>
         <translation type="unfinished"></translation>
     </message>
@@ -744,8 +791,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="553"/>
-        <location filename="../src/SettingsDialog.cpp" line="559"/>
+        <location filename="../src/SettingsDialog.cpp" line="557"/>
+        <location filename="../src/SettingsDialog.cpp" line="563"/>
         <source>服务</source>
         <translation type="unfinished"></translation>
     </message>
@@ -761,7 +808,7 @@
     </message>
     <message>
         <location filename="../src/App.cpp" line="207"/>
-        <location filename="../src/SettingsDialog.cpp" line="700"/>
+        <location filename="../src/SettingsDialog.cpp" line="704"/>
         <location filename="../src/Updater.cpp" line="188"/>
         <source>检查更新</source>
         <translation type="unfinished"></translation>
@@ -799,18 +846,18 @@
     </message>
     <message>
         <location filename="../src/App.cpp" line="176"/>
-        <location filename="../src/App.cpp" line="630"/>
+        <location filename="../src/App.cpp" line="632"/>
         <source>每 %1 分钟</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/App.cpp" line="176"/>
-        <location filename="../src/App.cpp" line="629"/>
+        <location filename="../src/App.cpp" line="631"/>
         <source>每 %1 秒</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="578"/>
+        <location filename="../src/SettingsDialog.cpp" line="582"/>
         <source>每行一个，如 Authorization: Bearer xxx</source>
         <translation type="unfinished"></translation>
     </message>
@@ -820,12 +867,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/RecordSession.cpp" line="187"/>
+        <location filename="../src/RecordSession.cpp" line="248"/>
         <source>没有录到画面</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="647"/>
+        <location filename="../src/SettingsDialog.cpp" line="651"/>
         <source>浅色</source>
         <translation type="unfinished"></translation>
     </message>
@@ -835,7 +882,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="647"/>
+        <location filename="../src/SettingsDialog.cpp" line="651"/>
         <source>深色</source>
         <translation type="unfinished"></translation>
     </message>
@@ -902,7 +949,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="711"/>
+        <location filename="../src/App.cpp" line="713"/>
         <source>简洁好看的 Windows 截图工具。&lt;br&gt;区域截图 · 标注 · 钉图&lt;br&gt;&lt;br&gt;基于 Qt %1 · MIT 许可证</source>
         <translation type="unfinished"></translation>
     </message>
@@ -922,7 +969,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/RecordSession.cpp" line="122"/>
+        <location filename="../src/RecordSession.cpp" line="169"/>
         <source>继续</source>
         <translation type="unfinished"></translation>
     </message>
@@ -937,13 +984,13 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="565"/>
+        <location filename="../src/SettingsDialog.cpp" line="569"/>
         <location filename="../src/Uploader.cpp" line="99"/>
         <source>自定义 HTTP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="555"/>
+        <location filename="../src/SettingsDialog.cpp" line="559"/>
         <source>自定义 HTTP（multipart POST）</source>
         <translation type="unfinished"></translation>
     </message>
@@ -955,11 +1002,6 @@
     <message>
         <location filename="../src/App.cpp" line="203"/>
         <source>设置…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/Recorder.cpp" line="88"/>
-        <source>设置输入格式失败（0x%1）</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -993,7 +1035,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="655"/>
+        <location filename="../src/SettingsDialog.cpp" line="659"/>
         <source>语言</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1003,7 +1045,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="580"/>
+        <location filename="../src/SettingsDialog.cpp" line="584"/>
         <source>请求头</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1013,13 +1055,13 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="647"/>
-        <location filename="../src/SettingsDialog.cpp" line="657"/>
+        <location filename="../src/SettingsDialog.cpp" line="651"/>
+        <location filename="../src/SettingsDialog.cpp" line="661"/>
         <source>跟随系统</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="576"/>
+        <location filename="../src/SettingsDialog.cpp" line="580"/>
         <source>返回 JSON 中链接的位置，如 data.url</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1056,7 +1098,7 @@
     <message>
         <location filename="../src/App.cpp" line="196"/>
         <location filename="../src/App.cpp" line="395"/>
-        <location filename="../src/ScrollCapture.cpp" line="109"/>
+        <location filename="../src/ScrollCapture.cpp" line="110"/>
         <location filename="../src/SettingsDialog.cpp" line="436"/>
         <source>钉图</source>
         <translation type="unfinished"></translation>
@@ -1077,7 +1119,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="576"/>
+        <location filename="../src/SettingsDialog.cpp" line="580"/>
         <source>链接路径</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1108,7 +1150,7 @@
     </message>
     <message>
         <location filename="../src/App.cpp" line="237"/>
-        <location filename="../src/App.cpp" line="625"/>
+        <location filename="../src/App.cpp" line="627"/>
         <location filename="../src/CaptureOverlay.cpp" line="420"/>
         <location filename="../src/main.cpp" line="31"/>
         <location filename="../src/PinWindow.cpp" line="261"/>
@@ -1126,7 +1168,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="631"/>
+        <location filename="../src/App.cpp" line="633"/>
         <source>青影 · 定时截图（%1）</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1205,7 +1247,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="661"/>
+        <location filename="../src/SettingsDialog.cpp" line="665"/>
         <source>Interface language</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1220,22 +1262,22 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="539"/>
+        <location filename="../src/SettingsDialog.cpp" line="543"/>
         <source>上传截图到图床，并把链接复制到剪贴板</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="703"/>
+        <location filename="../src/SettingsDialog.cpp" line="707"/>
         <source>上次检查：%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="649"/>
+        <location filename="../src/SettingsDialog.cpp" line="653"/>
         <source>主题</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="590"/>
+        <location filename="../src/SettingsDialog.cpp" line="594"/>
         <source>使用 Windows DPAPI 加密保存，仅当前用户可解密</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1250,28 +1292,28 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="645"/>
+        <location filename="../src/SettingsDialog.cpp" line="649"/>
         <source>修改后立即生效，无需重启</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/SettingsDialog.cpp" line="245"/>
-        <location filename="../src/SettingsDialog.cpp" line="678"/>
+        <location filename="../src/SettingsDialog.cpp" line="682"/>
         <source>关于与更新</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="528"/>
+        <location filename="../src/SettingsDialog.cpp" line="532"/>
         <source>减少渐变色带，文件稍大</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="587"/>
+        <location filename="../src/SettingsDialog.cpp" line="591"/>
         <source>凭据</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="717"/>
+        <location filename="../src/SettingsDialog.cpp" line="721"/>
         <source>反馈问题时可附上日志与崩溃转储</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1281,7 +1323,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="580"/>
+        <location filename="../src/SettingsDialog.cpp" line="584"/>
         <source>可选；以 DPAPI 加密保存</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1291,12 +1333,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="707"/>
+        <location filename="../src/SettingsDialog.cpp" line="711"/>
         <source>启动时检查，每天最多一次</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="542"/>
+        <location filename="../src/SettingsDialog.cpp" line="546"/>
         <source>启用上传</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1307,12 +1349,12 @@
     </message>
     <message>
         <location filename="../src/SettingsDialog.cpp" line="244"/>
-        <location filename="../src/SettingsDialog.cpp" line="645"/>
+        <location filename="../src/SettingsDialog.cpp" line="649"/>
         <source>外观与语言</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="703"/>
+        <location filename="../src/SettingsDialog.cpp" line="707"/>
         <source>尚未检查</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1332,38 +1374,33 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="513"/>
-        <source>录制 MP4 / GIF 时的画面设置</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../src/SettingsDialog.cpp" line="318"/>
         <source>快捷键、启动与历史记录</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="542"/>
+        <location filename="../src/SettingsDialog.cpp" line="546"/>
         <source>截图工具条与钉图菜单中出现“上传”</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="713"/>
+        <location filename="../src/SettingsDialog.cpp" line="717"/>
         <source>打开 GitHub</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="716"/>
+        <location filename="../src/SettingsDialog.cpp" line="720"/>
         <source>打开日志文件夹</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="528"/>
+        <location filename="../src/SettingsDialog.cpp" line="532"/>
         <source>抖动</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="568"/>
-        <location filename="../src/SettingsDialog.cpp" line="632"/>
+        <location filename="../src/SettingsDialog.cpp" line="572"/>
+        <location filename="../src/SettingsDialog.cpp" line="636"/>
         <source>接收 multipart/form-data POST 的地址</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1373,17 +1410,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="717"/>
+        <location filename="../src/SettingsDialog.cpp" line="721"/>
         <source>日志</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="712"/>
+        <location filename="../src/SettingsDialog.cpp" line="716"/>
         <source>更多</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="703"/>
+        <location filename="../src/SettingsDialog.cpp" line="707"/>
         <source>更新</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1415,12 +1452,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="691"/>
+        <location filename="../src/SettingsDialog.cpp" line="695"/>
         <source>版本 %1 · 简洁好看的 Windows 截图工具</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="678"/>
+        <location filename="../src/SettingsDialog.cpp" line="682"/>
         <source>版本信息、更新与诊断</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1430,7 +1467,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="661"/>
+        <location filename="../src/SettingsDialog.cpp" line="665"/>
         <source>界面语言</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1445,12 +1482,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="707"/>
+        <location filename="../src/SettingsDialog.cpp" line="711"/>
         <source>自动检查更新</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="572"/>
+        <location filename="../src/SettingsDialog.cpp" line="576"/>
         <source>表单中图片文件的字段名</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1460,12 +1497,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="632"/>
+        <location filename="../src/SettingsDialog.cpp" line="636"/>
         <source>请输入以 http:// 或 https:// 开头的完整地址</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="649"/>
+        <location filename="../src/SettingsDialog.cpp" line="653"/>
         <source>跟随系统时随 Windows 深浅色自动切换</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1495,22 +1532,37 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="559"/>
+        <location filename="../src/SettingsDialog.cpp" line="513"/>
+        <source>录制 MP4 / GIF；麦克风仅用于 MP4</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/SettingsDialog.cpp" line="527"/>
+        <source>录制麦克风</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/SettingsDialog.cpp" line="527"/>
+        <source>仅 MP4；默认关闭。GIF 不支持录音</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/SettingsDialog.cpp" line="563"/>
         <source>选择图床；下方只显示该服务需要的参数</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="689"/>
+        <location filename="../src/SettingsDialog.cpp" line="693"/>
         <source>青影 QingYing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="714"/>
+        <location filename="../src/SettingsDialog.cpp" line="718"/>
         <source>项目主页</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="730"/>
+        <location filename="../src/SettingsDialog.cpp" line="734"/>
         <source>预览：%1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1585,6 +1637,46 @@
         <location filename="../src/ResultDialog.cpp" line="183"/>
         <location filename="../src/Translator.cpp" line="165"/>
         <source>已在设置中关闭联网翻译</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/MicCapture.cpp" line="104"/>
+        <source>无法初始化音频设备枚举</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/MicCapture.cpp" line="109"/>
+        <source>未找到麦克风，请连接设备或在系统声音设置中选择输入设备</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/MicCapture.cpp" line="113"/>
+        <source>无法打开麦克风</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/MicCapture.cpp" line="117"/>
+        <source>无法读取麦克风格式</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/MicCapture.cpp" line="126"/>
+        <source>没有麦克风权限，请在系统设置 → 隐私 → 麦克风中允许应用访问</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/MicCapture.cpp" line="130"/>
+        <source>麦克风初始化失败（0x%1）</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/MicCapture.cpp" line="134"/>
+        <source>无法开始麦克风采集</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/MicCapture.cpp" line="138"/>
+        <source>麦克风启动失败</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

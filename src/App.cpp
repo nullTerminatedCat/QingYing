@@ -298,6 +298,27 @@ void App::writeSmokeReport()
                         .arg(started).arg(rec.framesWritten()).arg(QFileInfo(out).size()).arg(err + rec.lastError())
                         .arg(rec.backend()).arg(rec.estimatedBytes()).toUtf8());
         }
+        // 可选：带麦克风的短 MP4（默认关；设置 QINGYING_SMOKE_MIC=1 启用）
+        if (qEnvironmentVariableIsSet("QINGYING_SMOKE_MIC")) {
+            const QString out = QDir::temp().filePath(QStringLiteral("qy_smoke_mic.mp4"));
+            QFile::remove(out);
+            Recorder rec(QRect(0, 0, 320, 240), Recorder::Format::Mp4, 15, true, out);
+            rec.setRecordMic(true);
+            QString err;
+            const bool started = rec.start(&err);
+            const bool capturing = rec.micCapturing();
+            const QString warn = rec.micWarning();
+            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+            rec.stop();
+            f.write(QStringLiteral("record_mp4_mic started=%1 capturing=%2 warn=%3 frames=%4 bytes=%5 error=%6\n")
+                        .arg(started)
+                        .arg(capturing)
+                        .arg(warn)
+                        .arg(rec.framesWritten())
+                        .arg(QFileInfo(out).size())
+                        .arg(err + rec.lastError())
+                        .toUtf8());
+        }
     }
     if (qEnvironmentVariableIsSet("QINGYING_SMOKE_SHOTS")) {
         const QString dir = qEnvironmentVariable("QINGYING_SMOKE_SHOTS");
@@ -446,6 +467,8 @@ void App::startRecording(const QRect& region)
     if (!s->begin(&err)) {
         m_tray->showMessage(QCoreApplication::translate("QingYing", "无法开始录制"), err, QSystemTrayIcon::Warning, 5000);
         s->close();
+    } else if (!s->micWarning().isEmpty()) {
+        m_tray->showMessage(QCoreApplication::translate("QingYing", "麦克风不可用"), s->micWarning(), QSystemTrayIcon::Warning, 5000);
     }
 }
 

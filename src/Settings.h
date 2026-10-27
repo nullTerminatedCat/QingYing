@@ -30,6 +30,8 @@ int recordFps();
 void setRecordFps(int fps);
 bool recordCursor();
 void setRecordCursor(bool on);
+bool recordMic(); // MP4 录制麦克风，默认关；GIF 忽略
+void setRecordMic(bool on);
 QString theme(); // system / light / dark
 void setTheme(const QString& t);
 bool gifDither();

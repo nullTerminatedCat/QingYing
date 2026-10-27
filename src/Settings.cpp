@@ -83,6 +83,8 @@ int recordFps()
 void setRecordFps(int fps) { store().setValue("recordFps", fps); }
 bool recordCursor() { return store().value("recordCursor", true).toBool(); }
 void setRecordCursor(bool on) { store().setValue("recordCursor", on); }
+bool recordMic() { return store().value("recordMic", false).toBool(); }
+void setRecordMic(bool on) { store().setValue("recordMic", on); }
 
 bool uploadEnabled() { return store().value("upload/enabled", false).toBool(); }
 void setUploadEnabled(bool on) { store().setValue("upload/enabled", on); }

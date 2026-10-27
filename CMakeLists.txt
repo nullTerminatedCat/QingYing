@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(QingYing VERSION 0.6.0 LANGUAGES CXX)
+project(QingYing VERSION 0.6.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -53,6 +53,7 @@ qt_add_executable(QingYing WIN32
     src/Recognize.cpp src/Recognize.h
     src/QrDecoder.cpp src/QrDecoder.h
     src/Recorder.cpp src/Recorder.h
+    src/MicCapture.cpp src/MicCapture.h
     src/RecordSession.cpp src/RecordSession.h
     third_party/gif/gif.h
     src/Theme.cpp src/Theme.h
@@ -87,7 +88,7 @@ qt_add_resources(QingYing "ui_images" PREFIX "/ui" BASE resources/ui FILES
 target_compile_definitions(QingYing PRIVATE
     UNICODE _UNICODE NOMINMAX WIN32_LEAN_AND_MEAN
     QINGYING_VERSION="${PROJECT_VERSION}")
-target_link_libraries(QingYing PRIVATE Qt6::Widgets Qt6::Network ZXing::ZXing user32 gdi32 dwmapi windowsapp mfplat mfreadwrite mfuuid ole32 crypt32 d3d11 dxgi dbghelp)
+target_link_libraries(QingYing PRIVATE Qt6::Widgets Qt6::Network ZXing::ZXing user32 gdi32 dwmapi windowsapp mfplat mfreadwrite mfuuid ole32 crypt32 d3d11 dxgi dbghelp mmdevapi)
 if(MSVC)
     target_compile_options(QingYing PRIVATE /utf-8 /W3 /permissive- /bigobj)
 endif()

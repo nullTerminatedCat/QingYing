@@ -13,7 +13,9 @@
 #include <condition_variable>
 #include <deque>
 #include <vector>
+#include <cstdint>
 #include "CursorBlend.h"
+#include "MicCapture.h"
 #include "GifPalette.h"
 #include <mutex>
 
@@ -41,12 +43,22 @@ public:
     virtual ~Sink() = default;
     virtual bool open(int w, int h, int fps, const QString& path, QString* err) = 0;
     virtual bool write(const uchar* bgra, int stride, qint64 ms) = 0;
+    virtual bool writeAudio(const int16_t* pcm, uint32_t frames, int channels, int rate, qint64 ms) { Q_UNUSED(pcm); Q_UNUSED(frames); Q_UNUSED(channels); Q_UNUSED(rate); Q_UNUSED(ms); return true; }
     virtual bool close(QString* err) = 0;
     virtual qint64 bytes(qint64 ms) const = 0; // 当前文件大小估计
+    virtual void enableAudio(int /*rate*/, int /*channels*/) {}
+    virtual bool hasAudio() const { return false; }
 };
 
 class Mp4Sink : public Sink {
 public:
+    void enableAudio(int rate, int channels) override
+    {
+        m_wantAudio = true;
+        m_ar = rate > 0 ? rate : 48000;
+        m_ac = channels >= 2 ? 2 : 1;
+    }
+
     bool open(int w, int h, int fps, const QString& path, QString* err) override
     {
         m_w = w;
@@ -79,13 +91,47 @@ public:
         in->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
         in->SetGUID(MF_MT_SUBTYPE, MFVideoFormat_RGB32);
         in->SetUINT32(MF_MT_INTERLACE_MODE, MFVideoInterlace_Progressive);
-        in->SetUINT32(MF_MT_DEFAULT_STRIDE, UINT32(w * 4)); // 正 stride = 自上而下
+        in->SetUINT32(MF_MT_DEFAULT_STRIDE, UINT32(w * 4)); // 负 stride = 底朝上位图
         MFSetAttributeSize(in, MF_MT_FRAME_SIZE, w, h);
         MFSetAttributeRatio(in, MF_MT_FRAME_RATE, fps, 1);
         MFSetAttributeRatio(in, MF_MT_PIXEL_ASPECT_RATIO, 1, 1);
         hr = m_writer->SetInputMediaType(m_stream, in, nullptr);
         releaseCom(in);
-        if (FAILED(hr)) return fail(err, QCoreApplication::translate("QingYing", "设置输入格式失败（0x%1）").arg(quint32(hr), 8, 16, QLatin1Char('0')));
+        if (FAILED(hr)) return fail(err, QCoreApplication::translate("QingYing", "设置视频输入格式失败（0x%1）").arg(quint32(hr), 8, 16, QLatin1Char('0')));
+
+        if (m_wantAudio) {
+            IMFMediaType* aOut = nullptr;
+            MFCreateMediaType(&aOut);
+            aOut->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio);
+            aOut->SetGUID(MF_MT_SUBTYPE, MFAudioFormat_AAC);
+            aOut->SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND, UINT32(m_ar));
+            aOut->SetUINT32(MF_MT_AUDIO_NUM_CHANNELS, UINT32(m_ac));
+            aOut->SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE, 16);
+            aOut->SetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND, 16000); // ~128 kbps
+            aOut->SetUINT32(MF_MT_AAC_PAYLOAD_TYPE, 0);
+            aOut->SetUINT32(MF_MT_AAC_AUDIO_PROFILE_LEVEL_INDICATION, 0x29);
+            hr = m_writer->AddStream(aOut, &m_aStream);
+            releaseCom(aOut);
+            if (FAILED(hr)) {
+                m_wantAudio = false; // 编码器不支持则退化为无声视频，不整段失败
+            } else {
+                IMFMediaType* aIn = nullptr;
+                MFCreateMediaType(&aIn);
+                aIn->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio);
+                aIn->SetGUID(MF_MT_SUBTYPE, MFAudioFormat_PCM);
+                aIn->SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND, UINT32(m_ar));
+                aIn->SetUINT32(MF_MT_AUDIO_NUM_CHANNELS, UINT32(m_ac));
+                aIn->SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE, 16);
+                aIn->SetUINT32(MF_MT_AUDIO_BLOCK_ALIGNMENT, UINT32(m_ac * 2));
+                aIn->SetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND, UINT32(m_ar * m_ac * 2));
+                aIn->SetUINT32(MF_MT_ALL_SAMPLES_INDEPENDENT, TRUE);
+                hr = m_writer->SetInputMediaType(m_aStream, aIn, nullptr);
+                releaseCom(aIn);
+                if (FAILED(hr)) m_wantAudio = false;
+                else m_audio = true;
+            }
+        }
+
         if (FAILED(m_writer->BeginWriting())) return fail(err, QCoreApplication::translate("QingYing", "开始写入失败"));
         return true;
     }
@@ -112,12 +158,35 @@ public:
         return SUCCEEDED(hr);
     }
 
-    qint64 bytes(qint64 ms) const override { return m_rate / 8 * ms / 1000; }
+    bool writeAudio(const int16_t* pcm, uint32_t frames, int channels, int rate, qint64 ms) override
+    {
+        if (!m_audio || !pcm || frames == 0) return true;
+        const DWORD bytes = DWORD(frames * channels * sizeof(int16_t));
+        IMFMediaBuffer* buf = nullptr;
+        if (FAILED(MFCreateMemoryBuffer(bytes, &buf))) return false;
+        BYTE* dst = nullptr;
+        buf->Lock(&dst, nullptr, nullptr);
+        memcpy(dst, pcm, bytes);
+        buf->Unlock();
+        buf->SetCurrentLength(bytes);
+        IMFSample* sample = nullptr;
+        MFCreateSample(&sample);
+        sample->AddBuffer(buf);
+        sample->SetSampleTime(ms * 10'000);
+        sample->SetSampleDuration(LONGLONG(frames) * 10'000'000LL / qMax(1, rate));
+        const HRESULT hr = m_writer->WriteSample(m_aStream, sample);
+        releaseCom(sample);
+        releaseCom(buf);
+        if (SUCCEEDED(hr)) m_audioBytes += bytes;
+        return SUCCEEDED(hr);
+    }
+
+    qint64 bytes(qint64 ms) const override { return m_rate / 8 * ms / 1000 + m_audioBytes; }
 
     bool close(QString* err) override
     {
         bool ok = true;
-        if (m_writer && FAILED(m_writer->Finalize())) ok = fail(err, QCoreApplication::translate("QingYing", "写入 MP4 结尾失败（录制时间可能太短）"));
+        if (m_writer && FAILED(m_writer->Finalize())) ok = fail(err, QCoreApplication::translate("QingYing", "写入 MP4 收尾失败（录制时长可能太短）"));
         releaseCom(m_writer);
         if (m_mf) MFShutdown();
         m_mf = false;
@@ -138,9 +207,16 @@ private:
     }
     IMFSinkWriter* m_writer = nullptr;
     DWORD m_stream = 0;
+    DWORD m_aStream = 0;
     int m_w = 0, m_h = 0, m_fps = 15;
+    int m_ar = 48000, m_ac = 1;
     qint64 m_rate = 0;
+    qint64 m_audioBytes = 0;
     bool m_mf = false;
+    bool m_wantAudio = false;
+    bool m_audio = false;
+public:
+    bool hasAudio() const override { return m_audio; }
 };
 
 // GIF：抓帧线程只做拷贝，调色板量化与 LZW 编码放在独立线程；连续相同的帧合并为一帧（延长显示时间）
@@ -486,13 +562,40 @@ void Recorder::run()
     std::unique_ptr<Sink> sink;
     if (m_format == Format::Mp4) sink = std::make_unique<Mp4Sink>();
     else sink = std::make_unique<GifSink>(m_gifDither);
+
+    std::unique_ptr<MicCapture> mic;
+    m_micWarning.clear();
+    m_micCapturing = false;
+    if (m_mic && m_format == Format::Mp4) {
+        mic = std::make_unique<MicCapture>();
+        QString micErr;
+        if (!mic->open(&micErr)) {
+            m_micWarning = micErr;
+            mic.reset();
+        } else {
+            mic->setMuted(m_micMuted);
+            sink->enableAudio(mic->sampleRate(), mic->channels());
+        }
+    }
+
     QDir().mkpath(QFileInfo(m_path).absolutePath());
     QString err;
     if (w < 16 || h < 16 || !sink->open(w, h, m_fps, m_path, &err)) {
         m_error = err.isEmpty() ? QCoreApplication::translate("QingYing", "录制区域太小") : err;
+        if (mic) mic->stop();
         m_started = -1;
         CoUninitialize();
         return;
+    }
+    if (mic) {
+        if (!sink->hasAudio()) {
+            m_micWarning = QCoreApplication::translate("QingYing", "当前环境无法写入 AAC 音轨，已继续无声录制");
+            mic->stop();
+            mic.reset();
+            m_micCapturing = false;
+        } else {
+            m_micCapturing = true;
+        }
     }
     m_started = 1;
 
@@ -520,6 +623,12 @@ void Recorder::run()
     while (!m_stop) {
         if (m_paused) {
             if (pauseStart < 0) pauseStart = clock.elapsed();
+            if (mic) {
+                mic->setMuted(m_micMuted);
+                std::vector<int16_t> discard;
+                uint32_t df = 0;
+                mic->drain(&discard, &df);
+            }
             std::this_thread::sleep_for(std::chrono::milliseconds(20));
             continue;
         }
@@ -543,11 +652,45 @@ void Recorder::run()
             m_error = QCoreApplication::translate("QingYing", "写入视频帧失败");
             break;
         }
+        if (mic) {
+            mic->setMuted(m_micMuted);
+            if (!m_micMuted) {
+                std::vector<int16_t> pcm;
+                uint32_t aframes = 0;
+                mic->drain(&pcm, &aframes);
+                if (aframes > 0) {
+                    const qint64 audioMs = qMax<qint64>(0, t - qint64(aframes) * 1000 / qMax(1, mic->sampleRate()));
+                    if (!sink->writeAudio(pcm.data(), aframes, mic->channels(), mic->sampleRate(), audioMs)
+                        && m_error.isEmpty()) {
+                        m_micWarning = QCoreApplication::translate("QingYing", "麦克风写入失败，已继续无声录制");
+                        m_micCapturing = false;
+                        mic->stop();
+                        mic.reset();
+                    }
+                }
+            } else {
+                std::vector<int16_t> discard;
+                uint32_t df = 0;
+                mic->drain(&discard, &df);
+            }
+        }
         ++m_frames;
         m_elapsed = t;
         m_bytes = sink->bytes(t);
         next += interval;
         if (t > next + interval * 3) next = t + interval; // 编码跟不上时丢帧
+    }
+    if (mic) {
+        if (!m_micMuted) {
+            std::vector<int16_t> pcm;
+            uint32_t aframes = 0;
+            mic->drain(&pcm, &aframes);
+            if (aframes > 0)
+                sink->writeAudio(pcm.data(), aframes, mic->channels(), mic->sampleRate(), m_elapsed.load());
+        }
+        mic->stop();
+        mic.reset();
+        m_micCapturing = false;
     }
     dxgi.reset();
     SelectObject(mem, old);

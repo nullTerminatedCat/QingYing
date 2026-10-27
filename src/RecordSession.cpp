@@ -81,10 +81,34 @@ QIcon stopIcon()
     p.drawRoundedRect(QRectF(11, 11, 18, 18), 4, 4);
     return QIcon(pm);
 }
+
+// 简洁麦克风图标；active 用品牌色，静音/不可用灰色并划斜线
+QIcon micIcon(bool active, bool muted)
+{
+    QPixmap pm(40, 40);
+    pm.fill(Qt::transparent);
+    QPainter p(&pm);
+    p.setRenderHint(QPainter::Antialiasing);
+    p.setPen(Qt::NoPen);
+    const QColor c = (!active || muted) ? Style::Text3 : QColor(QStringLiteral("#4F6BFF"));
+    p.setBrush(c);
+    p.drawRoundedRect(QRectF(15, 8, 10, 14), 5, 5);
+    p.setPen(QPen(c, 2.2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    p.setBrush(Qt::NoBrush);
+    p.drawArc(QRectF(11, 14, 18, 14), 0, -180 * 16);
+    p.drawLine(QPointF(20, 28), QPointF(20, 32));
+    p.drawLine(QPointF(15, 32), QPointF(25, 32));
+    if (muted || !active) {
+        p.setPen(QPen(Style::Danger, 2.0, Qt::SolidLine, Qt::RoundCap));
+        p.drawLine(QPointF(10, 10), QPointF(30, 30));
+    }
+    return QIcon(pm);
+}
 }
 
 RecordSession::RecordSession(const QRect& region, Recorder::Format format)
     : QWidget(nullptr, Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Tool)
+    , m_format(format)
 {
     setAttribute(Qt::WA_TranslucentBackground);
     setAttribute(Qt::WA_DeleteOnClose);
@@ -92,6 +116,8 @@ RecordSession::RecordSession(const QRect& region, Recorder::Format format)
     const QString path = QDir(Settings::saveDir()).filePath(Settings::expandPattern(Settings::filePattern()) + ext);
     m_rec = new Recorder(region, format, Settings::recordFps(), Settings::recordCursor(), path);
     m_rec->setGifDither(Settings::gifDither());
+    if (format == Recorder::Format::Mp4)
+        m_rec->setRecordMic(Settings::recordMic());
 
     auto* lay = new QHBoxLayout(this);
     lay->setContentsMargins(22, 18, 18, 18);
@@ -115,6 +141,27 @@ RecordSession::RecordSession(const QRect& region, Recorder::Format format)
     m_pause = mk(pauseIcon(false), QCoreApplication::translate("QingYing", "暂停"));
     m_stop = mk(stopIcon(), QCoreApplication::translate("QingYing", "停止并保存（Esc）"));
     lay->addWidget(m_pause);
+    if (format == Recorder::Format::Mp4) {
+        const bool want = Settings::recordMic();
+        m_mic = mk(micIcon(want, false),
+                   want ? QCoreApplication::translate("QingYing", "麦克风开启（点击静音）")
+                        : QCoreApplication::translate("QingYing", "麦克风已关（点击开启，需在设置中默认开启才有音轨）"));
+        lay->addWidget(m_mic);
+        connect(m_mic, &QToolButton::clicked, this, [this] {
+            if (!m_rec->micCapturing()) {
+                // 本次未打开音轨：写入设置，提示下次生效；仍允许本地静音状态反馈
+                Settings::setRecordMic(true);
+                m_mic->setToolTip(QCoreApplication::translate("QingYing", "已记住开启麦克风，下次 MP4 录制生效"));
+                m_mic->setIcon(micIcon(true, false));
+                return;
+            }
+            m_rec->setMicMuted(!m_rec->isMicMuted());
+            const bool muted = m_rec->isMicMuted();
+            m_mic->setIcon(micIcon(true, muted));
+            m_mic->setToolTip(muted ? QCoreApplication::translate("QingYing", "已静音（点击恢复）")
+                                    : QCoreApplication::translate("QingYing", "麦克风开启（点击静音）"));
+        });
+    }
     lay->addWidget(m_stop);
     connect(m_pause, &QToolButton::clicked, this, [this] {
         m_rec->setPaused(!m_rec->isPaused());
@@ -151,6 +198,8 @@ RecordSession::~RecordSession()
     delete m_frame;
 }
 
+QString RecordSession::micWarning() const { return m_rec ? m_rec->micWarning() : QString(); }
+
 bool RecordSession::begin(QString* error)
 {
     m_frame->show();
@@ -158,6 +207,18 @@ bool RecordSession::begin(QString* error)
     exclude(m_frame);
     exclude(this);
     if (!m_rec->start(error)) return false;
+    if (m_mic) {
+        const bool on = m_rec->micCapturing();
+        m_mic->setIcon(micIcon(on, m_rec->isMicMuted()));
+        if (!m_rec->micWarning().isEmpty()) {
+            m_mic->setToolTip(m_rec->micWarning());
+            // 不阻断录屏：麦克风失败时继续无声，由托盘在 finished 前也可提示
+        } else if (on) {
+            m_mic->setToolTip(QCoreApplication::translate("QingYing", "麦克风开启（点击静音）"));
+        } else {
+            m_mic->setToolTip(QCoreApplication::translate("QingYing", "本次未录制麦克风"));
+        }
+    }
     m_esc->setHotkey(QKeySequence(Qt::Key_Escape));
     m_tick.start();
     return true;

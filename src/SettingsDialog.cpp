@@ -510,7 +510,7 @@ QWidget* SettingsDialog::buildAnnotate()
 QWidget* SettingsDialog::buildRecord()
 {
     QVBoxLayout* b;
-    QWidget* w = makePage(QCoreApplication::translate("QingYing", "录屏"), QCoreApplication::translate("QingYing", "录制 MP4 / GIF 时的画面设置"), b);
+    QWidget* w = makePage(QCoreApplication::translate("QingYing", "录屏"), QCoreApplication::translate("QingYing", "录制 MP4 / GIF；麦克风仅用于 MP4"), b);
     Card c = addCard(b, QCoreApplication::translate("QingYing", "画面"));
     auto* fps = new Segmented({QStringLiteral("10 fps"), QStringLiteral("15 fps"), QStringLiteral("30 fps")});
     const int cur = Settings::recordFps();
@@ -522,6 +522,10 @@ QWidget* SettingsDialog::buildRecord()
     });
     addRow(c, QCoreApplication::translate("QingYing", "录制鼠标指针"), QCoreApplication::translate("QingYing", "在画面中绘制鼠标指针"), toggle(Settings::recordCursor(), [this](bool on) {
                Settings::setRecordCursor(on);
+               emit changed();
+           }));
+    addRow(c, QCoreApplication::translate("QingYing", "录制麦克风"), QCoreApplication::translate("QingYing", "仅 MP4；默认关闭。GIF 不支持录音"), toggle(Settings::recordMic(), [this](bool on) {
+               Settings::setRecordMic(on);
                emit changed();
            }));
     c = addCard(b, QStringLiteral("GIF"));

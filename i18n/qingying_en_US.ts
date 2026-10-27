@@ -34,19 +34,24 @@
         <translation>Capturing in %1 s</translation>
     </message>
     <message>
-        <location line="+55"/>
+        <location line="+34"/>
+        <source>麦克风不可用</source>
+        <translation>Microphone unavailable</translation>
+    </message>
+    <message>
+        <location line="+23"/>
         <source>%1:%2:%3  %4×%5  复制</source>
         <translation>%1:%2:%3  %4×%5  Copy</translation>
     </message>
     <message>
-        <location line="-32"/>
+        <location line="-34"/>
         <source>%1
 点击打开所在文件夹</source>
         <translation>%1
 Click to open the containing folder</translation>
     </message>
     <message>
-        <location line="+194"/>
+        <location line="+196"/>
         <source>%1保存一次全屏截图到 %2</source>
         <translation>%1, a full-screen capture is saved to %2</translation>
     </message>
@@ -66,14 +71,14 @@ Click to open the containing folder</translation>
         <translation>C Copy</translation>
     </message>
     <message>
-        <location filename="../src/Recorder.cpp" line="+76"/>
+        <location filename="../src/Recorder.cpp" line="+88"/>
         <source>H.264 编码器不支持该尺寸（0x%1）</source>
         <translation>The H.264 encoder does not support this size (0x%1)</translation>
     </message>
     <message>
         <location filename="../src/CaptureOverlay.cpp" line="-450"/>
         <location filename="../src/PinWindow.cpp" line="+255"/>
-        <location filename="../src/ScrollCapture.cpp" line="+265"/>
+        <location filename="../src/ScrollCapture.cpp" line="+267"/>
         <source>JPG 图片 (*.jpg *.jpeg)</source>
         <translation>JPG image (*.jpg *.jpeg)</translation>
     </message>
@@ -101,7 +106,7 @@ Click to open the containing folder</translation>
     </message>
     <message>
         <location filename="../src/SettingsDialog.cpp" line="-201"/>
-        <location line="+295"/>
+        <location line="+299"/>
         <source>上传</source>
         <translation>Upload</translation>
     </message>
@@ -147,7 +152,7 @@ Click to open the containing folder</translation>
         <translation>Failed to download the update</translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="-211"/>
+        <location filename="../src/SettingsDialog.cpp" line="-215"/>
         <source>不保留</source>
         <translation>None</translation>
     </message>
@@ -167,7 +172,7 @@ Click to open the containing folder</translation>
         <translation>QR / barcode</translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="-157"/>
+        <location filename="../src/ScrollCapture.cpp" line="-158"/>
         <location filename="../src/SettingsDialog.cpp" line="+14"/>
         <location line="+65"/>
         <source>保存</source>
@@ -190,17 +195,44 @@ Click to open the containing folder</translation>
         <translation>Save pin</translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="-529"/>
+        <location filename="../src/App.cpp" line="-531"/>
         <source>停止定时截图</source>
         <translation>Stop timed capture</translation>
     </message>
     <message>
-        <location filename="../src/RecordSession.cpp" line="+116"/>
+        <location filename="../src/RecordSession.cpp" line="+142"/>
         <source>停止并保存（Esc）</source>
         <translation>Stop and save (Esc)</translation>
     </message>
     <message>
-        <location line="+56"/>
+        <location line="+5"/>
+        <location line="+15"/>
+        <location line="+55"/>
+        <source>麦克风开启（点击静音）</source>
+        <translation>Mic on (click to mute)</translation>
+    </message>
+    <message>
+        <location line="-69"/>
+        <source>麦克风已关（点击开启，需在设置中默认开启才有音轨）</source>
+        <translation>Mic off (turn on in Settings to record audio)</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>已记住开启麦克风，下次 MP4 录制生效</source>
+        <translation>Mic will be on for the next MP4 recording</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>已静音（点击恢复）</source>
+        <translation>Muted (click to unmute)</translation>
+    </message>
+    <message>
+        <location line="+58"/>
+        <source>本次未录制麦克风</source>
+        <translation>Mic not recorded this session</translation>
+    </message>
+    <message>
+        <location line="+14"/>
         <source>暂停 %1  %2 MB</source>
         <translation>Paused %1  %2 MB</translation>
     </message>
@@ -226,7 +258,7 @@ Click to open the containing folder</translation>
     </message>
     <message>
         <location line="+10"/>
-        <location line="+500"/>
+        <location line="+502"/>
         <source>关于青影</source>
         <translation>About QingYing</translation>
     </message>
@@ -237,12 +269,7 @@ Click to open the containing folder</translation>
         <translation>Close</translation>
     </message>
     <message>
-        <location filename="../src/Recorder.cpp" line="+65"/>
-        <source>写入 MP4 结尾失败（录制时间可能太短）</source>
-        <translation>Failed to finalize the MP4 (the recording may be too short)</translation>
-    </message>
-    <message>
-        <location line="+423"/>
+        <location filename="../src/Recorder.cpp" line="+585"/>
         <source>写入视频帧失败</source>
         <translation>Failed to write a video frame</translation>
     </message>
@@ -278,7 +305,7 @@ Click to open the containing folder</translation>
         <translation>Cancel  Esc</translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="-288"/>
+        <location filename="../src/App.cpp" line="-290"/>
         <source>取色</source>
         <translation>Color picker</translation>
     </message>
@@ -295,7 +322,7 @@ Click to open the containing folder</translation>
     <message>
         <location line="-384"/>
         <location filename="../src/ScrollCapture.cpp" line="-2"/>
-        <location line="+160"/>
+        <location line="+161"/>
         <source>另存为</source>
         <translation>Save as</translation>
     </message>
@@ -311,13 +338,13 @@ Click to open the containing folder</translation>
         <location filename="../src/ResultDialog.cpp" line="-52"/>
         <location line="+11"/>
         <location line="+42"/>
-        <location filename="../src/ScrollCapture.cpp" line="-162"/>
+        <location filename="../src/ScrollCapture.cpp" line="-163"/>
         <location filename="../src/SettingsDialog.cpp" line="-13"/>
         <source>复制</source>
         <translation>Copy</translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="+210"/>
+        <location filename="../src/SettingsDialog.cpp" line="+214"/>
         <source>外观</source>
         <translation>Appearance</translation>
     </message>
@@ -381,7 +408,7 @@ Actual: %2</translation>
         <translation>Timed capture</translation>
     </message>
     <message>
-        <location line="+458"/>
+        <location line="+460"/>
         <source>定时截图已开始</source>
         <translation>Timed capture started</translation>
     </message>
@@ -394,12 +421,12 @@ Actual: %2</translation>
         <location filename="../src/ScrollCapture.cpp" line="+18"/>
         <location line="+19"/>
         <location line="+46"/>
-        <location line="+115"/>
+        <location line="+118"/>
         <source>已停止</source>
         <translation>Stopped</translation>
     </message>
     <message>
-        <location line="-127"/>
+        <location line="-130"/>
         <source>无法截取选区，请重新选择或缩小范围</source>
         <translation>Could not capture this region. Select a smaller area and try again.</translation>
     </message>
@@ -424,12 +451,12 @@ Actual: %2</translation>
         <translation>Not enough memory. Close other programs and retry. Your capture is still available.</translation>
     </message>
     <message>
-        <location line="+18"/>
+        <location line="+19"/>
         <source>保存失败，长图已保留。请重试或使用“另存为”更换位置。</source>
         <translation>Save failed. Your capture is still available. Retry or choose a different location with Save as.</translation>
     </message>
     <message>
-        <location line="+18"/>
+        <location line="+19"/>
         <source>正在滚动截取 · %1 帧 · %2×%3</source>
         <translation>Capturing · %1 frames · %2×%3</translation>
     </message>
@@ -506,7 +533,7 @@ Actual: %2</translation>
         <translation>You&apos;re up to date</translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="-128"/>
+        <location filename="../src/SettingsDialog.cpp" line="-132"/>
         <source>帧率</source>
         <translation>Frame rate</translation>
     </message>
@@ -527,13 +554,13 @@ Actual: %2</translation>
         <translation>Number  N</translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="-386"/>
+        <location filename="../src/App.cpp" line="-388"/>
         <location line="+245"/>
         <source>延时截图</source>
         <translation>Delayed capture</translation>
     </message>
     <message>
-        <location filename="../src/Recorder.cpp" line="-454"/>
+        <location filename="../src/Recorder.cpp" line="-517"/>
         <source>开始写入失败</source>
         <translation>Failed to start writing</translation>
     </message>
@@ -553,7 +580,7 @@ Actual: %2</translation>
         <translation>Record MP4</translation>
     </message>
     <message>
-        <location filename="../src/Recorder.cpp" line="+403"/>
+        <location filename="../src/Recorder.cpp" line="+449"/>
         <source>录制区域太小</source>
         <translation>Recording area is too small</translation>
     </message>
@@ -628,7 +655,7 @@ Actual: %2</translation>
         <translation>Capture done</translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="+63"/>
+        <location filename="../src/App.cpp" line="+65"/>
         <source>截图已保存</source>
         <translation>Screenshot saved</translation>
     </message>
@@ -655,7 +682,7 @@ Actual: %2</translation>
         <translation>Open link</translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="-364"/>
+        <location filename="../src/App.cpp" line="-366"/>
         <source>按 %1 开始截图</source>
         <translation>Press %1 to capture</translation>
     </message>
@@ -675,12 +702,12 @@ Actual: %2</translation>
         <translation>File name</translation>
     </message>
     <message>
-        <location line="+156"/>
+        <location line="+160"/>
         <source>文件字段</source>
         <translation>File field</translation>
     </message>
     <message>
-        <location line="-96"/>
+        <location line="-100"/>
         <source>文字</source>
         <translation>Text</translation>
     </message>
@@ -700,7 +727,7 @@ Actual: %2</translation>
         <translation>None</translation>
     </message>
     <message>
-        <location filename="../src/Recorder.cpp" line="-302"/>
+        <location filename="../src/Recorder.cpp" line="-318"/>
         <location filename="../src/Updater.cpp" line="+50"/>
         <source>无法写入 %1</source>
         <translation>Cannot write %1</translation>
@@ -711,9 +738,29 @@ Actual: %2</translation>
         <translation>Cannot create the temporary GIF file</translation>
     </message>
     <message>
-        <location line="-99"/>
+        <location line="-163"/>
         <source>无法创建 MP4 文件（0x%1）</source>
         <translation>Cannot create the MP4 file (0x%1)</translation>
+    </message>
+    <message>
+        <location line="+26"/>
+        <source>设置视频输入格式失败（0x%1）</source>
+        <translation>Failed to set video input format (0x%1)</translation>
+    </message>
+    <message>
+        <location line="+89"/>
+        <source>写入 MP4 收尾失败（录制时长可能太短）</source>
+        <translation>Failed to finalize MP4 (recording may be too short)</translation>
+    </message>
+    <message>
+        <location line="+403"/>
+        <source>当前环境无法写入 AAC 音轨，已继续无声录制</source>
+        <translation>AAC audio unavailable; continuing without sound</translation>
+    </message>
+    <message>
+        <location line="+73"/>
+        <source>麦克风写入失败，已继续无声录制</source>
+        <translation>Mic write failed; continuing without sound</translation>
     </message>
     <message>
         <location filename="../src/Updater.cpp" line="+12"/>
@@ -721,7 +768,7 @@ Actual: %2</translation>
         <translation>Cannot launch the installer</translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="-74"/>
+        <location filename="../src/ScrollCapture.cpp" line="-76"/>
         <source>无法对齐画面，已停止（内容可能在变化）</source>
         <translation>Could not align frames; stopped (content may be changing)</translation>
     </message>
@@ -731,23 +778,23 @@ Actual: %2</translation>
         <translation>Cannot start recording</translation>
     </message>
     <message>
-        <location filename="../src/RecordSession.cpp" line="-57"/>
-        <location line="+7"/>
+        <location filename="../src/RecordSession.cpp" line="-92"/>
+        <location line="+28"/>
         <source>暂停</source>
         <translation>Pause</translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="+29"/>
+        <location filename="../src/App.cpp" line="+31"/>
         <source>暂无记录</source>
         <translation>No history yet</translation>
     </message>
     <message>
-        <location line="-276"/>
+        <location line="-278"/>
         <source>最近截图</source>
         <translation>Recent captures</translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="+78"/>
+        <location filename="../src/SettingsDialog.cpp" line="+82"/>
         <location line="+6"/>
         <source>服务</source>
         <translation>Service</translation>
@@ -758,13 +805,13 @@ Actual: %2</translation>
         <translation>No QR code or barcode found. Select only the code area and make sure it is sharp.</translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="-131"/>
+        <location filename="../src/SettingsDialog.cpp" line="-135"/>
         <source>格式</source>
         <translation>Format</translation>
     </message>
     <message>
         <location filename="../src/App.cpp" line="+7"/>
-        <location filename="../src/SettingsDialog.cpp" line="+272"/>
+        <location filename="../src/SettingsDialog.cpp" line="+276"/>
         <location filename="../src/Updater.cpp" line="-104"/>
         <source>检查更新</source>
         <translation>Check for updates</translation>
@@ -776,7 +823,7 @@ Actual: %2</translation>
         <translation>Update check failed</translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="-225"/>
+        <location filename="../src/SettingsDialog.cpp" line="-229"/>
         <source>椭圆</source>
         <translation>Ellipse</translation>
     </message>
@@ -796,24 +843,24 @@ Actual: %2</translation>
         <translation>Downloading %1 …</translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="-125"/>
+        <location filename="../src/ScrollCapture.cpp" line="-126"/>
         <source>正在滚动截取…</source>
         <translation>Scrolling capture…</translation>
     </message>
     <message>
         <location filename="../src/App.cpp" line="-31"/>
-        <location line="+454"/>
+        <location line="+456"/>
         <source>每 %1 分钟</source>
         <translation>Every %1 min</translation>
     </message>
     <message>
-        <location line="-454"/>
-        <location line="+453"/>
+        <location line="-456"/>
+        <location line="+455"/>
         <source>每 %1 秒</source>
         <translation>Every %1 s</translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="+103"/>
+        <location filename="../src/SettingsDialog.cpp" line="+107"/>
         <source>每行一个，如 Authorization: Bearer xxx</source>
         <translation>One per line, e.g. Authorization: Bearer xxx</translation>
     </message>
@@ -823,7 +870,7 @@ Actual: %2</translation>
         <translation>Flip horizontally	H</translation>
     </message>
     <message>
-        <location filename="../src/RecordSession.cpp" line="+65"/>
+        <location filename="../src/RecordSession.cpp" line="+79"/>
         <source>没有录到画面</source>
         <translation>No frames were recorded</translation>
     </message>
@@ -833,12 +880,12 @@ Actual: %2</translation>
         <translation>Light</translation>
     </message>
     <message>
-        <location line="-274"/>
+        <location line="-278"/>
         <source>浏览…</source>
         <translation>Browse…</translation>
     </message>
     <message>
-        <location line="+274"/>
+        <location line="+278"/>
         <source>深色</source>
         <translation>Dark</translation>
     </message>
@@ -853,7 +900,7 @@ Actual: %2</translation>
         <translation>Clear history</translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="-171"/>
+        <location filename="../src/SettingsDialog.cpp" line="-175"/>
         <source>画笔</source>
         <translation>Pen</translation>
     </message>
@@ -927,7 +974,7 @@ Actual: %2</translation>
         <translation>No OCR language pack is installed. Add a language in Settings → Time &amp; language → Language &amp; region, install its Optical character recognition feature, and try again.</translation>
     </message>
     <message>
-        <location filename="../src/RecordSession.cpp" line="-65"/>
+        <location filename="../src/RecordSession.cpp" line="-79"/>
         <source>继续</source>
         <translation>Resume</translation>
     </message>
@@ -942,7 +989,7 @@ Actual: %2</translation>
         <translation>Annotate	E</translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="+90"/>
+        <location filename="../src/SettingsDialog.cpp" line="+94"/>
         <location filename="../src/Uploader.cpp" line="-41"/>
         <source>自定义 HTTP</source>
         <translation>Custom HTTP</translation>
@@ -953,7 +1000,7 @@ Actual: %2</translation>
         <translation>Custom HTTP (multipart POST)</translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="-332"/>
+        <location filename="../src/App.cpp" line="-334"/>
         <source>设置</source>
         <translation>Settings</translation>
     </message>
@@ -961,11 +1008,6 @@ Actual: %2</translation>
         <location line="-176"/>
         <source>设置…</source>
         <translation>Settings…</translation>
-    </message>
-    <message>
-        <location filename="../src/Recorder.cpp" line="+26"/>
-        <source>设置输入格式失败（0x%1）</source>
-        <translation>Failed to set the input format (0x%1)</translation>
     </message>
     <message>
         <location filename="../src/PinWindow.cpp" line="+4"/>
@@ -1049,7 +1091,7 @@ Actual: %2</translation>
         <translation>Selection is too small; select at least 60×60 pixels.</translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="-182"/>
+        <location filename="../src/SettingsDialog.cpp" line="-186"/>
         <source>选择保存位置</source>
         <translation>Choose save location</translation>
     </message>
@@ -1061,7 +1103,7 @@ Actual: %2</translation>
     <message>
         <location filename="../src/App.cpp" line="-14"/>
         <location line="+199"/>
-        <location filename="../src/ScrollCapture.cpp" line="+17"/>
+        <location filename="../src/ScrollCapture.cpp" line="+18"/>
         <location filename="../src/SettingsDialog.cpp" line="+42"/>
         <source>钉图</source>
         <translation>Pin</translation>
@@ -1082,7 +1124,7 @@ Actual: %2</translation>
         <translation>Pin to desktop  F3</translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="+140"/>
+        <location filename="../src/SettingsDialog.cpp" line="+144"/>
         <source>链接路径</source>
         <translation>Link path</translation>
     </message>
@@ -1107,13 +1149,13 @@ Actual: %2</translation>
         <translation>Scrolling capture: select the area to scroll, then press Enter</translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="-248"/>
+        <location filename="../src/SettingsDialog.cpp" line="-252"/>
         <source>需要包含 Ctrl / Alt / Shift / Win 之一，并使用字母、数字或功能键</source>
         <translation>Needs Ctrl / Alt / Shift / Win plus a letter, digit, or function key</translation>
     </message>
     <message>
         <location filename="../src/App.cpp" line="+49"/>
-        <location line="+388"/>
+        <location line="+390"/>
         <location filename="../src/CaptureOverlay.cpp" line="-378"/>
         <location filename="../src/main.cpp" line="+31"/>
         <location filename="../src/PinWindow.cpp" line="+26"/>
@@ -1144,7 +1186,7 @@ Actual: %2</translation>
         <translation>QingYing · Update</translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="-232"/>
+        <location filename="../src/App.cpp" line="-234"/>
         <source>青影 截图 · %1</source>
         <translation>QingYing capture · %1</translation>
     </message>
@@ -1165,7 +1207,7 @@ Actual: %2</translation>
         <translation>QingYing pin</translation>
     </message>
     <message>
-        <location filename="../src/ScrollCapture.cpp" line="-28"/>
+        <location filename="../src/ScrollCapture.cpp" line="-29"/>
         <source>青影 长截图</source>
         <translation>QingYing scrolling capture</translation>
     </message>
@@ -1210,12 +1252,12 @@ Actual: %2</translation>
         <translation>%1 is in use by another app; try a different combination</translation>
     </message>
     <message>
-        <location line="+329"/>
+        <location line="+333"/>
         <source>Interface language</source>
         <translation>界面语言</translation>
     </message>
     <message>
-        <location line="-233"/>
+        <location line="-237"/>
         <source>PNG 无损清晰；JPG 体积更小</source>
         <translation>PNG is lossless; JPG is smaller</translation>
     </message>
@@ -1225,7 +1267,7 @@ Actual: %2</translation>
         <translation>Text in {} is a date/time format, e.g. {yyyyMMdd_HHmmss}; leave empty for default</translation>
     </message>
     <message>
-        <location line="+123"/>
+        <location line="+127"/>
         <source>上传截图到图床，并把链接复制到剪贴板</source>
         <translation>Upload screenshots to an image host and copy the link</translation>
     </message>
@@ -1245,7 +1287,7 @@ Actual: %2</translation>
         <translation>Encrypted with Windows DPAPI; only your account can decrypt it</translation>
     </message>
     <message>
-        <location line="-220"/>
+        <location line="-224"/>
         <source>保存位置、文件名与截图完成后的动作</source>
         <translation>Save location, file name and what happens after a capture</translation>
     </message>
@@ -1255,13 +1297,13 @@ Actual: %2</translation>
         <translation>Keep</translation>
     </message>
     <message>
-        <location line="+287"/>
+        <location line="+291"/>
         <source>修改后立即生效，无需重启</source>
         <translation>Changes apply immediately, no restart needed</translation>
     </message>
     <message>
-        <location line="-400"/>
-        <location line="+433"/>
+        <location line="-404"/>
+        <location line="+437"/>
         <source>关于与更新</source>
         <translation>About &amp; Updates</translation>
     </message>
@@ -1281,22 +1323,22 @@ Actual: %2</translation>
         <translation>Attach logs and crash dumps when reporting issues</translation>
     </message>
     <message>
-        <location line="-268"/>
+        <location line="-272"/>
         <source>取色器按 C 复制颜色时使用</source>
         <translation>Used when the color picker copies with C</translation>
     </message>
     <message>
-        <location line="+131"/>
+        <location line="+135"/>
         <source>可选；以 DPAPI 加密保存</source>
         <translation>Optional; stored encrypted with DPAPI</translation>
     </message>
     <message>
-        <location line="-234"/>
+        <location line="-238"/>
         <source>启动</source>
         <translation>Startup</translation>
     </message>
     <message>
-        <location line="+361"/>
+        <location line="+365"/>
         <source>启动时检查，每天最多一次</source>
         <translation>Check at startup, at most once a day</translation>
     </message>
@@ -1306,13 +1348,13 @@ Actual: %2</translation>
         <translation>Enable upload</translation>
     </message>
     <message>
-        <location line="-19"/>
+        <location line="-23"/>
         <source>在画面中绘制鼠标指针</source>
         <translation>Draw the mouse pointer into the video</translation>
     </message>
     <message>
         <location line="-279"/>
-        <location line="+401"/>
+        <location line="+405"/>
         <source>外观与语言</source>
         <translation>Appearance &amp; Language</translation>
     </message>
@@ -1322,7 +1364,7 @@ Actual: %2</translation>
         <translation>Never checked</translation>
     </message>
     <message>
-        <location line="-366"/>
+        <location line="-370"/>
         <source>已生效：%1</source>
         <translation>Active: %1</translation>
     </message>
@@ -1337,17 +1379,12 @@ Actual: %2</translation>
         <translation>Launch at sign-in</translation>
     </message>
     <message>
-        <location line="+166"/>
-        <source>录制 MP4 / GIF 时的画面设置</source>
-        <translation>Video settings for MP4 / GIF recording</translation>
-    </message>
-    <message>
-        <location line="-195"/>
+        <location line="-29"/>
         <source>快捷键、启动与历史记录</source>
         <translation>Hotkey, startup and history</translation>
     </message>
     <message>
-        <location line="+224"/>
+        <location line="+228"/>
         <source>截图工具条与钉图菜单中出现“上传”</source>
         <translation>Adds &quot;Upload&quot; to the capture toolbar and pin menu</translation>
     </message>
@@ -1373,12 +1410,12 @@ Actual: %2</translation>
         <translation>Endpoint that accepts a multipart/form-data POST</translation>
     </message>
     <message>
-        <location line="-249"/>
+        <location line="-253"/>
         <source>无法使用该文件夹，请选择一个可写入的完整路径</source>
         <translation>Cannot use this folder; choose a full, writable path</translation>
     </message>
     <message>
-        <location line="+334"/>
+        <location line="+338"/>
         <source>日志</source>
         <translation>Logs</translation>
     </message>
@@ -1393,7 +1430,7 @@ Actual: %2</translation>
         <translation>Updates</translation>
     </message>
     <message>
-        <location line="-345"/>
+        <location line="-349"/>
         <source>最近的截图可在“历史记录”中重新复制、钉图或编辑</source>
         <translation>Recent captures can be copied, pinned or edited again from History</translation>
     </message>
@@ -1420,7 +1457,7 @@ Actual: %2</translation>
         <translation>Click, then press a new combination; Esc cancels</translation>
     </message>
     <message>
-        <location line="+368"/>
+        <location line="+372"/>
         <source>版本 %1 · 简洁好看的 Windows 截图工具</source>
         <translation>Version %1 · A simple, beautiful screenshot tool for Windows</translation>
     </message>
@@ -1430,17 +1467,17 @@ Actual: %2</translation>
         <translation>Version, updates and diagnostics</translation>
     </message>
     <message>
-        <location line="-164"/>
+        <location line="-168"/>
         <source>画面</source>
         <translation>Video</translation>
     </message>
     <message>
-        <location line="+147"/>
+        <location line="+151"/>
         <source>界面语言</source>
         <translation>Interface language</translation>
     </message>
     <message>
-        <location line="-314"/>
+        <location line="-318"/>
         <source>登录 Windows 后在托盘中待命</source>
         <translation>Wait in the tray after you sign in to Windows</translation>
     </message>
@@ -1450,7 +1487,7 @@ Actual: %2</translation>
         <translation>Initial color for rectangles, arrows, pen and more</translation>
     </message>
     <message>
-        <location line="+206"/>
+        <location line="+210"/>
         <source>自动检查更新</source>
         <translation>Check for updates automatically</translation>
     </message>
@@ -1475,7 +1512,7 @@ Actual: %2</translation>
         <translation>Follows Windows light/dark mode when set to System</translation>
     </message>
     <message>
-        <location line="-178"/>
+        <location line="-182"/>
         <source>进入截图编辑时预先选中的工具与颜色</source>
         <translation>Tool and color selected when the editor opens</translation>
     </message>
@@ -1500,7 +1537,22 @@ Actual: %2</translation>
         <translation>With &quot;None&quot; you adjust the selection first, then pick a tool</translation>
     </message>
     <message>
-        <location line="+79"/>
+        <location line="+33"/>
+        <source>录制 MP4 / GIF；麦克风仅用于 MP4</source>
+        <translation>MP4 / GIF recording; mic is MP4-only</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>录制麦克风</source>
+        <translation>Record microphone</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>仅 MP4；默认关闭。GIF 不支持录音</source>
+        <translation>MP4 only; off by default. GIF has no audio</translation>
+    </message>
+    <message>
+        <location line="+36"/>
         <source>选择图床；下方只显示该服务需要的参数</source>
         <translation>Pick a host; only its fields are shown below</translation>
     </message>
@@ -1520,7 +1572,7 @@ Actual: %2</translation>
         <translation>Preview: %1</translation>
     </message>
     <message>
-        <location line="-258"/>
+        <location line="-262"/>
         <source>默认值</source>
         <translation>Defaults</translation>
     </message>
@@ -1592,6 +1644,46 @@ Press the capture hotkey or click the tray icon to take one</translation>
         <location filename="../src/Translator.cpp" line="+43"/>
         <source>已在设置中关闭联网翻译</source>
         <translation>Online translation is disabled in Settings</translation>
+    </message>
+    <message>
+        <location filename="../src/MicCapture.cpp" line="+104"/>
+        <source>无法初始化音频设备枚举</source>
+        <translation>Could not initialize audio device enumeration</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>未找到麦克风，请连接设备或在系统声音设置中选择输入设备</source>
+        <translation>No microphone found. Connect one or pick an input in Sound settings</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>无法打开麦克风</source>
+        <translation>Could not open the microphone</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>无法读取麦克风格式</source>
+        <translation>Could not read the microphone format</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>没有麦克风权限，请在系统设置 → 隐私 → 麦克风中允许应用访问</source>
+        <translation>Microphone permission denied. Allow access in Settings → Privacy → Microphone</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>麦克风初始化失败（0x%1）</source>
+        <translation>Microphone init failed (0x%1)</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>无法开始麦克风采集</source>
+        <translation>Could not start microphone capture</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>麦克风启动失败</source>
+        <translation>Failed to start the microphone</translation>
     </message>
 </context>
 </TS>
