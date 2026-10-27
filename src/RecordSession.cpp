@@ -34,7 +34,7 @@ protected:
     void paintEvent(QPaintEvent*) override
     {
         QPainter p(this);
-        p.setPen(QPen(paused ? Style::Text3 : Style::Danger, 2, Qt::DashLine));
+        p.setPen(QPen(paused ? QColor(0xFF, 0x9F, 0x0A) : Style::Danger, 2, Qt::DashLine));
         p.drawRect(QRectF(rect()).adjusted(1, 1, -1, -1));
     }
 };
@@ -122,10 +122,10 @@ RecordSession::RecordSession(const QRect& region, Recorder::Format format)
     auto* lay = new QHBoxLayout(this);
     lay->setContentsMargins(22, 18, 18, 18);
     lay->setSpacing(6);
-    auto* dot = new QLabel(this);
-    dot->setFixedSize(10, 10);
-    Theme::setSheet(dot, QStringLiteral("background:#FF453A;border-radius:5px;"));
-    lay->addWidget(dot);
+    m_dot = new QLabel(this);
+    m_dot->setFixedSize(10, 10);
+    Theme::setSheet(m_dot, QStringLiteral("background:#FF453A;border-radius:5px;"));
+    lay->addWidget(m_dot);
     m_time = new QLabel(QStringLiteral("00:00"), this);
     Theme::setSheet(m_time, QStringLiteral("font-family:Consolas;font-size:14px;color:#1C1C1E;padding:0 6px;"));
     lay->addWidget(m_time);
@@ -229,10 +229,13 @@ void RecordSession::refresh()
     const qint64 s = m_rec->elapsedMs() / 1000;
     const double mb = m_rec->estimatedBytes() / 1048576.0;
     const QString clock = QStringLiteral("%1:%2").arg(s / 60, 2, 10, QLatin1Char('0')).arg(s % 60, 2, 10, QLatin1Char('0'));
-    if (m_rec->isPaused())
+    if (m_rec->isPaused()) {
         m_time->setText(QCoreApplication::translate("QingYing", "暂停 %1  %2 MB").arg(clock).arg(mb, 0, 'f', 1));
-    else
+        if (m_dot) Theme::setSheet(m_dot, QStringLiteral("background:#FF9F0A;border-radius:5px;"));
+    } else {
         m_time->setText(QStringLiteral("%1  %2 MB").arg(clock).arg(mb, 0, 'f', 1));
+        if (m_dot) Theme::setSheet(m_dot, QStringLiteral("background:#FF453A;border-radius:5px;"));
+    }
 }
 
 void RecordSession::finish()

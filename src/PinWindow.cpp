@@ -32,7 +32,7 @@ PinWindow::PinWindow(const QImage& image)
     setAttribute(Qt::WA_TranslucentBackground);
     setAttribute(Qt::WA_DeleteOnClose);
     setMouseTracking(true);
-    setWindowTitle(QCoreApplication::translate("QingYing", "青影 钉图"));
+    setWindowTitle(QCoreApplication::translate("QingYing", "钉图"));
     m_base = QSizeF(m_img.width() / m_img.devicePixelRatio(), m_img.height() / m_img.devicePixelRatio());
     updateSize();
     registry().append(this);

@@ -23,7 +23,7 @@
 
 HistoryWindow::HistoryWindow(QWidget* parent) : QDialog(parent)
 {
-    setWindowTitle(QCoreApplication::translate("QingYing", "青影 截图历史"));
+    setWindowTitle(QCoreApplication::translate("QingYing", "截图历史"));
     setWindowIcon(appIcon());
     setWindowFlag(Qt::WindowContextHelpButtonHint, false);
     resize(760, 520);
@@ -54,7 +54,7 @@ HistoryWindow::HistoryWindow(QWidget* parent) : QDialog(parent)
     m_empty = new QLabel(QCoreApplication::translate("QingYing", "还没有截图记录\n按截图快捷键或单击托盘图标截一张试试"), this);
     m_empty->setAlignment(Qt::AlignCenter);
     m_empty->setObjectName(QStringLiteral("empty"));
-    Theme::setSheet(m_empty, QStringLiteral("QLabel#empty { color: #8E8E93; font-size: 14px; }"));
+    Theme::setSheet(m_empty, QStringLiteral("QLabel#empty { color: #6E6E73; font-size: 14px; line-height: 22px; padding: 24px; }"));
     root->addWidget(m_empty, 1);
     auto* row = new QHBoxLayout;
     auto* folder = new QPushButton(QCoreApplication::translate("QingYing", "打开文件夹"), this);

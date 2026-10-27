@@ -5,25 +5,115 @@
 #include "Icons.h"
 #include "Notify.h"
 #include "Settings.h"
+#include "Theme.h"
 
 #include <QApplication>
 #include <QCryptographicHash>
 #include <QDateTime>
 #include <QDesktopServices>
+#include <QDialog>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QHBoxLayout>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QLabel>
 #include <QMessageBox>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QProcess>
+#include <QProgressBar>
 #include <QProgressDialog>
 #include <QPushButton>
 #include <QStandardPaths>
+#include <QVBoxLayout>
 #include <memory>
+
+namespace {
+
+// 主题色等待对话框：避免原生 QProgressDialog 细灰条 + 「青影 · xxx - 青影」标题重复
+class UpdateBusyDialog : public QDialog {
+public:
+    explicit UpdateBusyDialog(QWidget* parent = nullptr) : QDialog(parent)
+    {
+        setWindowTitle(QCoreApplication::translate("QingYing", "检查更新"));
+        setWindowIcon(appIcon());
+        setWindowModality(Qt::ApplicationModal);
+        setWindowFlag(Qt::WindowStaysOnTopHint);
+        setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+        setMinimumWidth(360);
+        Theme::setSheet(this, QStringLiteral(R"(
+            QDialog { background: #F6F7FB; }
+            QLabel#msg { font-size: 14px; color: #1C1C1E; }
+            QProgressBar {
+                border: none; background: rgba(0,0,0,18); border-radius: 4px; min-height: 6px; max-height: 6px;
+                text-align: center;
+            }
+            QProgressBar::chunk { background: #4F6BFF; border-radius: 4px; }
+            QPushButton {
+                background: #FFFFFF; border: 1px solid rgba(0,0,0,30); border-radius: 10px;
+                padding: 6px 18px; color: #1C1C1E; min-width: 72px;
+            }
+            QPushButton:hover { background: #F0F2FA; }
+            QPushButton#primary { background: #4F6BFF; border: none; color: white; font-weight: 600; }
+            QPushButton#primary:hover { background: #3D57E8; }
+        )"));
+
+        auto* root = new QVBoxLayout(this);
+        root->setContentsMargins(28, 24, 28, 20);
+        root->setSpacing(16);
+
+        m_msg = new QLabel(QCoreApplication::translate("QingYing", "正在检查更新…"), this);
+        m_msg->setObjectName(QStringLiteral("msg"));
+        m_msg->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+        m_msg->setWordWrap(true);
+        root->addWidget(m_msg);
+
+        m_bar = new QProgressBar(this);
+        m_bar->setRange(0, 0); // 不确定进度
+        m_bar->setTextVisible(false);
+        m_bar->setFixedHeight(6);
+        root->addWidget(m_bar);
+
+        auto* row = new QHBoxLayout;
+        row->addStretch();
+        m_cancel = new QPushButton(QCoreApplication::translate("QingYing", "取消"), this);
+        row->addWidget(m_cancel);
+        root->addLayout(row);
+
+        connect(m_cancel, &QPushButton::clicked, this, &QDialog::reject);
+        adjustSize();
+    }
+
+    void setMessage(const QString& text) { m_msg->setText(text); }
+
+private:
+    QLabel* m_msg = nullptr;
+    QProgressBar* m_bar = nullptr;
+    QPushButton* m_cancel = nullptr;
+};
+
+QString progressSheet()
+{
+    return QStringLiteral(R"(
+        QProgressDialog { background: #F6F7FB; }
+        QLabel { color: #1C1C1E; font-size: 13px; }
+        QProgressBar {
+            border: none; background: rgba(0,0,0,18); border-radius: 4px; min-height: 8px; max-height: 8px;
+            text-align: center;
+        }
+        QProgressBar::chunk { background: #4F6BFF; border-radius: 4px; }
+        QPushButton {
+            background: #FFFFFF; border: 1px solid rgba(0,0,0,30); border-radius: 10px;
+            padding: 6px 16px; min-width: 72px;
+        }
+        QPushButton:hover { background: #F0F2FA; }
+    )");
+}
+
+} // namespace
 
 Updater::Updater(QObject* parent) : QObject(parent) {}
 
@@ -64,7 +154,6 @@ bool Updater::parse(const QByteArray& json, Release* out)
     return true;
 }
 
-
 void Updater::maybeAutoCheck()
 {
     if (!Settings::autoUpdate()) return;
@@ -82,12 +171,25 @@ void Updater::finishManualBusy()
     }
 }
 
+void Updater::cancelCheck()
+{
+    m_cancelled = true;
+    if (m_checkReply) {
+        m_checkReply->abort();
+        m_checkReply = nullptr;
+    }
+    m_busy = false;
+    finishManualBusy();
+    Diagnostics::log(QStringLiteral("update check cancelled by user"));
+}
+
 void Updater::reportManual(const QString& title, const QString& text, bool warn)
 {
     finishManualBusy();
     QMessageBox box(warn ? QMessageBox::Warning : QMessageBox::Information, title, text);
     box.setWindowIcon(appIcon());
     box.setWindowFlag(Qt::WindowStaysOnTopHint);
+    box.setWindowFlag(Qt::WindowContextHelpButtonHint, false);
     box.setStandardButtons(QMessageBox::Ok);
     box.exec();
 }
@@ -109,12 +211,24 @@ void Updater::applyRelease(const Release& r, bool manual)
 
 void Updater::tryHtmlFallback(bool manual)
 {
+    if (m_cancelled) {
+        m_busy = false;
+        finishManualBusy();
+        return;
+    }
     Diagnostics::log(QStringLiteral("update fallback: GET %1").arg(QString::fromLatin1(kLatestPage)));
     QNetworkRequest req = request(QUrl(QString::fromLatin1(kLatestPage)));
     req.setRawHeader("Accept", "text/html");
     QNetworkReply* reply = m_net.get(req);
+    m_checkReply = reply;
     connect(reply, &QNetworkReply::finished, this, [this, reply, manual] {
+        if (m_checkReply == reply) m_checkReply = nullptr;
         reply->deleteLater();
+        if (m_cancelled || reply->error() == QNetworkReply::OperationCanceledError) {
+            m_busy = false;
+            finishManualBusy();
+            return;
+        }
         m_busy = false;
         Settings::setLastUpdateCheck(QDateTime::currentDateTime());
         const int http = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
@@ -151,6 +265,11 @@ void Updater::tryHtmlFallback(bool manual)
 
 void Updater::handleApiResult(const QByteArray& body, int http, int err, const QString& errStr, bool manual)
 {
+    if (m_cancelled || err == QNetworkReply::OperationCanceledError) {
+        m_busy = false;
+        finishManualBusy();
+        return;
+    }
     Release r;
     const bool ok = (err == QNetworkReply::NoError) && parse(body, &r);
     Diagnostics::log(QStringLiteral("update api http=%1 err=%2 parsed=%3 tag=%4")
@@ -191,22 +310,28 @@ void Updater::check(bool manual)
         return;
     }
     m_busy = true;
+    m_cancelled = false;
     Diagnostics::log(QStringLiteral("update check manual=%1 ver=%2").arg(manual).arg(QCoreApplication::applicationVersion()));
     if (manual) {
         finishManualBusy();
-        m_busyDlg = new QProgressDialog(QCoreApplication::translate("QingYing", "正在检查更新…"), QString(), 0, 0);
-        m_busyDlg->setWindowTitle(QCoreApplication::translate("QingYing", "青影 · 更新"));
-        m_busyDlg->setWindowIcon(appIcon());
-        m_busyDlg->setWindowModality(Qt::ApplicationModal);
-        m_busyDlg->setMinimumDuration(0);
-        m_busyDlg->setCancelButton(nullptr);
-        m_busyDlg->setWindowFlag(Qt::WindowStaysOnTopHint);
-        m_busyDlg->show();
+        auto* dlg = new UpdateBusyDialog;
+        m_busyDlg = dlg;
+        connect(dlg, &QDialog::rejected, this, [this] {
+            if (m_busy) cancelCheck();
+        });
+        dlg->show();
         QApplication::processEvents();
     }
     QNetworkReply* reply = m_net.get(request(QUrl(QString::fromLatin1(kLatestApi))));
+    m_checkReply = reply;
     connect(reply, &QNetworkReply::finished, this, [this, reply, manual] {
+        if (m_checkReply == reply) m_checkReply = nullptr;
         reply->deleteLater();
+        if (m_cancelled || reply->error() == QNetworkReply::OperationCanceledError) {
+            m_busy = false;
+            finishManualBusy();
+            return;
+        }
         Settings::setLastUpdateCheck(QDateTime::currentDateTime());
         const QByteArray body = reply->readAll();
         const int http = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
@@ -217,7 +342,7 @@ void Updater::check(bool manual)
 void Updater::offer(const Release& r)
 {
     QMessageBox box;
-    box.setWindowTitle(QCoreApplication::translate("QingYing", "青影 · 发现新版本"));
+    box.setWindowTitle(QCoreApplication::translate("QingYing", "发现新版本"));
     box.setWindowIcon(appIcon());
     box.setIconPixmap(appIcon().pixmap(48, 48));
     box.setText(QCoreApplication::translate("QingYing", "<b>青影 %1 已发布</b>（当前 %2）")
@@ -232,6 +357,7 @@ void Updater::offer(const Release& r)
                                     QMessageBox::AcceptRole);
     box.addButton(QCoreApplication::translate("QingYing", "稍后"), QMessageBox::RejectRole);
     box.setWindowFlag(Qt::WindowStaysOnTopHint);
+    box.setWindowFlag(Qt::WindowContextHelpButtonHint, false);
     box.exec();
     if (box.clickedButton() != go) return;
     if (openPageOnly) QDesktopServices::openUrl(r.page.isValid() ? r.page : QUrl(QString::fromLatin1(kLatestPage)));
@@ -242,10 +368,12 @@ void Updater::download(const Release& r)
 {
     auto* progress = new QProgressDialog(QCoreApplication::translate("QingYing", "正在下载 %1 …").arg(r.setupName),
                                          QCoreApplication::translate("QingYing", "取消"), 0, 100);
-    progress->setWindowTitle(QCoreApplication::translate("QingYing", "青影 · 更新"));
+    progress->setWindowTitle(QCoreApplication::translate("QingYing", "下载更新"));
     progress->setWindowIcon(appIcon());
     progress->setAttribute(Qt::WA_DeleteOnClose);
     progress->setMinimumDuration(0);
+    progress->setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+    Theme::setSheet(progress, progressSheet());
     progress->show();
     QNetworkReply* sums = m_net.get(request(r.sumsUrl));
     QNetworkReply* setup = m_net.get(request(r.setupUrl));
@@ -268,7 +396,7 @@ void Updater::download(const Release& r)
         const QString actual = Logic::sha256Hex(data);
         const QString expected = Logic::expectedSha256(QString::fromUtf8(sums->readAll()), r.setupName);
         if (expected.isEmpty() || expected != actual) {
-            QMessageBox::warning(nullptr, QCoreApplication::translate("QingYing", "青影 · 更新"),
+            QMessageBox::warning(nullptr, QCoreApplication::translate("QingYing", "更新校验失败"),
                                  QCoreApplication::translate("QingYing", "安装包 SHA-256 校验失败，已放弃安装。\n期望：%1\n实际：%2")
                                      .arg(expected.isEmpty() ? QCoreApplication::translate("QingYing", "（未找到）") : expected, actual));
             return;
@@ -281,7 +409,7 @@ void Updater::download(const Release& r)
             return;
         }
         f.close();
-        if (QMessageBox::question(nullptr, QCoreApplication::translate("QingYing", "青影 · 更新"),
+        if (QMessageBox::question(nullptr, QCoreApplication::translate("QingYing", "准备安装"),
                                   QCoreApplication::translate("QingYing", "安装包已下载并通过校验。现在启动安装程序并退出青影吗？"))
             != QMessageBox::Yes)
             return;

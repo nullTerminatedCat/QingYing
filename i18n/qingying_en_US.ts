@@ -29,7 +29,7 @@
         <translation>in %1 s</translation>
     </message>
     <message>
-        <location line="+243"/>
+        <location line="+264"/>
         <source>%1 秒后开始截图</source>
         <translation>Capturing in %1 s</translation>
     </message>
@@ -44,7 +44,12 @@
         <translation>%1:%2:%3  %4×%5  Copy</translation>
     </message>
     <message>
-        <location line="-34"/>
+        <location line="+237"/>
+        <source>关于</source>
+        <translation>About</translation>
+    </message>
+    <message>
+        <location line="-271"/>
         <source>%1
 点击打开所在文件夹</source>
         <translation>%1
@@ -56,7 +61,7 @@ Click to open the containing folder</translation>
         <translation>%1, a full-screen capture is saved to %2</translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="+223"/>
+        <location filename="../src/Updater.cpp" line="+348"/>
         <source>&lt;b&gt;青影 %1 已发布&lt;/b&gt;（当前 %2）</source>
         <translation>&lt;b&gt;QingYing %1 is available&lt;/b&gt; (current %2)</translation>
     </message>
@@ -146,7 +151,7 @@ Click to open the containing folder</translation>
         <translation>Upload is disabled</translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="+41"/>
+        <location filename="../src/Updater.cpp" line="+44"/>
         <location line="+15"/>
         <source>下载更新失败</source>
         <translation>Failed to download the update</translation>
@@ -195,7 +200,7 @@ Click to open the containing folder</translation>
         <translation>Save pin</translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="-531"/>
+        <location filename="../src/App.cpp" line="-552"/>
         <source>停止定时截图</source>
         <translation>Stop timed capture</translation>
     </message>
@@ -258,13 +263,12 @@ Click to open the containing folder</translation>
     </message>
     <message>
         <location line="+10"/>
-        <location line="+502"/>
         <source>关于青影</source>
         <translation>About QingYing</translation>
     </message>
     <message>
         <location filename="../src/PinWindow.cpp" line="-16"/>
-        <location filename="../src/ResultDialog.cpp" line="+133"/>
+        <location filename="../src/ResultDialog.cpp" line="+134"/>
         <source>关闭</source>
         <translation>Close</translation>
     </message>
@@ -284,7 +288,7 @@ Click to open the containing folder</translation>
         <translation>History</translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="-230"/>
+        <location filename="../src/App.cpp" line="+293"/>
         <source>历史记录…</source>
         <translation>History…</translation>
     </message>
@@ -295,7 +299,8 @@ Click to open the containing folder</translation>
     </message>
     <message>
         <location filename="../src/ScrollCapture.cpp" line="+10"/>
-        <location filename="../src/Updater.cpp" line="-35"/>
+        <location filename="../src/Updater.cpp" line="-325"/>
+        <location line="+288"/>
         <source>取消</source>
         <translation>Cancel</translation>
     </message>
@@ -305,7 +310,7 @@ Click to open the containing folder</translation>
         <translation>Cancel  Esc</translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="-290"/>
+        <location filename="../src/App.cpp" line="-311"/>
         <source>取色</source>
         <translation>Color picker</translation>
     </message>
@@ -349,12 +354,12 @@ Click to open the containing folder</translation>
         <translation>Appearance</translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="-140"/>
+        <location filename="../src/Updater.cpp" line="-164"/>
         <source>当前版本 %1，无需更新。</source>
         <translation>You are on version %1. No update needed.</translation>
     </message>
     <message>
-        <location line="+30"/>
+        <location line="+42"/>
         <source>无法连接 GitHub，请检查网络或稍后重试</source>
         <translation>Cannot reach GitHub. Check your network or try again later.</translation>
     </message>
@@ -364,7 +369,7 @@ Click to open the containing folder</translation>
         <translation>Could not resolve the latest version. Open the GitHub Releases page to download manually.</translation>
     </message>
     <message>
-        <location line="+40"/>
+        <location line="+45"/>
         <source>无法解析更新信息，请稍后重试或打开 GitHub 发布页</source>
         <translation>Could not parse update info. Try again later or open the GitHub Releases page.</translation>
     </message>
@@ -374,17 +379,32 @@ Click to open the containing folder</translation>
         <translation>Already checking for updates, please wait…</translation>
     </message>
     <message>
-        <location line="+8"/>
+        <location line="-240"/>
         <source>正在检查更新…</source>
         <translation>Checking for updates…</translation>
     </message>
     <message>
-        <location line="+30"/>
+        <location line="+277"/>
+        <source>发现新版本</source>
+        <translation>New version available</translation>
+    </message>
+    <message>
+        <location line="+7"/>
         <source>将打开发布页下载新版本。</source>
         <translation>The Releases page will open so you can download the new version.</translation>
     </message>
     <message>
-        <location line="+45"/>
+        <location line="+19"/>
+        <source>下载更新</source>
+        <translation>Download update</translation>
+    </message>
+    <message>
+        <location line="+28"/>
+        <source>更新校验失败</source>
+        <translation>Update verification failed</translation>
+    </message>
+    <message>
+        <location line="+1"/>
         <source>安装包 SHA-256 校验失败，已放弃安装。
 期望：%1
 实际：%2</source>
@@ -393,7 +413,12 @@ Expected: %1
 Actual: %2</translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location line="+12"/>
+        <source>准备安装</source>
+        <translation>Ready to install</translation>
+    </message>
+    <message>
+        <location line="+1"/>
         <source>安装包已下载并通过校验。现在启动安装程序并退出青影吗？</source>
         <translation>The installer was downloaded and verified. Launch it and quit QingYing now?</translation>
     </message>
@@ -408,12 +433,12 @@ Actual: %2</translation>
         <translation>Timed capture</translation>
     </message>
     <message>
-        <location line="+460"/>
+        <location line="+481"/>
         <source>定时截图已开始</source>
         <translation>Timed capture started</translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="-57"/>
+        <location filename="../src/Updater.cpp" line="-60"/>
         <source>将下载安装包并校验 SHA-256，校验通过后启动安装程序并退出青影。</source>
         <translation>The installer will be downloaded and its SHA-256 verified; then it will launch and QingYing will quit.</translation>
     </message>
@@ -528,7 +553,7 @@ Actual: %2</translation>
         <translation>Color copied</translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="-125"/>
+        <location filename="../src/Updater.cpp" line="-148"/>
         <source>已是最新版本</source>
         <translation>You&apos;re up to date</translation>
     </message>
@@ -554,8 +579,8 @@ Actual: %2</translation>
         <translation>Number  N</translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="-388"/>
-        <location line="+245"/>
+        <location filename="../src/App.cpp" line="-409"/>
+        <location line="+266"/>
         <source>延时截图</source>
         <translation>Delayed capture</translation>
     </message>
@@ -565,7 +590,7 @@ Actual: %2</translation>
         <translation>Failed to start writing</translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="-212"/>
+        <location filename="../src/App.cpp" line="-233"/>
         <source>开机自启</source>
         <translation>Start with Windows</translation>
     </message>
@@ -585,7 +610,7 @@ Actual: %2</translation>
         <translation>Recording area is too small</translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="+249"/>
+        <location filename="../src/App.cpp" line="+270"/>
         <source>录制失败</source>
         <translation>Recording failed</translation>
     </message>
@@ -600,7 +625,7 @@ Actual: %2</translation>
         <translation>Record mouse pointer</translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="-247"/>
+        <location filename="../src/App.cpp" line="-268"/>
         <location filename="../src/SettingsDialog.cpp" line="-279"/>
         <location line="+269"/>
         <source>录屏</source>
@@ -640,12 +665,13 @@ Actual: %2</translation>
         <translation>Capture</translation>
     </message>
     <message>
-        <location line="+224"/>
+        <location line="+245"/>
         <source>截图	%1</source>
         <translation>Capture	%1</translation>
     </message>
     <message>
-        <location filename="../src/HistoryWindow.cpp" line="-46"/>
+        <location filename="../src/HistoryWindow.cpp" line="-63"/>
+        <location line="+17"/>
         <source>截图历史</source>
         <translation>Capture history</translation>
     </message>
@@ -665,7 +691,7 @@ Actual: %2</translation>
         <translation>Open save folder</translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="+127"/>
+        <location filename="../src/Updater.cpp" line="+150"/>
         <source>打开发布页</source>
         <translation>Open release page</translation>
     </message>
@@ -682,7 +708,7 @@ Actual: %2</translation>
         <translation>Open link</translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="-366"/>
+        <location filename="../src/App.cpp" line="-387"/>
         <source>按 %1 开始截图</source>
         <translation>Press %1 to capture</translation>
     </message>
@@ -728,7 +754,7 @@ Actual: %2</translation>
     </message>
     <message>
         <location filename="../src/Recorder.cpp" line="-318"/>
-        <location filename="../src/Updater.cpp" line="+50"/>
+        <location filename="../src/Updater.cpp" line="+53"/>
         <source>无法写入 %1</source>
         <translation>Cannot write %1</translation>
     </message>
@@ -773,7 +799,7 @@ Actual: %2</translation>
         <translation>Could not align frames; stopped (content may be changing)</translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="+332"/>
+        <location filename="../src/App.cpp" line="+353"/>
         <source>无法开始录制</source>
         <translation>Cannot start recording</translation>
     </message>
@@ -789,7 +815,7 @@ Actual: %2</translation>
         <translation>No history yet</translation>
     </message>
     <message>
-        <location line="-278"/>
+        <location line="-299"/>
         <source>最近截图</source>
         <translation>Recent captures</translation>
     </message>
@@ -812,13 +838,14 @@ Actual: %2</translation>
     <message>
         <location filename="../src/App.cpp" line="+7"/>
         <location filename="../src/SettingsDialog.cpp" line="+276"/>
-        <location filename="../src/Updater.cpp" line="-104"/>
+        <location filename="../src/Updater.cpp" line="-379"/>
+        <location line="+266"/>
         <source>检查更新</source>
         <translation>Check for updates</translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="-51"/>
-        <location line="+38"/>
+        <location filename="../src/Updater.cpp" line="-56"/>
+        <location line="+43"/>
         <source>检查更新失败</source>
         <translation>Update check failed</translation>
     </message>
@@ -838,7 +865,7 @@ Actual: %2</translation>
         <translation>Uploading…</translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="+68"/>
+        <location filename="../src/Updater.cpp" line="+75"/>
         <source>正在下载 %1 …</source>
         <translation>Downloading %1 …</translation>
     </message>
@@ -849,13 +876,13 @@ Actual: %2</translation>
     </message>
     <message>
         <location filename="../src/App.cpp" line="-31"/>
-        <location line="+456"/>
+        <location line="+477"/>
         <source>每 %1 分钟</source>
         <translation>Every %1 min</translation>
     </message>
     <message>
-        <location line="-456"/>
-        <location line="+455"/>
+        <location line="-477"/>
+        <location line="+476"/>
         <source>每 %1 秒</source>
         <translation>Every %1 s</translation>
     </message>
@@ -870,7 +897,7 @@ Actual: %2</translation>
         <translation>Flip horizontally	H</translation>
     </message>
     <message>
-        <location filename="../src/RecordSession.cpp" line="+79"/>
+        <location filename="../src/RecordSession.cpp" line="+82"/>
         <source>没有录到画面</source>
         <translation>No frames were recorded</translation>
     </message>
@@ -934,7 +961,7 @@ Actual: %2</translation>
 %1</translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="-10"/>
+        <location filename="../src/Updater.cpp" line="-11"/>
         <source>稍后</source>
         <translation>Later</translation>
     </message>
@@ -974,7 +1001,7 @@ Actual: %2</translation>
         <translation>No OCR language pack is installed. Add a language in Settings → Time &amp; language → Language &amp; region, install its Optical character recognition feature, and try again.</translation>
     </message>
     <message>
-        <location filename="../src/RecordSession.cpp" line="-79"/>
+        <location filename="../src/RecordSession.cpp" line="-82"/>
         <source>继续</source>
         <translation>Resume</translation>
     </message>
@@ -1001,11 +1028,12 @@ Actual: %2</translation>
     </message>
     <message>
         <location filename="../src/App.cpp" line="-334"/>
+        <location filename="../src/SettingsDialog.cpp" line="-411"/>
         <source>设置</source>
         <translation>Settings</translation>
     </message>
     <message>
-        <location line="-176"/>
+        <location line="-197"/>
         <source>设置…</source>
         <translation>Settings…</translation>
     </message>
@@ -1040,7 +1068,7 @@ Actual: %2</translation>
         <translation>Language: %1 · %2 lines, edit and copy as needed</translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="+100"/>
+        <location filename="../src/SettingsDialog.cpp" line="+511"/>
         <source>语言</source>
         <translation>Language</translation>
     </message>
@@ -1102,7 +1130,8 @@ Actual: %2</translation>
     </message>
     <message>
         <location filename="../src/App.cpp" line="-14"/>
-        <location line="+199"/>
+        <location line="+220"/>
+        <location filename="../src/PinWindow.cpp" line="-200"/>
         <location filename="../src/ScrollCapture.cpp" line="+18"/>
         <location filename="../src/SettingsDialog.cpp" line="+42"/>
         <source>钉图</source>
@@ -1130,11 +1159,12 @@ Actual: %2</translation>
     </message>
     <message>
         <location filename="../src/CaptureOverlay.cpp" line="+0"/>
+        <location filename="../src/ScrollCapture.cpp" line="-29"/>
         <source>长截图</source>
         <translation>Scrolling capture</translation>
     </message>
     <message>
-        <location filename="../src/App.cpp" line="-207"/>
+        <location filename="../src/App.cpp" line="-228"/>
         <source>长截图（滚动）</source>
         <translation>Scrolling capture</translation>
     </message>
@@ -1155,69 +1185,35 @@ Actual: %2</translation>
     </message>
     <message>
         <location filename="../src/App.cpp" line="+49"/>
-        <location line="+390"/>
+        <location line="+411"/>
         <location filename="../src/CaptureOverlay.cpp" line="-378"/>
         <location filename="../src/main.cpp" line="+31"/>
-        <location filename="../src/PinWindow.cpp" line="+26"/>
+        <location filename="../src/PinWindow.cpp" line="+226"/>
         <source>青影</source>
         <translation>QingYing</translation>
     </message>
     <message>
-        <location filename="../src/ResultDialog.cpp" line="+23"/>
-        <source>青影 · %1</source>
-        <translation>QingYing · %1</translation>
-    </message>
-    <message>
-        <location filename="../src/Updater.cpp" line="-11"/>
-        <source>青影 · 发现新版本</source>
-        <translation>QingYing · Update available</translation>
-    </message>
-    <message>
-        <location filename="../src/App.cpp" line="+6"/>
+        <location line="+6"/>
         <source>青影 · 定时截图（%1）</source>
         <translation>QingYing · Timed capture (%1)</translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="-22"/>
-        <location line="+47"/>
-        <location line="+26"/>
-        <location line="+13"/>
-        <source>青影 · 更新</source>
-        <translation>QingYing · Update</translation>
-    </message>
-    <message>
-        <location filename="../src/App.cpp" line="-234"/>
+        <location line="-234"/>
         <source>青影 截图 · %1</source>
         <translation>QingYing capture · %1</translation>
     </message>
     <message>
-        <location filename="../src/HistoryWindow.cpp" line="-38"/>
-        <source>青影 截图历史</source>
-        <translation>QingYing capture history</translation>
-    </message>
-    <message>
-        <location filename="../src/SettingsDialog.cpp" line="-180"/>
-        <location line="+74"/>
+        <location filename="../src/SettingsDialog.cpp" line="-106"/>
         <source>青影 设置</source>
         <translation>QingYing Settings</translation>
     </message>
     <message>
-        <location filename="../src/PinWindow.cpp" line="-226"/>
-        <source>青影 钉图</source>
-        <translation>QingYing pin</translation>
-    </message>
-    <message>
-        <location filename="../src/ScrollCapture.cpp" line="-29"/>
-        <source>青影 长截图</source>
-        <translation>QingYing scrolling capture</translation>
-    </message>
-    <message>
-        <location filename="../src/App.cpp" line="-284"/>
+        <location filename="../src/App.cpp" line="-305"/>
         <source>青影已在后台运行</source>
         <translation>QingYing is running in the background</translation>
     </message>
     <message>
-        <location filename="../src/PinWindow.cpp" line="+199"/>
+        <location filename="../src/PinWindow.cpp" line="-27"/>
         <source>顺时针旋转 90°	R</source>
         <translation>Rotate 90° right	R</translation>
     </message>
@@ -1242,7 +1238,7 @@ Actual: %2</translation>
         <translation>Default tool</translation>
     </message>
     <message>
-        <location filename="../src/Updater.cpp" line="-11"/>
+        <location filename="../src/Updater.cpp" line="+45"/>
         <source>（未找到）</source>
         <translation>(not found)</translation>
     </message>
@@ -1592,7 +1588,7 @@ Actual: %2</translation>
         <translation>Press %1 or click the tray icon to capture. Right-click the tray icon to record, pin or open History. Click this message to open Settings.</translation>
     </message>
     <message>
-        <location filename="../src/HistoryWindow.cpp" line="+28"/>
+        <location filename="../src/HistoryWindow.cpp" line="-10"/>
         <source>还没有截图记录
 按截图快捷键或单击托盘图标截一张试试</source>
         <translation>No captures yet
@@ -1605,7 +1601,7 @@ Press the capture hotkey or click the tray icon to take one</translation>
     </message>
     <message>
         <location line="+3"/>
-        <location filename="../src/Updater.cpp" line="-142"/>
+        <location filename="../src/Updater.cpp" line="-156"/>
         <source>连接超时，请检查网络后重试</source>
         <translation>Connection timed out. Check your network and try again.</translation>
     </message>
@@ -1640,7 +1636,7 @@ Press the capture hotkey or click the tray icon to take one</translation>
         <translation>Translation service is busy or quota exhausted. Try again later.</translation>
     </message>
     <message>
-        <location filename="../src/ResultDialog.cpp" line="+57"/>
+        <location filename="../src/ResultDialog.cpp" line="+80"/>
         <location filename="../src/Translator.cpp" line="+43"/>
         <source>已在设置中关闭联网翻译</source>
         <translation>Online translation is disabled in Settings</translation>

@@ -30,6 +30,7 @@ private:
     void refresh();
     Recorder* m_rec;
     QWidget* m_frame;
+    QLabel* m_dot = nullptr;
     QLabel* m_time;
     QToolButton* m_pause;
     QToolButton* m_mic = nullptr; // 仅 MP4：显示/切换麦克风静音

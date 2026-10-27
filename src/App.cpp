@@ -728,7 +728,7 @@ void App::openSettings()
 void App::showAbout()
 {
     QMessageBox box;
-    box.setWindowTitle(QCoreApplication::translate("QingYing", "关于青影"));
+    box.setWindowTitle(QCoreApplication::translate("QingYing", "关于"));
     box.setIconPixmap(appIcon().pixmap(64, 64));
     box.setText(QCoreApplication::translate("QingYing", "<h3>青影 QingYing %1</h3>").arg(QApplication::applicationVersion()));
     box.setInformativeText(QCoreApplication::translate("QingYing", "简洁好看的 Windows 截图工具。<br>区域截图 · 标注 · 钉图<br><br>"

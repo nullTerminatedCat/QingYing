@@ -145,7 +145,7 @@ const int kFps[3] = {10, 15, 30};
 SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, QWidget* parent)
     : QDialog(parent), m_apply(std::move(apply))
 {
-    setWindowTitle(QCoreApplication::translate("QingYing", "青影 设置"));
+    setWindowTitle(QCoreApplication::translate("QingYing", "设置"));
     setWindowIcon(appIcon());
     setWindowFlag(Qt::WindowContextHelpButtonHint, false);
     setWindowFlag(Qt::WindowMaximizeButtonHint, true);

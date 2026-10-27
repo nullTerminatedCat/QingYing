@@ -78,7 +78,7 @@ ScrollCapture::ScrollCapture(const QRect& region)
 {
     setAttribute(Qt::WA_DeleteOnClose);
     setAttribute(Qt::WA_TranslucentBackground);
-    setWindowTitle(QCoreApplication::translate("QingYing", "青影 长截图"));
+    setWindowTitle(QCoreApplication::translate("QingYing", "长截图"));
     Theme::setSheet(this, QStringLiteral(R"(
         QLabel { color: #1C1C1E; font-size: 12px; }
         QLabel#status { color: #6E6E73; }

@@ -15,6 +15,7 @@
 #include <QPlainTextEdit>
 #include <QPointer>
 #include <QPushButton>
+#include <QStyle>
 #include <QTimer>
 #include <QUrl>
 #include <QVBoxLayout>
@@ -123,7 +124,7 @@ ResultDialog::ResultDialog(const QString& title, QWidget* parent) : QDialog(pare
 
 void ResultDialog::retranslateUi()
 {
-    setWindowTitle(QCoreApplication::translate("QingYing", "青影 · %1").arg(m_panelTitle));
+    setWindowTitle(m_panelTitle);
     if (m_titleLabel) m_titleLabel->setText(m_panelTitle);
     m_open->setText(QCoreApplication::translate("QingYing", "打开链接"));
     m_auto->setText(QCoreApplication::translate("QingYing", "翻译"));
@@ -208,7 +209,11 @@ void ResultDialog::startTranslate(bool toChinese)
 void ResultDialog::setStatus(const QString& s, bool error)
 {
     m_status->setObjectName(error ? QStringLiteral("error") : QStringLiteral("status"));
-    Theme::setSheet(m_status, QString());
+    if (m_status->style()) {
+        m_status->style()->unpolish(m_status);
+        m_status->style()->polish(m_status);
+    }
+    m_status->update();
     m_status->setText(s);
 }
 

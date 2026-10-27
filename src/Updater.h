@@ -4,10 +4,11 @@
 #include <QUrl>
 #include <QVersionNumber>
 
-class QProgressDialog;
+class QDialog;
+class QNetworkReply;
 
 // 通过 GitHub Releases 检查更新；安装版下载 setup.exe 并校验 SHA-256，免安装版打开发布页。
-// 手动检查：进度对话框 + 结果一律用消息框（不依赖易被系统吞掉的托盘气泡）。
+// 手动检查：主题色等待对话框 + 结果一律用消息框（不依赖易被系统吞掉的托盘气泡）。
 // API 限流/失败时回退到 github.com/releases/latest 的跳转解析版本。
 class Updater : public QObject {
     Q_OBJECT
@@ -38,8 +39,11 @@ private:
     void handleApiResult(const QByteArray& body, int http, int err, const QString& errStr, bool manual);
     void tryHtmlFallback(bool manual);
     void applyRelease(const Release& r, bool manual);
+    void cancelCheck();
     QNetworkRequest request(const QUrl& url) const;
     QNetworkAccessManager m_net;
     bool m_busy = false;
-    QProgressDialog* m_busyDlg = nullptr;
+    bool m_cancelled = false;
+    QDialog* m_busyDlg = nullptr;
+    QNetworkReply* m_checkReply = nullptr;
 };
