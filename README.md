@@ -4,7 +4,7 @@
 
 简洁、好看的 Windows 桌面截图工具。靛蓝主色、悬浮圆角工具条，只在需要时出现二级选项。
 
-> 当前版本：0.6.2（检查更新主题对话框、窗口标题去重与体验打磨）。。完整规划见 [PRODUCT_PLAN.md](PRODUCT_PLAN.md)，界面设计稿见 [docs/design](docs/design)。
+> 当前版本：0.6.3（检查更新主题对话框、窗口标题去重与体验打磨）。。完整规划见 [PRODUCT_PLAN.md](PRODUCT_PLAN.md)，界面设计稿见 [docs/design](docs/design)。
 
 ## 功能
 

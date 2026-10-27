@@ -25,6 +25,11 @@
 #include <QNetworkRequest>
 #include <QProcess>
 #include <QProgressBar>
+#include <cmath>
+#include <QStyleFactory>
+#include <QTimer>
+#include <QLinearGradient>
+#include <QPainter>
 #include <QProgressDialog>
 #include <QPushButton>
 #include <QStandardPaths>
@@ -33,7 +38,50 @@
 
 namespace {
 
-// 主题色等待对话框：避免原生 QProgressDialog 细灰条 + 「青影 · xxx - 青影」标题重复
+// 自绘不确定进度条：Windows 原生 QProgressBar 不确定态常无视 stylesheet，仍是系统细灰条+蓝块
+class IndigoBusyBar : public QWidget {
+public:
+    explicit IndigoBusyBar(QWidget* parent = nullptr) : QWidget(parent)
+    {
+        setFixedHeight(6);
+        setMinimumWidth(200);
+        m_timer.setInterval(16);
+        connect(&m_timer, &QTimer::timeout, this, [this] {
+            m_phase += 0.018;
+            if (m_phase >= 1.0) m_phase -= 1.0;
+            update();
+        });
+        m_timer.start();
+    }
+
+protected:
+    void paintEvent(QPaintEvent*) override
+    {
+        QPainter p(this);
+        p.setRenderHint(QPainter::Antialiasing);
+        const QRectF track = QRectF(rect()).adjusted(0.5, 0.5, -0.5, -0.5);
+        p.setPen(Qt::NoPen);
+        p.setBrush(QColor(0, 0, 0, Theme::isDark() ? 40 : 18));
+        p.drawRoundedRect(track, 3, 3);
+
+        const qreal pillW = track.width() * 0.38;
+        const qreal travel = track.width() + pillW;
+        const qreal x = track.left() - pillW + travel * m_phase;
+        const QRectF pill(x, track.top(), pillW, track.height());
+        QLinearGradient g(pill.topLeft(), pill.topRight());
+        g.setColorAt(0.0, QColor(79, 107, 255, 0));
+        g.setColorAt(0.3, QColor(0x4F, 0x6B, 0xFF));
+        g.setColorAt(0.7, QColor(0x4F, 0x6B, 0xFF));
+        g.setColorAt(1.0, QColor(79, 107, 255, 0));
+        p.setBrush(g);
+        p.drawRoundedRect(pill.intersected(track), 3, 3);
+    }
+
+private:
+    QTimer m_timer;
+    qreal m_phase = 0;
+};
+
 class UpdateBusyDialog : public QDialog {
 public:
     explicit UpdateBusyDialog(QWidget* parent = nullptr) : QDialog(parent)
@@ -43,27 +91,20 @@ public:
         setWindowModality(Qt::ApplicationModal);
         setWindowFlag(Qt::WindowStaysOnTopHint);
         setWindowFlag(Qt::WindowContextHelpButtonHint, false);
-        setMinimumWidth(360);
+        setMinimumWidth(380);
         Theme::setSheet(this, QStringLiteral(R"(
             QDialog { background: #F6F7FB; }
             QLabel#msg { font-size: 14px; color: #1C1C1E; }
-            QProgressBar {
-                border: none; background: rgba(0,0,0,18); border-radius: 4px; min-height: 6px; max-height: 6px;
-                text-align: center;
-            }
-            QProgressBar::chunk { background: #4F6BFF; border-radius: 4px; }
             QPushButton {
                 background: #FFFFFF; border: 1px solid rgba(0,0,0,30); border-radius: 10px;
                 padding: 6px 18px; color: #1C1C1E; min-width: 72px;
             }
             QPushButton:hover { background: #F0F2FA; }
-            QPushButton#primary { background: #4F6BFF; border: none; color: white; font-weight: 600; }
-            QPushButton#primary:hover { background: #3D57E8; }
         )"));
 
         auto* root = new QVBoxLayout(this);
-        root->setContentsMargins(28, 24, 28, 20);
-        root->setSpacing(16);
+        root->setContentsMargins(28, 26, 28, 22);
+        root->setSpacing(18);
 
         m_msg = new QLabel(QCoreApplication::translate("QingYing", "正在检查更新…"), this);
         m_msg->setObjectName(QStringLiteral("msg"));
@@ -71,10 +112,7 @@ public:
         m_msg->setWordWrap(true);
         root->addWidget(m_msg);
 
-        m_bar = new QProgressBar(this);
-        m_bar->setRange(0, 0); // 不确定进度
-        m_bar->setTextVisible(false);
-        m_bar->setFixedHeight(6);
+        m_bar = new IndigoBusyBar(this);
         root->addWidget(m_bar);
 
         auto* row = new QHBoxLayout;
@@ -91,7 +129,7 @@ public:
 
 private:
     QLabel* m_msg = nullptr;
-    QProgressBar* m_bar = nullptr;
+    IndigoBusyBar* m_bar = nullptr;
     QPushButton* m_cancel = nullptr;
 };
 
@@ -114,6 +152,7 @@ QString progressSheet()
 }
 
 } // namespace
+
 
 Updater::Updater(QObject* parent) : QObject(parent) {}
 
@@ -373,6 +412,8 @@ void Updater::download(const Release& r)
     progress->setAttribute(Qt::WA_DeleteOnClose);
     progress->setMinimumDuration(0);
     progress->setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+    if (auto* fusion = QStyleFactory::create(QStringLiteral("Fusion")))
+        progress->setStyle(fusion);
     Theme::setSheet(progress, progressSheet());
     progress->show();
     QNetworkReply* sums = m_net.get(request(r.sumsUrl));
