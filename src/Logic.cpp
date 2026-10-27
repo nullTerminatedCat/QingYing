@@ -8,6 +8,7 @@
 #include <QList>
 #include <QRegularExpression>
 #include <QVersionNumber>
+#include <QtMath>
 
 namespace Logic {
 
@@ -35,10 +36,62 @@ QString expandPattern(const QString& pattern, const QDateTime& now)
 
 QString formatColor(const QColor& c, const QString& f)
 {
+    auto hex2 = [](int v) { return QStringLiteral("%1").arg(v, 2, 16, QLatin1Char('0')); };
     if (f == QLatin1String("hexlower")) return c.name().toLower();
-    if (f == QLatin1String("rgb")) return QStringLiteral("rgb(%1, %2, %3)").arg(c.red()).arg(c.green()).arg(c.blue());
-    if (f == QLatin1String("rgbplain")) return QStringLiteral("%1, %2, %3").arg(c.red()).arg(c.green()).arg(c.blue());
+    if (f == QLatin1String("hexa"))
+        return (QStringLiteral("#") + hex2(c.red()) + hex2(c.green()) + hex2(c.blue()) + hex2(c.alpha())).toUpper();
+    if (f == QLatin1String("rgb"))
+        return QStringLiteral("rgb(%1, %2, %3)").arg(c.red()).arg(c.green()).arg(c.blue());
+    if (f == QLatin1String("rgba")) {
+        const qreal a = c.alphaF();
+        const int prec = (a == 0.0 || a == 1.0) ? 0 : 2;
+        return QStringLiteral("rgba(%1, %2, %3, %4)")
+            .arg(c.red()).arg(c.green()).arg(c.blue()).arg(a, 0, 'f', prec);
+    }
+    if (f == QLatin1String("rgbplain"))
+        return QStringLiteral("%1, %2, %3").arg(c.red()).arg(c.green()).arg(c.blue());
+    if (f == QLatin1String("hsl")) {
+        int h = 0, s = 0, l = 0, a = 0;
+        c.getHsl(&h, &s, &l, &a);
+        if (h < 0) h = 0;
+        return QStringLiteral("hsl(%1, %2%, %3%)")
+            .arg(h).arg(qRound(s * 100.0 / 255.0)).arg(qRound(l * 100.0 / 255.0));
+    }
+    if (f == QLatin1String("hsv")) {
+        int h = 0, s = 0, v = 0, a = 0;
+        c.getHsv(&h, &s, &v, &a);
+        if (h < 0) h = 0;
+        return QStringLiteral("hsv(%1, %2%, %3%)")
+            .arg(h).arg(qRound(s * 100.0 / 255.0)).arg(qRound(v * 100.0 / 255.0));
+    }
+    if (f == QLatin1String("bgr"))
+        return QStringLiteral("0x") + (hex2(c.blue()) + hex2(c.green()) + hex2(c.red())).toUpper();
     return c.name().toUpper();
+}
+
+QStringList colorFormatIds()
+{
+    return {
+        QStringLiteral("hex"),
+        QStringLiteral("hexlower"),
+        QStringLiteral("hexa"),
+        QStringLiteral("rgb"),
+        QStringLiteral("rgba"),
+        QStringLiteral("rgbplain"),
+        QStringLiteral("hsl"),
+        QStringLiteral("hsv"),
+        QStringLiteral("bgr"),
+    };
+}
+
+QString nextColorFormat(const QString& current, bool reverse)
+{
+    const QStringList ids = colorFormatIds();
+    int i = ids.indexOf(current);
+    if (i < 0) i = 0;
+    const int n = ids.size();
+    i = reverse ? (i - 1 + n) % n : (i + 1) % n;
+    return ids.at(i);
 }
 
 bool isNewerVersion(const QString& remoteTag, const QString& current)

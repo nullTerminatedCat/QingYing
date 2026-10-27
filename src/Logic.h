@@ -4,6 +4,7 @@
 #include <QDateTime>
 #include <QImage>
 #include <QString>
+#include <QStringList>
 #include <QUrl>
 
 // 不依赖界面与设置的纯逻辑，便于单元测试（tests/）
@@ -12,8 +13,10 @@ namespace Logic {
 int findShift(const QImage& prev, const QImage& cur);
 // 文件名规则：{} 内按 QDateTime 格式展开，并替换 Windows 文件名非法字符
 QString expandPattern(const QString& pattern, const QDateTime& now);
-// 取色格式：hex / hexlower / rgb / rgbplain
+// 取色格式：hex / hexlower / hexa / rgb / rgba / rgbplain / hsl / hsv / bgr
 QString formatColor(const QColor& c, const QString& format);
+QStringList colorFormatIds();
+QString nextColorFormat(const QString& current, bool reverse = false);
 // 语义化版本比较：tag 可带 v 前缀；预发布（-beta 等）低于同号正式版
 bool isNewerVersion(const QString& remoteTag, const QString& current);
 // 从 GitHub /releases/tag/vX.Y.Z URL 解析标签；失败返回空

@@ -5,6 +5,7 @@
 #include "Recognize.h"
 #include "Uploader.h"
 #include "Settings.h"
+#include "Logic.h"
 #include "Style.h"
 #include "ToolBars.h"
 #include "WindowDetector.h"
@@ -13,6 +14,8 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QGuiApplication>
+#include <QTimer>
+#include <QDateTime>
 #include <QKeyEvent>
 #include <QPlainTextEdit>
 #include <QTextDocument>
@@ -510,10 +513,25 @@ void CaptureOverlay::doLongShot()
 
 void CaptureOverlay::copyHex()
 {
+    if (m_pickClosing) return;
     const QString text = Settings::formatColor(m_raw.pixelColor(toPhysical(m_cursor)));
     QGuiApplication::clipboard()->setText(text);
+    m_lastCopied = text;
+    m_copiedUntilMs = QDateTime::currentMSecsSinceEpoch() + 900;
     emit colorPicked(text);
-    if (m_mode == CaptureMode::Pick) emit finished();
+    update();
+    if (m_mode == CaptureMode::Pick) {
+        m_pickClosing = true;
+        // 稍留反馈，避免托盘气泡被系统吞掉时像「没反应」
+        QTimer::singleShot(650, this, [this] { emit finished(); });
+    }
+}
+
+void CaptureOverlay::cycleColorFormat(bool reverse)
+{
+    const QString next = Logic::nextColorFormat(Settings::colorFormat(), reverse);
+    Settings::setColorFormat(next);
+    update();
 }
 
 bool CaptureOverlay::magnifierVisible() const
@@ -688,6 +706,10 @@ void CaptureOverlay::keyPressEvent(QKeyEvent* e)
     case Qt::Key_Return:
     case Qt::Key_Enter: doDefault(); return;
     case Qt::Key_Tab:
+        if (m_mode == CaptureMode::Pick || (magnifierVisible() && m_state != State::Selected)) {
+            cycleColorFormat(e->modifiers() & Qt::ShiftModifier);
+            return;
+        }
         m_controls = !m_controls;
         updateHover(m_cursor);
         update();
@@ -796,7 +818,7 @@ void CaptureOverlay::paintEvent(QPaintEvent*)
     }
     if (m_mode != CaptureMode::Normal && m_inside) {
         static const QString tips[] = {QString(), QCoreApplication::translate("QingYing", "长截图：框选要滚动的区域后按 Enter 开始"),
-                                       QCoreApplication::translate("QingYing", "取色：单击或按 C 复制颜色 · Esc 退出"),
+                                       QCoreApplication::QCoreApplication::translate("QingYing", "取色器：C / 点击复制 · Tab 切换格式 · Esc 退出"),
                                        QCoreApplication::translate("QingYing", "录屏：框选录制区域后按 Enter 开始")};
         const QString tip = tips[int(m_mode)];
         const QSizeF ts = Style::pillSize(tip);
@@ -813,7 +835,7 @@ void CaptureOverlay::paintMagnifier(QPainter& p)
     const QPoint phys = toPhysical(c);
     const QImage patch = m_raw.copy(phys.x() - kGrid / 2, phys.y() - kGrid / 2, kGrid, kGrid);
     const QColor col = m_raw.pixelColor(phys);
-    const int infoH = 46;
+    const int infoH = 58;
     QPoint tl = c + QPoint(20, 20);
     if (tl.x() + kMag > width() - 4) tl.setX(c.x() - 20 - kMag);
     if (tl.y() + kMag + infoH + 8 > height() - 4) tl.setY(c.y() - 20 - kMag - infoH - 8);
@@ -850,19 +872,27 @@ void CaptureOverlay::paintMagnifier(QPainter& p)
     p.setPen(QPen(QColor(255, 255, 255, 120), 1));
     p.drawRoundedRect(QRectF(info.left() + 10, info.top() + 9, 12, 12), 3, 3);
     const QString colorText = Settings::formatColor(col);
+    const bool justCopied = m_copiedUntilMs > QDateTime::currentMSecsSinceEpoch();
     QFont mono(QStringLiteral("Consolas"));
     mono.setPixelSize(12);
     p.setFont(mono);
     p.setPen(Qt::white);
-    p.drawText(QRectF(info.left() + 30, info.top() + 6, kMag - 36, 18), Qt::AlignVCenter | Qt::AlignLeft, colorText.left(14));
+    const QString shown = justCopied ? m_lastCopied : colorText;
+    p.drawText(QRectF(info.left() + 30, info.top() + 6, kMag - 36, 18), Qt::AlignVCenter | Qt::AlignLeft, shown.left(18));
     QFont small(Style::uiFontFamily());
     small.setPixelSize(11);
     p.setFont(small);
-    p.setPen(Style::Text3);
-    p.drawText(QRectF(info.left() + 30, info.top() + 6, kMag - 40, 18), Qt::AlignVCenter | Qt::AlignRight, QCoreApplication::translate("QingYing", "C 复制"));
+    p.setPen(justCopied ? Style::Accent : Style::Text3);
+    p.drawText(QRectF(info.left() + 30, info.top() + 6, kMag - 40, 18), Qt::AlignVCenter | Qt::AlignRight,
+               justCopied ? QCoreApplication::translate("QingYing", "已复制")
+                          : QCoreApplication::translate("QingYing", "C 复制"));
     p.setFont(mono);
     p.setPen(QColor(255, 255, 255, 200));
-    p.drawText(QRectF(info.left() + 10, info.top() + 24, kMag - 20, 18), Qt::AlignVCenter | Qt::AlignLeft,
+    p.drawText(QRectF(info.left() + 10, info.top() + 24, kMag - 20, 16), Qt::AlignVCenter | Qt::AlignLeft,
                QStringLiteral("RGB %1, %2, %3").arg(col.red()).arg(col.green()).arg(col.blue()));
+    p.setFont(small);
+    p.setPen(Style::Text3);
+    p.drawText(QRectF(info.left() + 10, info.top() + 40, kMag - 20, 14), Qt::AlignVCenter | Qt::AlignLeft,
+               QCoreApplication::translate("QingYing", "Tab 切换格式"));
     p.restore();
 }

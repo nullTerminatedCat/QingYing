@@ -321,7 +321,7 @@ Click to open the containing folder</translation>
     </message>
     <message>
         <location filename="../src/CaptureOverlay.cpp" line="+31"/>
-        <source>取色：单击或按 C 复制颜色 · Esc 退出</source>
+        <source>取色器：C / 点击复制 · Tab 切换格式 · Esc 退出</source>
         <translation>Color picker: click or press C to copy · Esc to exit</translation>
     </message>
     <message>
@@ -1320,8 +1320,8 @@ Actual: %2</translation>
     </message>
     <message>
         <location line="-272"/>
-        <source>取色器按 C 复制颜色时使用</source>
-        <translation>Used when the color picker copies with C</translation>
+        <source>取色器按 C 复制；取色时 Tab 可切换格式</source>
+        <translation>Default format for C / click; Tab cycles while picking</translation>
     </message>
     <message>
         <location line="+135"/>
@@ -1680,6 +1680,18 @@ Press the capture hotkey or click the tray icon to take one</translation>
         <location line="+4"/>
         <source>麦克风启动失败</source>
         <translation>Failed to start the microphone</translation>
+    </message>
+    <message>
+        <source>Tab 切换格式</source>
+        <translation>Tab: cycle format</translation>
+    </message>
+    <message>
+        <source>0xFF6B4F（Windows BGR）</source>
+        <translation>0xFF6B4F (Windows BGR)</translation>
+    </message>
+    <message>
+        <source>#4F6BFFFF（HEXA）</source>
+        <translation>#4F6BFFFF (HEXA)</translation>
     </message>
 </context>
 </TS>

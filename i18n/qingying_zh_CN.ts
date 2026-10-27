@@ -1675,5 +1675,21 @@
         <source>麦克风启动失败</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>取色器：C / 点击复制 · Tab 切换格式 · Esc 退出</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>取色器按 C 复制；取色时 Tab 可切换格式</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Tab 切换格式</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>0xFF6B4F（Windows BGR）</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 </TS>

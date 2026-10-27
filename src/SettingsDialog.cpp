@@ -440,13 +440,18 @@ QWidget* SettingsDialog::buildCapture()
         Settings::setDefaultAction(kActions.value(i, kActions[0]));
         emit changed();
     });
-    auto* cf = new QComboBox;
+        auto* cf = new QComboBox;
     cf->addItem(QCoreApplication::translate("QingYing", "#4F6BFF（HEX 大写）"), QStringLiteral("hex"));
     cf->addItem(QCoreApplication::translate("QingYing", "#4f6bff（HEX 小写）"), QStringLiteral("hexlower"));
+    cf->addItem(QStringLiteral("#4F6BFFFF（HEXA）"), QStringLiteral("hexa"));
     cf->addItem(QStringLiteral("rgb(79, 107, 255)"), QStringLiteral("rgb"));
+    cf->addItem(QStringLiteral("rgba(79, 107, 255, 1)"), QStringLiteral("rgba"));
     cf->addItem(QStringLiteral("79, 107, 255"), QStringLiteral("rgbplain"));
+    cf->addItem(QStringLiteral("hsl(227, 100%, 65%)"), QStringLiteral("hsl"));
+    cf->addItem(QStringLiteral("hsv(227, 69%, 100%)"), QStringLiteral("hsv"));
+    cf->addItem(QCoreApplication::translate("QingYing", "0xFF6B4F（Windows BGR）"), QStringLiteral("bgr"));
     cf->setCurrentIndex(qMax(0, cf->findData(Settings::colorFormat())));
-    addRow(c, QCoreApplication::translate("QingYing", "取色格式"), QCoreApplication::translate("QingYing", "取色器按 C 复制颜色时使用"), cf);
+    addRow(c, QCoreApplication::translate("QingYing", "取色格式"), QCoreApplication::translate("QingYing", "取色器按 C 复制；取色时 Tab 可切换格式"), cf);
     connect(cf, &QComboBox::currentIndexChanged, this, [this, cf] {
         Settings::setColorFormat(cf->currentData().toString());
         emit changed();

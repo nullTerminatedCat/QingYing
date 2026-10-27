@@ -23,7 +23,7 @@ int historySize();
 void setHistorySize(int n);
 QString defaultAction(); // "copy" / "save" / "pin"
 void setDefaultAction(const QString& a);
-QString colorFormat(); // hex / hexlower / rgb / rgbplain
+QString colorFormat(); // hex / hexlower / hexa / rgb / rgba / rgbplain / hsl / hsv / bgr
 void setColorFormat(const QString& f);
 QString formatColor(const QColor& c);
 int recordFps();

@@ -89,6 +89,7 @@ private:
 private:
     CaptureMode m_mode = CaptureMode::Normal;
     void copyHex();
+    void cycleColorFormat(bool reverse = false);
     void paintMagnifier(QPainter& p);
     bool magnifierVisible() const;
 
@@ -112,6 +113,9 @@ private:
     bool m_dragged = false;
     Handle m_handle = None;
     QPoint m_cursor;
+    qint64 m_copiedUntilMs = 0;
+    QString m_lastCopied;
+    bool m_pickClosing = false;
 
     Tool m_tool = Tool::None;
     QColor m_color;

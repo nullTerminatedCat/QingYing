@@ -197,9 +197,18 @@ private slots:
         const QColor c(0x4F, 0x6B, 0xFF);
         QCOMPARE(Logic::formatColor(c, QStringLiteral("hex")), QStringLiteral("#4F6BFF"));
         QCOMPARE(Logic::formatColor(c, QStringLiteral("hexlower")), QStringLiteral("#4f6bff"));
+        QCOMPARE(Logic::formatColor(c, QStringLiteral("hexa")), QStringLiteral("#4F6BFFFF"));
         QCOMPARE(Logic::formatColor(c, QStringLiteral("rgb")), QStringLiteral("rgb(79, 107, 255)"));
+        QCOMPARE(Logic::formatColor(c, QStringLiteral("rgba")), QStringLiteral("rgba(79, 107, 255, 1)"));
         QCOMPARE(Logic::formatColor(c, QStringLiteral("rgbplain")), QStringLiteral("79, 107, 255"));
+        QCOMPARE(Logic::formatColor(c, QStringLiteral("bgr")), QStringLiteral("0xFF6B4F"));
         QCOMPARE(Logic::formatColor(c, QStringLiteral("unknown")), QStringLiteral("#4F6BFF"));
+        QVERIFY(Logic::formatColor(c, QStringLiteral("hsl")).startsWith(QStringLiteral("hsl(")));
+        QVERIFY(Logic::formatColor(c, QStringLiteral("hsv")).startsWith(QStringLiteral("hsv(")));
+        QCOMPARE(Logic::colorFormatIds().size(), 9);
+        QCOMPARE(Logic::nextColorFormat(QStringLiteral("hex")), QStringLiteral("hexlower"));
+        QCOMPARE(Logic::nextColorFormat(QStringLiteral("bgr")), QStringLiteral("hex"));
+        QCOMPARE(Logic::nextColorFormat(QStringLiteral("hex"), true), QStringLiteral("bgr"));
     }
 
     void isNewerVersion_data()
