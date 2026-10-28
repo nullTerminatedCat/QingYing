@@ -5,6 +5,13 @@
 简洁、好看的 Windows 桌面截图工具。靛蓝主色、悬浮圆角工具条，只在需要时出现二级选项。
 
 > 当前版本：0.6.6（放大镜色值完整显示、双屏 Tab 跟随光标）。
+>
+> **国内下载（推荐，免翻墙）**
+> - 安装包直链：[QingYing-0.6.6-windows-x64-setup.exe](https://gitee.com/liner123/qing-ying/releases/download/v0.6.6/QingYing-0.6.6-windows-x64-setup.exe)
+> - 免安装 ZIP：[QingYing-0.6.6-windows-x64-portable.zip](https://gitee.com/liner123/qing-ying/releases/download/v0.6.6/QingYing-0.6.6-windows-x64-portable.zip)
+> - 全部版本：[Gitee Releases](https://gitee.com/liner123/qing-ying/releases)
+>
+> GitHub 镜像同步；应用内「检查更新」仍使用 GitHub Releases。
 
 ## 功能
 
@@ -80,7 +87,14 @@
 
 ## 下载
 
-前往 [Releases](https://github.com/nullTerminatedCat/QingYing/releases) 下载安装包（setup.exe）或免安装版（portable.zip）。
+**国内下载（推荐）：**
+
+- 安装包直链：[QingYing-0.6.6-windows-x64-setup.exe](https://gitee.com/liner123/qing-ying/releases/download/v0.6.6/QingYing-0.6.6-windows-x64-setup.exe)
+- 免安装 ZIP：[QingYing-0.6.6-windows-x64-portable.zip](https://gitee.com/liner123/qing-ying/releases/download/v0.6.6/QingYing-0.6.6-windows-x64-portable.zip)
+- 校验和：[SHA256SUMS-0.6.6-x64.txt](https://gitee.com/liner123/qing-ying/releases/download/v0.6.6/SHA256SUMS-0.6.6-x64.txt)
+- 全部版本：[Gitee Releases](https://gitee.com/liner123/qing-ying/releases) · [v0.6.6](https://gitee.com/liner123/qing-ying/releases/tag/v0.6.6)
+
+GitHub：[Releases](https://github.com/nullTerminatedCat/QingYing/releases)（应用内「检查更新」仍走 GitHub）。
 
 ## 构建
 
@@ -160,7 +174,12 @@ QingYing (青影) is a simple, good-looking screenshot tool for Windows: an indi
 - Auto-update with release notes and SHA-256 verification; the portable build opens the release page instead
 - Optional upload (off by default): SM.MS, Imgur, or custom HTTP multipart. The link is copied to the clipboard, and secrets are encrypted with Windows DPAPI.
 
-**Download:** [Releases](https://github.com/nullTerminatedCat/QingYing/releases) provides `setup.exe` or `portable.zip`.
+**Download (China, recommended):**
+- Setup: [QingYing-0.6.6-windows-x64-setup.exe](https://gitee.com/liner123/qing-ying/releases/download/v0.6.6/QingYing-0.6.6-windows-x64-setup.exe)
+- Portable: [QingYing-0.6.6-windows-x64-portable.zip](https://gitee.com/liner123/qing-ying/releases/download/v0.6.6/QingYing-0.6.6-windows-x64-portable.zip)
+- All releases: [Gitee Releases](https://gitee.com/liner123/qing-ying/releases)
+
+GitHub: [Releases](https://github.com/nullTerminatedCat/QingYing/releases) (in-app auto-update still uses GitHub).
 
 **Build:** you need Visual Studio 2022 (MSVC x64, Windows SDK), Qt 6.7+ with qttools, CMake 3.21+, and Ninja.
 
