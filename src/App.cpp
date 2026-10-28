@@ -638,6 +638,10 @@ void App::startCapture(int mode)
             for (auto& other : m_overlays)
                 if (other && other != self) other->setPassive(false);
         });
+        connect(o, &CaptureOverlay::controlsModeChanged, this, [this](bool controls) {
+            for (auto& other : m_overlays)
+                if (other) other->setControlsMode(controls);
+        });
         m_overlays.append(o);
         o->show();
         if (editIndex >= 0) {

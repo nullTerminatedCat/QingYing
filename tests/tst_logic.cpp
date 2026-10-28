@@ -209,6 +209,9 @@ private slots:
         QCOMPARE(Logic::nextColorFormat(QStringLiteral("hex")), QStringLiteral("hexlower"));
         QCOMPARE(Logic::nextColorFormat(QStringLiteral("bgr")), QStringLiteral("hex"));
         QCOMPARE(Logic::nextColorFormat(QStringLiteral("hex"), true), QStringLiteral("bgr"));
+        QCOMPARE(Logic::colorFormatLabel(QStringLiteral("rgba")), QStringLiteral("RGBA"));
+        QCOMPARE(Logic::colorFormatLabel(QStringLiteral("hsl")), QStringLiteral("HSL"));
+        QCOMPARE(Logic::colorFormatLabel(QStringLiteral("bgr")), QStringLiteral("BGR"));
     }
 
     void isNewerVersion_data()

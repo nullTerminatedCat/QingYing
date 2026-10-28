@@ -84,6 +84,20 @@ QStringList colorFormatIds()
     };
 }
 
+QString colorFormatLabel(const QString& f)
+{
+    if (f == QLatin1String("hex")) return QStringLiteral("HEX");
+    if (f == QLatin1String("hexlower")) return QStringLiteral("HEX");
+    if (f == QLatin1String("hexa")) return QStringLiteral("HEXA");
+    if (f == QLatin1String("rgb")) return QStringLiteral("RGB");
+    if (f == QLatin1String("rgba")) return QStringLiteral("RGBA");
+    if (f == QLatin1String("rgbplain")) return QStringLiteral("RGB");
+    if (f == QLatin1String("hsl")) return QStringLiteral("HSL");
+    if (f == QLatin1String("hsv")) return QStringLiteral("HSV");
+    if (f == QLatin1String("bgr")) return QStringLiteral("BGR");
+    return QStringLiteral("HEX");
+}
+
 QString nextColorFormat(const QString& current, bool reverse)
 {
     const QStringList ids = colorFormatIds();

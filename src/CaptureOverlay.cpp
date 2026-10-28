@@ -16,6 +16,7 @@
 #include <QGuiApplication>
 #include <QTimer>
 #include <QDateTime>
+#include <QEnterEvent>
 #include <QKeyEvent>
 #include <QWheelEvent>
 #include <QPlainTextEdit>
@@ -134,6 +135,25 @@ void CaptureOverlay::activate()
         updateHover(local);
     }
 }
+
+void CaptureOverlay::claimKeyboard()
+{
+    if (m_passive || m_editing || m_pickClosing) return;
+    if (hasFocus()) return;
+    raise();
+    activateWindow();
+    setFocus(Qt::MouseFocusReason);
+}
+
+void CaptureOverlay::setControlsMode(bool controls)
+{
+    if (m_controls == controls) return;
+    m_controls = controls;
+    if (m_inside && m_state == State::Idle && !m_passive && m_mode != CaptureMode::Pick)
+        updateHover(m_cursor);
+    update();
+}
+
 
 void CaptureOverlay::setPassive(bool passive)
 {
@@ -626,6 +646,7 @@ void CaptureOverlay::mouseMoveEvent(QMouseEvent* e)
     const QPoint pos = e->position().toPoint();
     m_cursor = pos;
     m_inside = true;
+    claimKeyboard();
     if (m_mode == CaptureMode::Pick) {
         update();
         return;
@@ -707,10 +728,11 @@ void CaptureOverlay::keyPressEvent(QKeyEvent* e)
     case Qt::Key_Return:
     case Qt::Key_Enter: doDefault(); return;
     case Qt::Key_Tab:
-        // Tab 只切换窗口/控件识别，绝不抢作取色格式切换
+        // Tab 只切换窗口/控件识别，绝不抢作取色格式切换；多屏同步
         m_controls = !m_controls;
         updateHover(m_cursor);
         update();
+        emit controlsModeChanged(m_controls);
         return;
     case Qt::Key_BracketLeft:
     case Qt::Key_BraceLeft:
@@ -768,6 +790,17 @@ void CaptureOverlay::wheelEvent(QWheelEvent* e)
         return;
     }
     QWidget::wheelEvent(e);
+}
+
+void CaptureOverlay::enterEvent(QEnterEvent* e)
+{
+    m_inside = true;
+    claimKeyboard();
+    const QPoint local = e->position().toPoint();
+    m_cursor = local;
+    if (m_state == State::Idle) updateHover(local);
+    update();
+    QWidget::enterEvent(e);
 }
 
 void CaptureOverlay::leaveEvent(QEvent*)
@@ -858,10 +891,47 @@ void CaptureOverlay::paintMagnifier(QPainter& p)
     const QPoint phys = toPhysical(c);
     const QImage patch = m_raw.copy(phys.x() - kGrid / 2, phys.y() - kGrid / 2, kGrid, kGrid);
     const QColor col = m_raw.pixelColor(phys);
-    const int infoH = 58;
+
+    const QString fmtId = Settings::colorFormat();
+    const QString colorText = Settings::formatColor(col);
+    const QString fmtLabel = Logic::colorFormatLabel(fmtId);
+    const bool justCopied = m_copiedUntilMs > QDateTime::currentMSecsSinceEpoch();
+    const QString valueText = justCopied ? m_lastCopied : colorText;
+    const QString copyHint = justCopied ? QCoreApplication::translate("QingYing", "已复制")
+                                        : QCoreApplication::translate("QingYing", "C 复制");
+    const QString switchHint = QCoreApplication::translate("QingYing", "[ ] 切换格式");
+
+    QFont mono(QStringLiteral("Consolas"));
+    mono.setPixelSize(12);
+    QFont small(Style::uiFontFamily());
+    small.setPixelSize(11);
+    const QFontMetrics fmMono(mono);
+    const QFontMetrics fmSmall(small);
+
+    constexpr int padX = 10;
+    constexpr int swatch = 12;
+    constexpr int gap = 8;
+    const int row1W = swatch + gap + fmSmall.horizontalAdvance(fmtLabel) + 12 + fmSmall.horizontalAdvance(copyHint);
+    const int row2W = fmMono.horizontalAdvance(valueText);
+    const int row3W = fmSmall.horizontalAdvance(switchHint);
+    const int contentW = qMax(row1W, qMax(row2W, row3W));
+    const int infoW = qMax(kMag, contentW + padX * 2);
+    constexpr int infoH = 58;
+
+    // 圆放大镜相对光标定位；贴边时翻到另一侧，并预留信息条宽高
     QPoint tl = c + QPoint(20, 20);
-    if (tl.x() + kMag > width() - 4) tl.setX(c.x() - 20 - kMag);
-    if (tl.y() + kMag + infoH + 8 > height() - 4) tl.setY(c.y() - 20 - kMag - infoH - 8);
+    bool placeLeft = false;
+    bool placeAbove = false;
+    if (tl.x() + qMax(kMag, infoW) > width() - 4) {
+        placeLeft = true;
+        tl.setX(c.x() - 20 - kMag);
+    }
+    if (tl.y() + kMag + 8 + infoH > height() - 4) {
+        placeAbove = true;
+        tl.setY(c.y() - 20 - kMag - 8 - infoH);
+    }
+    tl.setX(qBound(4, tl.x(), width() - kMag - 4));
+    tl.setY(qBound(4, tl.y(), height() - kMag - 4));
     const QRectF circle(tl, QSizeF(kMag, kMag));
 
     p.save();
@@ -887,35 +957,39 @@ void CaptureOverlay::paintMagnifier(QPainter& p)
     p.setPen(QPen(QColor(0, 0, 0, 40), 1));
     p.drawEllipse(circle);
 
-    const QRectF info(circle.left(), circle.bottom() + 8, kMag, infoH);
+    // 信息条：按内容加宽；贴右缘时与圆右对齐或整体左移，勿裁切色值
+    qreal infoX = placeLeft ? (circle.right() - infoW) : circle.left();
+    if (infoX + infoW > width() - 4) infoX = width() - 4 - infoW;
+    if (infoX < 4) infoX = 4;
+    qreal infoY = placeAbove ? (circle.top() - 8 - infoH) : (circle.bottom() + 8);
+    if (infoY < 4) infoY = 4;
+    if (infoY + infoH > height() - 4) infoY = height() - 4 - infoH;
+    const QRectF info(infoX, infoY, infoW, infoH);
+
     p.setPen(Qt::NoPen);
     p.setBrush(Style::Pill);
     p.drawRoundedRect(info, 8, 8);
     p.setBrush(col);
     p.setPen(QPen(QColor(255, 255, 255, 120), 1));
-    p.drawRoundedRect(QRectF(info.left() + 10, info.top() + 9, 12, 12), 3, 3);
-    const QString colorText = Settings::formatColor(col);
-    const bool justCopied = m_copiedUntilMs > QDateTime::currentMSecsSinceEpoch();
-    QFont mono(QStringLiteral("Consolas"));
-    mono.setPixelSize(12);
-    p.setFont(mono);
-    p.setPen(Qt::white);
-    const QString shown = justCopied ? m_lastCopied : colorText;
-    p.drawText(QRectF(info.left() + 30, info.top() + 6, kMag - 36, 18), Qt::AlignVCenter | Qt::AlignLeft, shown.left(18));
-    QFont small(Style::uiFontFamily());
-    small.setPixelSize(11);
+    p.drawRoundedRect(QRectF(info.left() + padX, info.top() + 9, swatch, swatch), 3, 3);
+
     p.setFont(small);
+    p.setPen(Qt::white);
+    p.drawText(QRectF(info.left() + padX + swatch + gap, info.top() + 6, infoW - padX * 2 - swatch - gap - 48, 18),
+               Qt::AlignVCenter | Qt::AlignLeft, fmtLabel);
     p.setPen(justCopied ? Style::Accent : Style::Text3);
-    p.drawText(QRectF(info.left() + 30, info.top() + 6, kMag - 40, 18), Qt::AlignVCenter | Qt::AlignRight,
-               justCopied ? QCoreApplication::translate("QingYing", "已复制")
-                          : QCoreApplication::translate("QingYing", "C 复制"));
+    p.drawText(QRectF(info.left() + padX, info.top() + 6, infoW - padX * 2, 18),
+               Qt::AlignVCenter | Qt::AlignRight, copyHint);
+
     p.setFont(mono);
-    p.setPen(QColor(255, 255, 255, 200));
-    p.drawText(QRectF(info.left() + 10, info.top() + 24, kMag - 20, 16), Qt::AlignVCenter | Qt::AlignLeft,
-               QStringLiteral("RGB %1, %2, %3").arg(col.red()).arg(col.green()).arg(col.blue()));
+    p.setPen(QColor(255, 255, 255, 230));
+    p.drawText(QRectF(info.left() + padX, info.top() + 24, infoW - padX * 2, 16),
+               Qt::AlignVCenter | Qt::AlignLeft, valueText);
+
     p.setFont(small);
     p.setPen(Style::Text3);
-    p.drawText(QRectF(info.left() + 10, info.top() + 40, kMag - 20, 14), Qt::AlignVCenter | Qt::AlignLeft,
-               QCoreApplication::translate("QingYing", "[ ] 切换格式"));
+    p.drawText(QRectF(info.left() + padX, info.top() + 40, infoW - padX * 2, 14),
+               Qt::AlignVCenter | Qt::AlignLeft, switchHint);
     p.restore();
 }
+

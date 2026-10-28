@@ -17,6 +17,7 @@ QString expandPattern(const QString& pattern, const QDateTime& now);
 QString formatColor(const QColor& c, const QString& format);
 QStringList colorFormatIds();
 QString nextColorFormat(const QString& current, bool reverse = false);
+QString colorFormatLabel(const QString& format); // HEX / RGBA / HSL ...
 // 语义化版本比较：tag 可带 v 前缀；预发布（-beta 等）低于同号正式版
 bool isNewerVersion(const QString& remoteTag, const QString& current);
 // 从 GitHub /releases/tag/vX.Y.Z URL 解析标签；失败返回空

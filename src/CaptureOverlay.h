@@ -22,6 +22,10 @@ public:
     CaptureOverlay(QScreen* screen, const QImage& shot, const QRect& monitorPhysical, const WindowDetector* detector);
     void setPassive(bool passive);
     void activate();
+    // 键盘跟随光标：鼠标进入本屏时轻量抢焦点（不 SetForegroundWindow）
+    void claimKeyboard();
+    void setControlsMode(bool controls);
+    bool controlsMode() const { return m_controls; }
 
 signals:
     void selectionStarted(CaptureOverlay* self);
@@ -31,6 +35,8 @@ signals:
     void longShotRequested(const QRect& physicalGlobal);
     void recordRequested(const QRect& physicalGlobal);
     void colorPicked(const QString& text);
+    // Tab 切换「窗口 / 窗口+控件」时广播，多屏同步
+    void controlsModeChanged(bool controls);
     // 截图已产出（复制/保存/钉图），savedPath 非空表示已写入文件
     void delivered(const QImage& image, const QString& savedPath);
 
@@ -42,6 +48,7 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent*) override;
     void keyPressEvent(QKeyEvent*) override;
     void wheelEvent(QWheelEvent*) override;
+    void enterEvent(QEnterEvent*) override;
     void leaveEvent(QEvent*) override;
     bool eventFilter(QObject* o, QEvent* e) override;
 
