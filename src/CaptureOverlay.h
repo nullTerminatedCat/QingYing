@@ -7,6 +7,7 @@
 #include <QWidget>
 
 class QPlainTextEdit;
+class QWheelEvent;
 class QScreen;
 class StyleBar;
 class ToolBar;
@@ -40,6 +41,7 @@ protected:
     void mouseReleaseEvent(QMouseEvent*) override;
     void mouseDoubleClickEvent(QMouseEvent*) override;
     void keyPressEvent(QKeyEvent*) override;
+    void wheelEvent(QWheelEvent*) override;
     void leaveEvent(QEvent*) override;
     bool eventFilter(QObject* o, QEvent* e) override;
 

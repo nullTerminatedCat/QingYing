@@ -100,23 +100,32 @@ App::App()
         m_lastRecording.clear();
     });
     connect(&m_hotkey, &HotkeyManager::activated, this, [this] { startCapture(); });
+    connect(&m_recordHotkey, &HotkeyManager::activated, this, &App::onRecordHotkey);
     const QKeySequence hk = Settings::hotkey();
+    const QKeySequence rhk = Settings::recordHotkey();
     const bool ok = m_hotkey.setHotkey(hk);
+    const bool rok = m_recordHotkey.setHotkey(rhk);
     updateMenu();
     const QString hkText = hk.toString(QKeySequence::NativeText);
+    const QString rhkText = rhk.toString(QKeySequence::NativeText);
     const bool firstRun = !Settings::welcomed() && !qEnvironmentVariableIsSet("QINGYING_SMOKE_REPORT");
     if (ok && firstRun) {
         Settings::setWelcomed(true);
         m_welcomePending = true;
         m_tray->showMessage(QCoreApplication::translate("QingYing", "欢迎使用青影"),
-                            QCoreApplication::translate("QingYing", "按 %1 或单击托盘图标开始截图；右键托盘图标可录屏、钉图、查看历史。点击此提示打开设置。").arg(hkText),
+                            QCoreApplication::translate("QingYing", "按 %1 截图，%2 录屏；右键托盘可钉图、查看历史。点击此提示打开设置。").arg(hkText, rhkText),
                             appIcon(), 10000);
     } else if (ok)
-        m_tray->showMessage(QCoreApplication::translate("QingYing", "青影已在后台运行"), QCoreApplication::translate("QingYing", "按 %1 开始截图").arg(hkText),
+        m_tray->showMessage(QCoreApplication::translate("QingYing", "青影已在后台运行"),
+                            QCoreApplication::translate("QingYing", "按 %1 截图 · %2 录屏").arg(hkText, rhkText),
                             appIcon(), 3000);
     else
         m_tray->showMessage(QCoreApplication::translate("QingYing", "快捷键冲突"),
                             QCoreApplication::translate("QingYing", "%1 已被其他程序占用，请在设置中更换。也可单击托盘图标截图。").arg(hkText),
+                            QSystemTrayIcon::Warning, 6000);
+    if (ok && !rok)
+        m_tray->showMessage(QCoreApplication::translate("QingYing", "录屏热键冲突"),
+                            QCoreApplication::translate("QingYing", "%1 已被占用，请在设置中更换录屏热键。").arg(rhkText),
                             QSystemTrayIcon::Warning, 6000);
     writeSmokeReport();
     if (qEnvironmentVariableIsSet("QINGYING_SMOKE_EDIT") && qEnvironmentVariableIsSet("QINGYING_SMOKE_REPORT")) {
@@ -190,7 +199,7 @@ void App::buildMenu()
     m_menu->addAction(menuIcon(Icon::Picker), QCoreApplication::translate("QingYing", "取色"), this,
                       [this] { QTimer::singleShot(180, this, [this] { startCapture(int(CaptureMode::Pick)); }); });
     QMenu* rec = m_menu->addMenu(menuIcon(Icon::Record), QCoreApplication::translate("QingYing", "录屏"));
-    rec->addAction(QCoreApplication::translate("QingYing", "录制 MP4"), this, [this] { m_recordGif = false; QTimer::singleShot(180, this, [this] { startCapture(int(CaptureMode::Record)); }); });
+    m_recordAct = rec->addAction(QCoreApplication::translate("QingYing", "录制 MP4"), this, [this] { m_recordGif = false; QTimer::singleShot(180, this, [this] { startCapture(int(CaptureMode::Record)); }); });
     rec->addAction(QCoreApplication::translate("QingYing", "录制 GIF"), this, [this] { m_recordGif = true; QTimer::singleShot(180, this, [this] { startCapture(int(CaptureMode::Record)); }); });
     m_menu->addSeparator();
     m_pinMenu = m_menu->addMenu(menuIcon(Icon::Pin), QCoreApplication::translate("QingYing", "钉图"));
@@ -255,11 +264,13 @@ void App::writeSmokeReport()
     if (path.isEmpty()) return;
     QFile f(path);
     if (f.open(QIODevice::WriteOnly | QIODevice::Text))
-        f.write(QStringLiteral("tray_available=%1\ntray_visible=%2\nhotkey=%3\nhotkey_registered=%4\nscreens=%5\n")
+        f.write(QStringLiteral("tray_available=%1\ntray_visible=%2\nhotkey=%3\nhotkey_registered=%4\nrecord_hotkey=%5\nrecord_hotkey_registered=%6\nscreens=%7\n")
                     .arg(QSystemTrayIcon::isSystemTrayAvailable())
                     .arg(m_tray->isVisible())
                     .arg(m_hotkey.current().toString())
                     .arg(m_hotkey.isRegistered())
+                    .arg(m_recordHotkey.current().toString())
+                    .arg(m_recordHotkey.isRegistered())
                     .arg(QGuiApplication::screens().size())
                     .toUtf8());
     // 长截图拼接自检：构造一张随机纹理，平移 37 像素后应能找回位移
@@ -324,7 +335,7 @@ void App::writeSmokeReport()
         const QString dir = qEnvironmentVariable("QINGYING_SMOKE_SHOTS");
         QDir().mkpath(dir);
         {
-            SettingsDialog sd([](const QKeySequence&) { return true; });
+            SettingsDialog sd([](const QKeySequence&) { return true; }, [](const QKeySequence&) { return true; });
             sd.resize(780, 560);
             sd.show();
             for (int i = 0; i < sd.pageCount(); ++i) {
@@ -412,16 +423,21 @@ void App::writeSmokeReport()
 void App::updateMenu()
 {
     m_captureAct->setText(QCoreApplication::translate("QingYing", "截图\t%1").arg(Settings::hotkey().toString(QKeySequence::NativeText)));
+    if (m_recordAct)
+        m_recordAct->setText(QCoreApplication::translate("QingYing", "录制 MP4\t%1").arg(Settings::recordHotkey().toString(QKeySequence::NativeText)));
     const int pins = PinWindow::all().size();
     m_pinMenu->setTitle(pins ? QCoreApplication::translate("QingYing", "钉图（%1）").arg(pins) : QCoreApplication::translate("QingYing", "钉图"));
     m_pinMenu->setEnabled(pins > 0);
     const QSignalBlocker b(m_autoAct);
     m_autoAct->setChecked(Settings::autostart());
-    m_tray->setToolTip(QCoreApplication::translate("QingYing", "青影 截图 · %1").arg(Settings::hotkey().toString(QKeySequence::NativeText)));
+    m_tray->setToolTip(QCoreApplication::translate("QingYing", "青影 · 截图 %1 · 录屏 %2")
+                           .arg(Settings::hotkey().toString(QKeySequence::NativeText),
+                                Settings::recordHotkey().toString(QKeySequence::NativeText)));
 }
 
 bool App::applyHotkey(const QKeySequence& seq)
 {
+    if (seq == Settings::recordHotkey() || seq == m_recordHotkey.current()) return false;
     const QKeySequence old = m_hotkey.current();
     if (m_hotkey.isRegistered() && old == seq) return true;
     if (m_hotkey.setHotkey(seq)) {
@@ -430,6 +446,30 @@ bool App::applyHotkey(const QKeySequence& seq)
     }
     if (!old.isEmpty()) m_hotkey.setHotkey(old);
     return false;
+}
+
+bool App::applyRecordHotkey(const QKeySequence& seq)
+{
+    if (seq == Settings::hotkey() || seq == m_hotkey.current()) return false;
+    const QKeySequence old = m_recordHotkey.current();
+    if (m_recordHotkey.isRegistered() && old == seq) return true;
+    if (m_recordHotkey.setHotkey(seq)) {
+        updateMenu();
+        return true;
+    }
+    if (!old.isEmpty()) m_recordHotkey.setHotkey(old);
+    return false;
+}
+
+void App::onRecordHotkey()
+{
+    if (m_recordSession) {
+        m_recordSession->requestStop();
+        return;
+    }
+    if (m_busy || !m_overlays.isEmpty()) return;
+    m_recordGif = false;
+    startCapture(int(CaptureMode::Record));
 }
 
 void App::startDelayedCapture(int seconds)
@@ -453,7 +493,11 @@ void App::startRecording(const QRect& region)
     if (m_busy) return;
     m_busy = true;
     auto* s = new RecordSession(region, m_recordGif ? Recorder::Format::Gif : Recorder::Format::Mp4);
-    connect(s, &QObject::destroyed, this, [this] { m_busy = false; });
+    m_recordSession = s;
+    connect(s, &QObject::destroyed, this, [this] {
+        m_busy = false;
+        m_recordSession.clear();
+    });
     connect(s, &RecordSession::finished, this, [this](bool ok, const QString& path, const QString& err) {
         if (ok) {
             m_lastRecording = path;
@@ -697,12 +741,18 @@ void App::openSettings()
         m_settings->activateWindow();
         return;
     }
-    m_settings = new SettingsDialog([this](const QKeySequence& k) { return applyHotkey(k); });
+    m_settings = new SettingsDialog([this](const QKeySequence& k) { return applyHotkey(k); },
+                                    [this](const QKeySequence& k) { return applyRecordHotkey(k); });
     m_settings->setAttribute(Qt::WA_DeleteOnClose);
     m_settings->setCheckUpdate([this] { m_updater->check(true); });
     m_settings->setSuspendHotkey([this](bool on) {
-        if (on) m_hotkey.unregister();
-        else if (!m_hotkey.isRegistered()) m_hotkey.setHotkey(Settings::hotkey());
+        if (on) {
+            m_hotkey.unregister();
+            m_recordHotkey.unregister();
+        } else {
+            if (!m_hotkey.isRegistered()) m_hotkey.setHotkey(Settings::hotkey());
+            if (!m_recordHotkey.isRegistered()) m_recordHotkey.setHotkey(Settings::recordHotkey());
+        }
     });
     connect(m_settings, &SettingsDialog::changed, this, &App::updateMenu);
     connect(m_settings, &QDialog::finished, this, [] { History::prune(); });

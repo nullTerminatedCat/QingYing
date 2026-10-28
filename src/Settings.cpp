@@ -34,6 +34,16 @@ QKeySequence hotkey()
 }
 void setHotkey(const QKeySequence& seq) { store().setValue("hotkey", seq.toString()); }
 
+QKeySequence defaultRecordHotkey() { return QKeySequence(QStringLiteral("Ctrl+Alt+R")); }
+
+QKeySequence recordHotkey()
+{
+    const QString s = store().value("recordHotkey", defaultRecordHotkey().toString()).toString();
+    QKeySequence k(s);
+    return k.isEmpty() ? defaultRecordHotkey() : k;
+}
+void setRecordHotkey(const QKeySequence& seq) { store().setValue("recordHotkey", seq.toString()); }
+
 QString saveDir()
 {
     const QString def = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation) + QStringLiteral("/QingYing");

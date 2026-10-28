@@ -17,6 +17,7 @@
 #include <QTimer>
 #include <QDateTime>
 #include <QKeyEvent>
+#include <QWheelEvent>
 #include <QPlainTextEdit>
 #include <QTextDocument>
 #include <QMessageBox>
@@ -706,14 +707,25 @@ void CaptureOverlay::keyPressEvent(QKeyEvent* e)
     case Qt::Key_Return:
     case Qt::Key_Enter: doDefault(); return;
     case Qt::Key_Tab:
-        if (m_mode == CaptureMode::Pick || (magnifierVisible() && m_state != State::Selected)) {
-            cycleColorFormat(e->modifiers() & Qt::ShiftModifier);
-            return;
-        }
+        // Tab 只切换窗口/控件识别，绝不抢作取色格式切换
         m_controls = !m_controls;
         updateHover(m_cursor);
         update();
         return;
+    case Qt::Key_BracketLeft:
+    case Qt::Key_BraceLeft:
+        if (m_mode == CaptureMode::Pick || magnifierVisible()) {
+            cycleColorFormat(true);
+            return;
+        }
+        break;
+    case Qt::Key_BracketRight:
+    case Qt::Key_BraceRight:
+        if (m_mode == CaptureMode::Pick || magnifierVisible()) {
+            cycleColorFormat(false);
+            return;
+        }
+        break;
     case Qt::Key_F3: doPin(); return;
     default: break;
     }
@@ -745,6 +757,17 @@ void CaptureOverlay::keyPressEvent(QKeyEvent* e)
     if (e->key() == Qt::Key_Up) d = {0, -1};
     if (e->key() == Qt::Key_Down) d = {0, 1};
     if (!d.isNull()) QCursor::setPos(QCursor::pos() + d);
+}
+
+void CaptureOverlay::wheelEvent(QWheelEvent* e)
+{
+    // 放大镜/取色时滚轮切换格式，不占用 Tab
+    if (m_mode == CaptureMode::Pick || (magnifierVisible() && m_state != State::Selected)) {
+        cycleColorFormat(e->angleDelta().y() < 0);
+        e->accept();
+        return;
+    }
+    QWidget::wheelEvent(e);
 }
 
 void CaptureOverlay::leaveEvent(QEvent*)
@@ -818,7 +841,7 @@ void CaptureOverlay::paintEvent(QPaintEvent*)
     }
     if (m_mode != CaptureMode::Normal && m_inside) {
         static const QString tips[] = {QString(), QCoreApplication::translate("QingYing", "长截图：框选要滚动的区域后按 Enter 开始"),
-                                       QCoreApplication::QCoreApplication::translate("QingYing", "取色器：C / 点击复制 · Tab 切换格式 · Esc 退出"),
+                                       QCoreApplication::translate("QingYing", "取色器：C / 点击复制 · [ ] 切换格式 · Esc 退出"),
                                        QCoreApplication::translate("QingYing", "录屏：框选录制区域后按 Enter 开始")};
         const QString tip = tips[int(m_mode)];
         const QSizeF ts = Style::pillSize(tip);
@@ -893,6 +916,6 @@ void CaptureOverlay::paintMagnifier(QPainter& p)
     p.setFont(small);
     p.setPen(Style::Text3);
     p.drawText(QRectF(info.left() + 10, info.top() + 40, kMag - 20, 14), Qt::AlignVCenter | Qt::AlignLeft,
-               QCoreApplication::translate("QingYing", "Tab 切换格式"));
+               QCoreApplication::translate("QingYing", "[ ] 切换格式"));
     p.restore();
 }

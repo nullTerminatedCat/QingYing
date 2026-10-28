@@ -142,8 +142,10 @@ const QStringList kActions = {QStringLiteral("copy"), QStringLiteral("save"), QS
 const int kFps[3] = {10, 15, 30};
 }
 
-SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, QWidget* parent)
-    : QDialog(parent), m_apply(std::move(apply))
+SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> applyCapture,
+                               std::function<bool(const QKeySequence&)> applyRecord,
+                               QWidget* parent)
+    : QDialog(parent), m_applyCapture(std::move(applyCapture)), m_applyRecord(std::move(applyRecord))
 {
     setWindowTitle(QCoreApplication::translate("QingYing", "设置"));
     setWindowIcon(appIcon());
@@ -277,7 +279,8 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> apply, Q
 SettingsDialog::~SettingsDialog()
 {
     if (m_upTimer && m_upTimer->isActive()) saveUpload(); // 关闭时写入未保存的请求头
-    if (m_hotkey && m_hotkey->isRecording() && m_suspend) m_suspend(false);
+    if (((m_hotkey && m_hotkey->isRecording()) || (m_recordHotkey && m_recordHotkey->isRecording())) && m_suspend)
+        m_suspend(false);
     QSettings st(QStringLiteral("QingYing"), QStringLiteral("QingYing"));
     if (!isMaximized()) st.setValue("settingsSize", size());
 }
@@ -321,14 +324,18 @@ QWidget* SettingsDialog::buildGeneral()
     m_hotkey->setSequence(Settings::hotkey());
     auto* reset = new QPushButton(QCoreApplication::translate("QingYing", "恢复默认"));
     addRow(c, QCoreApplication::translate("QingYing", "截图"), QCoreApplication::translate("QingYing", "点击后按下新的组合键，Esc 取消"), hbox({m_hotkey, reset}, -1), false, &m_hotkeyHint);
-    auto tryApply = [this](QKeySequence k) {
+    auto tryApplyCapture = [this](QKeySequence k) {
         if (k.isEmpty()) k = Settings::defaultHotkey();
         unsigned m = 0, v = 0;
         if (!HotkeyManager::toNative(k, m, v) || m == 0) {
             setStatus(m_hotkeyHint, QCoreApplication::translate("QingYing", "需要包含 Ctrl / Alt / Shift / Win 之一，并使用字母、数字或功能键"), true);
             return;
         }
-        if (!m_apply(k)) {
+        if (k == Settings::recordHotkey()) {
+            setStatus(m_hotkeyHint, QCoreApplication::translate("QingYing", "不能与录屏热键相同"), true);
+            return;
+        }
+        if (!m_applyCapture || !m_applyCapture(k)) {
             setStatus(m_hotkeyHint, QCoreApplication::translate("QingYing", "%1 已被其他程序占用，请换一个组合").arg(k.toString(QKeySequence::NativeText)), true);
             return;
         }
@@ -340,8 +347,38 @@ QWidget* SettingsDialog::buildGeneral()
     connect(m_hotkey, &HotkeyEdit::recordingChanged, this, [this](bool on) {
         if (m_suspend) m_suspend(on);
     });
-    connect(m_hotkey, &HotkeyEdit::recorded, this, tryApply);
-    connect(reset, &QPushButton::clicked, this, [tryApply] { tryApply(Settings::defaultHotkey()); });
+    connect(m_hotkey, &HotkeyEdit::recorded, this, tryApplyCapture);
+    connect(reset, &QPushButton::clicked, this, [tryApplyCapture] { tryApplyCapture(Settings::defaultHotkey()); });
+
+    m_recordHotkey = new HotkeyEdit;
+    m_recordHotkey->setSequence(Settings::recordHotkey());
+    auto* resetRec = new QPushButton(QCoreApplication::translate("QingYing", "恢复默认"));
+    addRow(c, QCoreApplication::translate("QingYing", "录屏"), QCoreApplication::translate("QingYing", "开始框选录制；录制中再次按下可停止保存"), hbox({m_recordHotkey, resetRec}, -1), false, &m_recordHotkeyHint);
+    auto tryApplyRecord = [this](QKeySequence k) {
+        if (k.isEmpty()) k = Settings::defaultRecordHotkey();
+        unsigned m = 0, v = 0;
+        if (!HotkeyManager::toNative(k, m, v) || m == 0) {
+            setStatus(m_recordHotkeyHint, QCoreApplication::translate("QingYing", "需要包含 Ctrl / Alt / Shift / Win 之一，并使用字母、数字或功能键"), true);
+            return;
+        }
+        if (k == Settings::hotkey()) {
+            setStatus(m_recordHotkeyHint, QCoreApplication::translate("QingYing", "不能与截图热键相同"), true);
+            return;
+        }
+        if (!m_applyRecord || !m_applyRecord(k)) {
+            setStatus(m_recordHotkeyHint, QCoreApplication::translate("QingYing", "%1 已被其他程序占用，请换一个组合").arg(k.toString(QKeySequence::NativeText)), true);
+            return;
+        }
+        Settings::setRecordHotkey(k);
+        m_recordHotkey->setSequence(k);
+        setStatus(m_recordHotkeyHint, QCoreApplication::translate("QingYing", "已生效：%1").arg(k.toString(QKeySequence::NativeText)), false);
+        emit changed();
+    };
+    connect(m_recordHotkey, &HotkeyEdit::recordingChanged, this, [this](bool on) {
+        if (m_suspend) m_suspend(on);
+    });
+    connect(m_recordHotkey, &HotkeyEdit::recorded, this, tryApplyRecord);
+    connect(resetRec, &QPushButton::clicked, this, [tryApplyRecord] { tryApplyRecord(Settings::defaultRecordHotkey()); });
 
     c = addCard(b, QCoreApplication::translate("QingYing", "启动"));
     addRow(c, QCoreApplication::translate("QingYing", "开机自动启动"), QCoreApplication::translate("QingYing", "登录 Windows 后在托盘中待命"), toggle(Settings::autostart(), [this](bool on) {
@@ -451,7 +488,7 @@ QWidget* SettingsDialog::buildCapture()
     cf->addItem(QStringLiteral("hsv(227, 69%, 100%)"), QStringLiteral("hsv"));
     cf->addItem(QCoreApplication::translate("QingYing", "0xFF6B4F（Windows BGR）"), QStringLiteral("bgr"));
     cf->setCurrentIndex(qMax(0, cf->findData(Settings::colorFormat())));
-    addRow(c, QCoreApplication::translate("QingYing", "取色格式"), QCoreApplication::translate("QingYing", "取色器按 C 复制；取色时 Tab 可切换格式"), cf);
+    addRow(c, QCoreApplication::translate("QingYing", "取色格式"), QCoreApplication::translate("QingYing", "取色器按 C 复制；取色时用 [ ] 或滚轮切换格式"), cf);
     connect(cf, &QComboBox::currentIndexChanged, this, [this, cf] {
         Settings::setColorFormat(cf->currentData().toString());
         emit changed();

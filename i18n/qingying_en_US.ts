@@ -321,8 +321,8 @@ Click to open the containing folder</translation>
     </message>
     <message>
         <location filename="../src/CaptureOverlay.cpp" line="+31"/>
-        <source>取色器：C / 点击复制 · Tab 切换格式 · Esc 退出</source>
-        <translation>Color picker: click or press C to copy · Esc to exit</translation>
+        <source>取色器：C / 点击复制 · [ ] 切换格式 · Esc 退出</source>
+        <translation>Color picker: C / click to copy · [ ] cycles format · Esc exits</translation>
     </message>
     <message>
         <location line="-384"/>
@@ -1320,8 +1320,8 @@ Actual: %2</translation>
     </message>
     <message>
         <location line="-272"/>
-        <source>取色器按 C 复制；取色时 Tab 可切换格式</source>
-        <translation>Default format for C / click; Tab cycles while picking</translation>
+        <source>取色器按 C 复制；取色时用 [ ] 或滚轮切换格式</source>
+        <translation>Default for C / click; [ ] or wheel cycles while picking</translation>
     </message>
     <message>
         <location line="+135"/>
@@ -1584,8 +1584,8 @@ Actual: %2</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>按 %1 或单击托盘图标开始截图；右键托盘图标可录屏、钉图、查看历史。点击此提示打开设置。</source>
-        <translation>Press %1 or click the tray icon to capture. Right-click the tray icon to record, pin or open History. Click this message to open Settings.</translation>
+        <source>按 %1 截图，%2 录屏；右键托盘可钉图、查看历史。点击此提示打开设置。</source>
+        <translation>Press %1 to capture, %2 to record; right-click the tray for pin and history. Click this tip to open Settings.</translation>
     </message>
     <message>
         <location filename="../src/HistoryWindow.cpp" line="-10"/>
@@ -1682,8 +1682,8 @@ Press the capture hotkey or click the tray icon to take one</translation>
         <translation>Failed to start the microphone</translation>
     </message>
     <message>
-        <source>Tab 切换格式</source>
-        <translation>Tab: cycle format</translation>
+        <source>[ ] 切换格式</source>
+        <translation>[ ]: cycle format</translation>
     </message>
     <message>
         <source>0xFF6B4F（Windows BGR）</source>
@@ -1692,6 +1692,39 @@ Press the capture hotkey or click the tray icon to take one</translation>
     <message>
         <source>#4F6BFFFF（HEXA）</source>
         <translation>#4F6BFFFF (HEXA)</translation>
+    </message>
+
+    <message>
+        <source>录屏热键冲突</source>
+        <translation>Record hotkey conflict</translation>
+    </message>
+    <message>
+        <source>%1 已被占用，请在设置中更换录屏热键。</source>
+        <translation>%1 is already in use; change the record hotkey in Settings.</translation>
+    </message>
+    <message>
+        <source>按 %1 截图 · %2 录屏</source>
+        <translation>Press %1 to capture · %2 to record</translation>
+    </message>
+    <message>
+        <source>青影 · 截图 %1 · 录屏 %2</source>
+        <translation>QingYing · Capture %1 · Record %2</translation>
+    </message>
+    <message>
+        <source>录制 MP4	%1</source>
+        <translation>Record MP4	%1</translation>
+    </message>
+    <message>
+        <source>不能与录屏热键相同</source>
+        <translation>Cannot match the record hotkey</translation>
+    </message>
+    <message>
+        <source>不能与截图热键相同</source>
+        <translation>Cannot match the capture hotkey</translation>
+    </message>
+    <message>
+        <source>开始框选录制；录制中再次按下可停止保存</source>
+        <translation>Start region recording; press again while recording to stop and save</translation>
     </message>
 </context>
 </TS>

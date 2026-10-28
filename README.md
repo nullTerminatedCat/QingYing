@@ -9,12 +9,12 @@
 ## 功能
 
 - **托盘常驻**：单击托盘图标截图；右键菜单包含截图、设置、开机自启、关于、退出
-- **全局热键**：默认 `Ctrl+Alt+A`，可在设置中修改，被占用时会提示
+- **全局热键**：截图默认 `Ctrl+Alt+A`，录屏默认 `Ctrl+Alt+R`，均可在设置中修改，被占用或彼此冲突时会提示
 - **区域截图**
   - 冻结所有显示器，每块屏幕按各自 DPI 像素精确截取
   - 自动识别光标下的窗口和控件，单击即可选中；`Tab` 切换"窗口 / 窗口+控件"识别
   - 拖拽框选，8 个手柄调整大小，拖动选区内部移动
-  - 圆形放大镜（13×13 像素网格），显示当前格式与 RGB，按 `C` 复制；取色时 `Tab` 切换格式
+  - 圆形放大镜（13×13 像素网格），显示当前格式与 RGB，按 `C` 复制；取色时用 `[` / `]` 或滚轮切换格式（`Tab` 只用于窗口/控件识别）
 - **标注**：矩形、椭圆、箭头、画笔、文字、马赛克、序号；8 种颜色、3 档粗细 / 字号；撤销 / 重做
 - **输出**：复制到剪贴板、保存为 PNG / JPG、钉在桌面
 - **钉图**：拖动移动、滚轮缩放、`Ctrl`+滚轮调透明度、双击恢复原始大小、右键菜单复制 / 保存 / 关闭、`Esc` 关闭
@@ -28,8 +28,8 @@
 - **文字识别（OCR）**：框选后点工具条「识别文字」或按 `O`，也可在钉图右键菜单中识别；基于 Windows 自带的离线 OCR（Windows.Media.Ocr），优先简体中文，结果可编辑、保留换行、一键复制
 - **OCR 结果翻译**：识别面板可一键译成中文或英文（自动判断方向），使用 MyMemory 公开接口、无需密钥；设置 → 截图中可关闭；支持还原原文与失败提示
 - **二维码 / 条码识别**：框选后点「识别二维码」或按 `Q`（钉图右键菜单同样可用）；支持 QR、Data Matrix、PDF417、EAN、Code128 等；识别到网址时可确认后在浏览器打开
-- **取色器**：托盘「取色」，在多显示器上用放大镜定位，点击或 `C` 复制颜色；`Tab` / `Shift+Tab` 切换格式。支持 `#4F6BFF` / `#4f6bff` / `#4F6BFFFF`、`rgb(...)` / `rgba(...)`、`79, 107, 255`、`hsl(...)` / `hsv(...)`、Windows `0xBBGGRR`；默认格式可在设置里改
-- **录屏 / GIF**：托盘「录屏」→「录制 MP4」或「录制 GIF」，框选区域后按 Enter 开始；悬浮迷你控制条可暂停 / 继续 / 停止并显示计时，控制条和虚线框不会被录进画面；`Esc` 停止；帧率 10 / 15 / 30 可设，可选录制鼠标指针；优先使用 Desktop Duplication（DXGI）抓帧，CPU 占用低，不可用时自动回退 GDI；录制指针按 DXGI 帧信息绘制（形状、热点与位置均为物理像素）；GIF 在后台线程编码、合并静止帧，使用中位切分自适应调色板（约每 2 秒或场景切换时重建），可在设置中开启 Floyd–Steinberg 抖动减少色带；控制条显示文件大小估计；文件保存到设置的保存位置
+- **取色器**：托盘「取色」，在多显示器上用放大镜定位，点击或 `C` 复制颜色；`[` / `]` 或滚轮切换格式（不占用 `Tab`）。支持 `#4F6BFF` / `#4f6bff` / `#4F6BFFFF`、`rgb(...)` / `rgba(...)`、`79, 107, 255`、`hsl(...)` / `hsv(...)`、Windows `0xBBGGRR`；默认格式可在设置里改
+- **录屏 / GIF**：全局热键 `Ctrl+Alt+R`（可改）开始框选录制 MP4，录制中再按一次停止保存；或托盘「录屏」→「录制 MP4 / GIF」。框选后按 Enter 开始；悬浮迷你控制条可暂停 / 继续 / 停止并显示计时，控制条和虚线框不会被录进画面；`Esc` 停止；帧率 10 / 15 / 30 可设，可选录制鼠标指针与麦克风（仅 MP4）；优先使用 Desktop Duplication（DXGI）抓帧，不可用时回退 GDI；GIF 在后台线程编码并可用抖动减少色带；文件保存到设置的保存位置
 - **主题**：浅色 / 深色 / 跟随系统（实时响应系统切换），主色保持靛蓝 `#4F6BFF`
 - **多语言**：简体中文 / English / 跟随系统，在设置中切换后立即生效（托盘菜单与历史窗口自动刷新）；Qt 自带对话框同步翻译
 - **自动更新**：启动时自动检查（每天最多一次，可关闭），托盘「检查更新」手动检查；显示更新说明，下载安装包并按 SHA256SUMS 校验后经确认启动安装；免安装版改为打开发布页
@@ -56,7 +56,8 @@
 | `Ctrl+Z` / `Ctrl+Y` | 撤销 / 重做 |
 | `Shift` + 拖动 | 画正方形 / 正圆 |
 | `C` | 复制光标处颜色（当前取色格式） |
-| `Tab` | 取色时切换颜色格式；截图选区时切换窗口/控件识别 |
+| `Tab` | 截图时切换窗口 / 窗口+控件识别（取色不占用） |
+| `[` / `]` 或滚轮 | 取色 / 放大镜时切换颜色格式 |
 | 文字工具中 `Enter` / `Ctrl+Enter` | 换行 / 完成输入（点击别处也会完成） |
 | 方向键 | 光标微移 1 像素 |
 
@@ -145,8 +146,8 @@ docs/design/          UI 设计稿与规范
 QingYing (青影) is a simple, good-looking screenshot tool for Windows: an indigo accent (`#4F6BFF`), a floating rounded toolbar, and secondary options only when you need them.
 
 **Features**
-- Tray app with a global hotkey (default `Ctrl+Alt+A`, configurable, with conflict detection)
-- Region capture that freezes every monitor at native DPI, detects windows and controls (`Tab`), and shows a pixel magnifier
+- Tray app with global hotkeys (capture `Ctrl+Alt+A`, record `Ctrl+Alt+R`, both configurable with conflict detection)
+- Region capture that freezes every monitor at native DPI, detects windows and controls (`Tab`), and shows a pixel magnifier (`[`/`]` or wheel cycles color formats while picking)
 - Annotations: rectangle, ellipse, arrow, pen, text, mosaic, and numbered steps, with undo and redo
 - Output: copy, quick save (`Ctrl+S`), save as, and pin to desktop (`F3`); pins can be zoomed, made translucent, rotated, and flipped
 - Scrolling capture (`L`) with static fixed header/footer handling, incremental image buffering and a live size/frame counter; copy (`Ctrl+C` / Enter), save (`Ctrl+S`), save as (`Ctrl+Shift+S`) or pin (`F3`) after capture. Failed saves keep the image available for retry. Delayed capture and capture history are also supported.

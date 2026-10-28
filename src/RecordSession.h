@@ -16,6 +16,7 @@ public:
     ~RecordSession() override;
     bool begin(QString* error);
     QString micWarning() const; // 请求麦克风但未能采集时的提示（可空）
+    void requestStop(); // 外部热键：停止并保存
 
 signals:
     void finished(bool ok, const QString& path, const QString& error);

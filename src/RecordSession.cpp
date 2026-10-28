@@ -238,6 +238,11 @@ void RecordSession::refresh()
     }
 }
 
+void RecordSession::requestStop()
+{
+    finish();
+}
+
 void RecordSession::finish()
 {
     if (m_done) return;

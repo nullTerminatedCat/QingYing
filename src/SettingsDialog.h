@@ -15,8 +15,10 @@ class HotkeyEdit;
 class SettingsDialog : public QDialog {
     Q_OBJECT
 public:
-    // applyHotkey：尝试注册新热键，失败（冲突）返回 false
-    explicit SettingsDialog(std::function<bool(const QKeySequence&)> applyHotkey, QWidget* parent = nullptr);
+    // applyCapture / applyRecord：尝试注册新热键，失败（冲突）返回 false
+    explicit SettingsDialog(std::function<bool(const QKeySequence&)> applyCapture,
+                            std::function<bool(const QKeySequence&)> applyRecord,
+                            QWidget* parent = nullptr);
     ~SettingsDialog() override;
     void setCheckUpdate(std::function<void()> f) { m_checkUpdate = std::move(f); }
     // 录制快捷键期间暂停全局热键（true 暂停，false 恢复），以便录到当前组合
@@ -42,7 +44,8 @@ private:
     void saveUpload();
     void setStatus(QLabel* l, const QString& text, bool warn);
 
-    std::function<bool(const QKeySequence&)> m_apply;
+    std::function<bool(const QKeySequence&)> m_applyCapture;
+    std::function<bool(const QKeySequence&)> m_applyRecord;
     std::function<void()> m_checkUpdate;
     std::function<void(bool)> m_suspend;
     class QTimer* m_upTimer = nullptr;
@@ -50,6 +53,8 @@ private:
     QStackedWidget* m_stack = nullptr;
     HotkeyEdit* m_hotkey = nullptr;
     QLabel* m_hotkeyHint = nullptr;
+    HotkeyEdit* m_recordHotkey = nullptr;
+    QLabel* m_recordHotkeyHint = nullptr;
     QLineEdit* m_dir = nullptr;
     QLabel* m_dirHint = nullptr;
     QLineEdit* m_pattern = nullptr;

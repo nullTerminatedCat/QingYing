@@ -11,6 +11,9 @@ namespace Settings {
 QKeySequence defaultHotkey();
 QKeySequence hotkey();
 void setHotkey(const QKeySequence& seq);
+QKeySequence defaultRecordHotkey();
+QKeySequence recordHotkey();
+void setRecordHotkey(const QKeySequence& seq);
 QString saveDir();
 void setSaveDir(const QString& dir);
 QString filePattern();

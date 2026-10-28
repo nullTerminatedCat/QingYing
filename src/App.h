@@ -14,6 +14,7 @@ class QTimer;
 class QWidget;
 class QMenu;
 class QSystemTrayIcon;
+class RecordSession;
 class SettingsDialog;
 class Updater;
 
@@ -36,6 +37,8 @@ public:
 
 private:
     bool applyHotkey(const QKeySequence& seq);
+    bool applyRecordHotkey(const QKeySequence& seq);
+    void onRecordHotkey();
     void updateMenu();
     void buildMenu();
     void retranslate();
@@ -49,8 +52,10 @@ private:
     QMenu* m_pinMenu;
     QMenu* m_recentMenu;
     QAction* m_captureAct;
+    QAction* m_recordAct = nullptr;
     QAction* m_autoAct;
     HotkeyManager m_hotkey;
+    HotkeyManager m_recordHotkey;
     WindowDetector m_detector;
     QList<QPointer<CaptureOverlay>> m_overlays;
     QPointer<SettingsDialog> m_settings;
@@ -58,6 +63,7 @@ private:
     bool m_busy = false;
     Updater* m_updater = nullptr;
     bool m_recordGif = false;
+    QPointer<RecordSession> m_recordSession;
     QString m_lastRecording;
     bool m_welcomePending = false;
     struct Edit {
