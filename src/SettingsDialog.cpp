@@ -3,13 +3,17 @@
 #include "HotkeyManager.h"
 #include "Icons.h"
 #include "Language.h"
+#include "OcrModels.h"
 #include "Settings.h"
 #include "SettingsWidgets.h"
 #include "Style.h"
 #include "Theme.h"
+#include "TranslateText.h"
 
 #include <QApplication>
 #include <QComboBox>
+#include <QPointer>
+#include <QThreadPool>
 #include <QCoreApplication>
 #include <QDateTime>
 #include <QDesktopServices>
@@ -279,6 +283,7 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> applyCap
 SettingsDialog::~SettingsDialog()
 {
     if (m_upTimer && m_upTimer->isActive()) saveUpload(); // 关闭时写入未保存的请求头
+    if (m_aiUrl) saveAi();
     if (((m_hotkey && m_hotkey->isRecording()) || (m_recordHotkey && m_recordHotkey->isRecording())) && m_suspend)
         m_suspend(false);
     QSettings st(QStringLiteral("QingYing"), QStringLiteral("QingYing"));
@@ -404,7 +409,7 @@ QWidget* SettingsDialog::buildGeneral()
 QWidget* SettingsDialog::buildCapture()
 {
     QVBoxLayout* b;
-    QWidget* w = makePage(QCoreApplication::translate("QingYing", "截图"), QCoreApplication::translate("QingYing", "保存位置、文件名与截图完成后的动作"), b);
+    QWidget* w = makePage(QCoreApplication::translate("QingYing", "截图"), QCoreApplication::translate("QingYing", "保存位置、完成动作、文字识别与翻译"), b);
     Card c = addCard(b, QCoreApplication::translate("QingYing", "保存"));
     m_dir = new QLineEdit(QDir::toNativeSeparators(Settings::saveDir()));
     auto* browse = new QPushButton(QCoreApplication::translate("QingYing", "浏览…"));
@@ -494,13 +499,72 @@ QWidget* SettingsDialog::buildCapture()
         emit changed();
     });
 
-    c = addCard(b, QCoreApplication::translate("QingYing", "识别与翻译"));
-    addRow(c, QCoreApplication::translate("QingYing", "联网翻译 OCR 结果"),
-           QCoreApplication::translate("QingYing", "识别面板提供译成中文 / 英文；使用 MyMemory 公开接口，无需密钥，可随时关闭"),
+    c = addCard(b, QCoreApplication::translate("QingYing", "文字识别"));
+    auto* engine = new Segmented({QStringLiteral("RapidOCR"), QCoreApplication::translate("QingYing", "系统 OCR")});
+    engine->setCurrent(Settings::ocrEngine() == QLatin1String("system") ? 1 : 0);
+    addRow(c, QCoreApplication::translate("QingYing", "识别引擎"),
+           QCoreApplication::translate("QingYing", "RapidOCR 对中文和界面混排更准。模型缺失或识别失败时自动改用系统 OCR。"), engine);
+    connect(engine, &Segmented::changed, this, [this](int i) {
+        Settings::setOcrEngine(i == 1 ? QStringLiteral("system") : QStringLiteral("rapid"));
+        emit changed();
+    });
+    m_ocrDownload = new QPushButton;
+    auto* openModels = new QPushButton(QCoreApplication::translate("QingYing", "打开目录"));
+    addRow(c, QCoreApplication::translate("QingYing", "识别模型"),
+           QCoreApplication::translate("QingYing", "PP-OCRv4 检测 / 识别 / 方向 / 字典，约 16 MB，不随安装包附带"),
+           hbox({m_ocrDownload, openModels}, -1), false, &m_ocrHint);
+    connect(m_ocrDownload, &QPushButton::clicked, this, &SettingsDialog::downloadOcrModels);
+    connect(openModels, &QPushButton::clicked, this, [] {
+        const OcrModels::Paths paths = OcrModels::locate();
+        const QString dir = paths.ready ? paths.directory : OcrModels::preferredDirectory();
+        QDir().mkpath(dir);
+        QDesktopServices::openUrl(QUrl::fromLocalFile(dir));
+    });
+    refreshOcrHint();
+
+    c = addCard(b, QCoreApplication::translate("QingYing", "翻译"));
+    addRow(c, QCoreApplication::translate("QingYing", "联网翻译"),
+           QCoreApplication::translate("QingYing", "识别面板可译成中文或英文。未启用 AI 时使用 MyMemory，无需密钥。"),
            toggle(Settings::translateEnabled(), [this](bool on) {
                Settings::setTranslateEnabled(on);
                emit changed();
            }));
+    addRow(c, QCoreApplication::translate("QingYing", "使用 AI 翻译"),
+           QCoreApplication::translate("QingYing", "OpenAI 兼容的 Chat Completions。密钥只保存在本机。"),
+           toggle(Settings::aiTranslateEnabled(), [this](bool on) {
+               Settings::setAiTranslateEnabled(on);
+               if (m_aiBody) m_aiBody->setVisible(on);
+               emit changed();
+           }));
+
+    m_aiBody = new QWidget;
+    auto* aiLay = new QVBoxLayout(m_aiBody);
+    aiLay->setContentsMargins(0, 0, 0, 0);
+    aiLay->setSpacing(0);
+    b->addWidget(m_aiBody);
+    Card ai = addCard(aiLay, QCoreApplication::translate("QingYing", "AI 接口"));
+    m_aiUrl = new QLineEdit(Settings::aiBaseUrl());
+    m_aiUrl->setPlaceholderText(QStringLiteral("https://api.openai.com/v1"));
+    addRow(ai, QCoreApplication::translate("QingYing", "接口地址"),
+           QCoreApplication::translate("QingYing", "填写到 /v1 即可，程序会请求 /chat/completions"), m_aiUrl, true, &m_aiHint);
+    m_aiKey = new QLineEdit(Settings::aiApiKey());
+    m_aiKey->setEchoMode(QLineEdit::Password);
+    m_aiKey->setPlaceholderText(QCoreApplication::translate("QingYing", "粘贴密钥"));
+    addRow(ai, QCoreApplication::translate("QingYing", "API 密钥"),
+           QCoreApplication::translate("QingYing", "使用 Windows DPAPI 加密保存，仅当前用户可解密，不会写入日志"), m_aiKey, true);
+    m_aiModel = new QLineEdit(Settings::aiModel());
+    m_aiModel->setPlaceholderText(QStringLiteral("gpt-4o-mini"));
+    addRow(ai, QCoreApplication::translate("QingYing", "模型"),
+           QCoreApplication::translate("QingYing", "服务商提供的模型名"), m_aiModel, true);
+    addRow(ai, QCoreApplication::translate("QingYing", "失败时用 MyMemory"),
+           QCoreApplication::translate("QingYing", "AI 未填完整或调用失败时，改用无需密钥的 MyMemory"),
+           toggle(Settings::memoryFallback(), [this](bool on) {
+               Settings::setMemoryFallback(on);
+               emit changed();
+           }));
+    for (QLineEdit* e : {m_aiUrl, m_aiKey, m_aiModel})
+        connect(e, &QLineEdit::editingFinished, this, &SettingsDialog::saveAi);
+    m_aiBody->setVisible(Settings::aiTranslateEnabled());
 
     b->addStretch();
     updatePreview();
@@ -683,6 +747,63 @@ void SettingsDialog::saveUpload()
     }
     Settings::setUploadConfig(up);
     emit changed();
+}
+
+void SettingsDialog::saveAi()
+{
+    if (!m_aiUrl) return;
+    const QString url = m_aiUrl->text().trimmed();
+    const bool empty = url.isEmpty();
+    const bool ok = empty || TranslateText::chatCompletionsUrl(url).isValid();
+    setStatus(m_aiHint, ok ? QCoreApplication::translate("QingYing", "填写到 /v1 即可，程序会请求 /chat/completions")
+                           : QCoreApplication::translate("QingYing", "请输入以 http:// 或 https:// 开头的地址"),
+              !ok);
+    m_aiUrl->setProperty("state", ok ? QString() : QStringLiteral("warn"));
+    m_aiUrl->style()->unpolish(m_aiUrl);
+    m_aiUrl->style()->polish(m_aiUrl);
+    Settings::setAiBaseUrl(url);
+    Settings::setAiModel(m_aiModel->text());
+    // 未改过的密码框不要重写：避免解密失败时用空值覆盖已保存的密钥
+    if (m_aiKey->isModified()) Settings::setAiApiKey(m_aiKey->text());
+    emit changed();
+}
+
+void SettingsDialog::refreshOcrHint(const QString& error)
+{
+    const OcrModels::Paths paths = OcrModels::locate();
+    if (!m_ocrHint) return;
+    if (!error.isEmpty())
+        setStatus(m_ocrHint, error, true);
+    else if (paths.ready)
+        setStatus(m_ocrHint, QCoreApplication::translate("QingYing", "模型已就绪：%1").arg(QDir::toNativeSeparators(paths.directory)), false);
+    else
+        setStatus(m_ocrHint, QCoreApplication::translate("QingYing", "尚未下载（约 16 MB）。首次识别会自动下载，也可点此提前下载。"), false);
+    if (m_ocrDownload)
+        m_ocrDownload->setText(paths.ready ? QCoreApplication::translate("QingYing", "重新下载")
+                                           : QCoreApplication::translate("QingYing", "下载模型"));
+}
+
+void SettingsDialog::downloadOcrModels()
+{
+    if (m_ocrBusy) return;
+    m_ocrBusy = true;
+    if (m_ocrDownload) m_ocrDownload->setEnabled(false);
+    setStatus(m_ocrHint, QCoreApplication::translate("QingYing", "正在下载文字识别模型…"), false);
+    QPointer<SettingsDialog> guard(this);
+    QThreadPool::globalInstance()->start([guard] {
+        QString err;
+        const bool ok = OcrModels::ensure(&err, [guard](const QString& status) {
+            QMetaObject::invokeMethod(qApp, [guard, status] {
+                if (guard && guard->m_ocrHint) guard->setStatus(guard->m_ocrHint, status, false);
+            }, Qt::QueuedConnection);
+        });
+        QMetaObject::invokeMethod(qApp, [guard, ok, err] {
+            if (!guard) return;
+            guard->m_ocrBusy = false;
+            if (guard->m_ocrDownload) guard->m_ocrDownload->setEnabled(true);
+            guard->refreshOcrHint(ok ? QString() : err);
+        }, Qt::QueuedConnection);
+    });
 }
 
 QWidget* SettingsDialog::buildAppearance()

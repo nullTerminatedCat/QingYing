@@ -187,7 +187,8 @@ void ResultDialog::startTranslate(bool toChinese)
     if (m_original.isEmpty()) m_original = src;
     const int gen = ++m_translateGen;
     setBusy(true);
-    setStatus(QCoreApplication::translate("QingYing", "正在翻译…"));
+    setStatus(Settings::aiTranslateReady() ? QCoreApplication::translate("QingYing", "正在用 AI 翻译…")
+                                           : QCoreApplication::translate("QingYing", "正在翻译…"));
     QPointer<ResultDialog> guard(this);
     const auto target = toChinese ? Translator::Target::Chinese : Translator::Target::English;
     Translator::translate(src, target, [guard, toChinese, gen](Translator::Result r) {
@@ -200,9 +201,14 @@ void ResultDialog::startTranslate(bool toChinese)
         guard->m_edit->setPlainText(r.text);
         guard->m_restore->show();
         guard->m_restore->setEnabled(true);
-        guard->setStatus(QCoreApplication::translate("QingYing", "已译成%1 · 可编辑后复制，或点“还原原文”")
-                             .arg(toChinese ? QCoreApplication::translate("QingYing", "中文")
-                                            : QCoreApplication::translate("QingYing", "英文")));
+        const QString lang = toChinese ? QCoreApplication::translate("QingYing", "中文")
+                                       : QCoreApplication::translate("QingYing", "英文");
+        if (r.fellBack)
+            guard->setStatus(QCoreApplication::translate("QingYing", "AI 不可用，已改用 MyMemory · 已译成%1").arg(lang));
+        else if (r.engine == QLatin1String("ai"))
+            guard->setStatus(QCoreApplication::translate("QingYing", "已用 AI 译成%1 · 可编辑后复制，或点“还原原文”").arg(lang));
+        else
+            guard->setStatus(QCoreApplication::translate("QingYing", "已译成%1 · 可编辑后复制，或点“还原原文”").arg(lang));
     });
 }
 

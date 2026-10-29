@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(QingYing VERSION 0.6.6 LANGUAGES CXX)
+project(QingYing VERSION 0.7.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -49,7 +49,12 @@ qt_add_executable(QingYing WIN32
     src/ScrollStitcher.cpp src/ScrollStitcher.h
     src/ResultDialog.cpp src/ResultDialog.h
     src/Translator.cpp src/Translator.h
+    src/TranslateText.cpp src/TranslateText.h
     src/Ocr.cpp src/Ocr.h
+    src/OcrWin.cpp src/OcrWin.h
+    src/OcrPost.cpp src/OcrPost.h
+    src/OcrModels.cpp src/OcrModels.h
+    src/RapidOcr.cpp src/RapidOcr.h
     src/Recognize.cpp src/Recognize.h
     src/QrDecoder.cpp src/QrDecoder.h
     src/Recorder.cpp src/Recorder.h
@@ -89,6 +94,42 @@ target_compile_definitions(QingYing PRIVATE
     UNICODE _UNICODE NOMINMAX WIN32_LEAN_AND_MEAN
     QINGYING_VERSION="${PROJECT_VERSION}")
 target_link_libraries(QingYing PRIVATE Qt6::Widgets Qt6::Network ZXing::ZXing user32 gdi32 dwmapi windowsapp mfplat mfreadwrite mfuuid ole32 crypt32 d3d11 dxgi dbghelp mmdevapi)
+
+# RapidOCR：配置时下载 ONNX Runtime Windows x64（约数 MB 的导入库 + DLL，不进仓库）
+set(QINGYING_ORT_VERSION "1.23.2" CACHE STRING "ONNX Runtime version for RapidOCR")
+option(QINGYING_WITH_ONNX "Link ONNX Runtime so RapidOCR can run" ON)
+if(WIN32 AND QINGYING_WITH_ONNX)
+    if(ONNXRUNTIME_ROOT)
+        set(ORT_ROOT "${ONNXRUNTIME_ROOT}")
+    else()
+        set(ORT_ROOT "${CMAKE_BINARY_DIR}/onnxruntime-win-x64-${QINGYING_ORT_VERSION}")
+        if(NOT EXISTS "${ORT_ROOT}/include/onnxruntime_cxx_api.h")
+            set(ORT_URL "https://github.com/microsoft/onnxruntime/releases/download/v${QINGYING_ORT_VERSION}/onnxruntime-win-x64-${QINGYING_ORT_VERSION}.zip")
+            set(ORT_ZIP "${CMAKE_BINARY_DIR}/onnxruntime-win-x64-${QINGYING_ORT_VERSION}.zip")
+            message(STATUS "Downloading ONNX Runtime ${QINGYING_ORT_VERSION}")
+            file(DOWNLOAD "${ORT_URL}" "${ORT_ZIP}" SHOW_PROGRESS STATUS ort_status TIMEOUT 180)
+            list(GET ort_status 0 ort_code)
+            if(NOT ort_code EQUAL 0)
+                list(GET ort_status 1 ort_msg)
+                message(FATAL_ERROR "ONNX Runtime download failed: ${ort_msg}\nReconfigure with -DQINGYING_WITH_ONNX=OFF to skip RapidOCR.")
+            endif()
+            file(ARCHIVE_EXTRACT INPUT "${ORT_ZIP}" DESTINATION "${CMAKE_BINARY_DIR}")
+        endif()
+    endif()
+    if(NOT EXISTS "${ORT_ROOT}/include/onnxruntime_cxx_api.h")
+        message(FATAL_ERROR "ONNX Runtime headers not found in ${ORT_ROOT}")
+    endif()
+    find_library(ORT_LIB NAMES onnxruntime PATHS "${ORT_ROOT}/lib" NO_DEFAULT_PATH REQUIRED)
+    target_include_directories(QingYing PRIVATE "${ORT_ROOT}/include")
+    target_link_libraries(QingYing PRIVATE "${ORT_LIB}")
+    target_compile_definitions(QingYing PRIVATE QINGYING_HAS_ONNXRUNTIME)
+    file(GLOB ORT_DLLS "${ORT_ROOT}/lib/*.dll")
+    foreach(dll ${ORT_DLLS})
+        add_custom_command(TARGET QingYing POST_BUILD
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${dll}" "$<TARGET_FILE_DIR:QingYing>"
+            VERBATIM)
+    endforeach()
+endif()
 if(MSVC)
     target_compile_options(QingYing PRIVATE /utf-8 /W3 /permissive- /bigobj)
 endif()
@@ -117,6 +158,14 @@ if(QINGYING_BUILD_TESTS)
     endif()
     add_test(NAME logic COMMAND qingying_tests)
     set_tests_properties(logic PROPERTIES ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:${_qtbin}")
+    qt_add_executable(qingying_ocr_tests tests/tst_ocr.cpp src/OcrPost.cpp src/OcrPost.h src/TranslateText.cpp src/TranslateText.h)
+    set_target_properties(qingying_ocr_tests PROPERTIES WIN32_EXECUTABLE OFF)
+    target_link_libraries(qingying_ocr_tests PRIVATE Qt6::Gui Qt6::Test)
+    if(MSVC)
+        target_compile_options(qingying_ocr_tests PRIVATE /utf-8 /W3 /permissive-)
+    endif()
+    add_test(NAME ocr COMMAND qingying_ocr_tests)
+    set_tests_properties(ocr PROPERTIES ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:${_qtbin}")
     qt_add_executable(qingying_scroll_bench tests/bench_scroll.cpp src/ScrollStitcher.cpp src/ScrollStitcher.h)
     set_target_properties(qingying_scroll_bench PROPERTIES WIN32_EXECUTABLE OFF)
     target_link_libraries(qingying_scroll_bench PRIVATE Qt6::Gui)

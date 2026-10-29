@@ -3,6 +3,9 @@
 #include "Settings.h"
 #include "Logic.h"
 
+#include "TranslateText.h"
+
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QNetworkAccessManager>
@@ -129,6 +132,102 @@ void translateChunk(const QString& chunk, const QString& pair, std::function<voi
     });
 }
 
+QString aiFailure(QNetworkReply* reply, const QString& key)
+{
+    const int http = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    const QByteArray body = reply->readAll();
+    QString parsed;
+    TranslateText::parseChatCompletion(body, &parsed);
+    parsed = TranslateText::redactSecret(parsed, key);
+    if (reply->error() == QNetworkReply::TimeoutError)
+        return QCoreApplication::translate("QingYing", "连接超时，请检查网络或接口地址");
+    if (reply->error() == QNetworkReply::HostNotFoundError || reply->error() == QNetworkReply::NetworkSessionFailedError)
+        return QCoreApplication::translate("QingYing", "无法连接 AI 接口，请检查地址和网络");
+    if (http == 401 || http == 403)
+        return QCoreApplication::translate("QingYing", "API 密钥被拒绝（HTTP %1）").arg(http);
+    if (!parsed.isEmpty() && parsed != QLatin1String("invalid json") && parsed != QLatin1String("empty completion"))
+        return QCoreApplication::translate("QingYing", "AI 接口返回错误（HTTP %1）：%2").arg(http).arg(parsed);
+    if (reply->error() != QNetworkReply::NoError)
+        return TranslateText::redactSecret(reply->errorString(), key);
+    return QCoreApplication::translate("QingYing", "AI 没有返回文字");
+}
+
+void translateAiChunk(const QString& chunk, bool toChinese, std::function<void(Translator::Result)> done)
+{
+    const QUrl url = TranslateText::chatCompletionsUrl(Settings::aiBaseUrl());
+    const QString key = Settings::aiApiKey();
+    const QString model = Settings::aiModel();
+    if (!url.isValid() || key.isEmpty() || model.isEmpty()) {
+        Translator::Result r;
+        r.error = QCoreApplication::translate("QingYing", "请在设置中填写 AI 翻译的接口地址、密钥和模型");
+        done(r);
+        return;
+    }
+    QJsonObject system;
+    system.insert(QStringLiteral("role"), QStringLiteral("system"));
+    system.insert(QStringLiteral("content"), TranslateText::systemPrompt(toChinese));
+    QJsonObject user;
+    user.insert(QStringLiteral("role"), QStringLiteral("user"));
+    user.insert(QStringLiteral("content"), chunk);
+    QJsonArray messages;
+    messages.append(system);
+    messages.append(user);
+    QJsonObject body;
+    body.insert(QStringLiteral("model"), model);
+    body.insert(QStringLiteral("temperature"), 0.2);
+    body.insert(QStringLiteral("stream"), false);
+    body.insert(QStringLiteral("messages"), messages);
+    QNetworkRequest req(url);
+    req.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("application/json"));
+    req.setRawHeader("Authorization", QByteArray("Bearer ") + key.toUtf8());
+    req.setTransferTimeout(45000);
+    QNetworkReply* reply = net()->post(req, QJsonDocument(body).toJson(QJsonDocument::Compact));
+    QObject::connect(reply, &QNetworkReply::finished, reply, [reply, key, done] {
+        reply->deleteLater();
+        Translator::Result r;
+        r.engine = QStringLiteral("ai");
+        if (reply->error() != QNetworkReply::NoError) {
+            r.error = aiFailure(reply, key);
+            done(r);
+            return;
+        }
+        QString err;
+        const QString text = TranslateText::parseChatCompletion(reply->readAll(), &err);
+        if (text.isEmpty()) {
+            err = TranslateText::redactSecret(err, key);
+            r.error = (err.isEmpty() || err == QLatin1String("empty completion"))
+                          ? QCoreApplication::translate("QingYing", "AI 没有返回文字")
+                          : QCoreApplication::translate("QingYing", "AI 返回无法使用：%1").arg(err);
+            done(r);
+            return;
+        }
+        r.ok = true;
+        r.text = text;
+        done(r);
+    });
+}
+
+void translateAiChunks(QStringList chunks, bool toChinese, QStringList doneParts, std::function<void(Translator::Result)> done)
+{
+    if (chunks.isEmpty()) {
+        Translator::Result r;
+        r.ok = true;
+        r.engine = QStringLiteral("ai");
+        r.text = doneParts.join(QString());
+        done(r);
+        return;
+    }
+    const QString next = chunks.takeFirst();
+    translateAiChunk(next, toChinese, [chunks, toChinese, doneParts, done](Translator::Result part) mutable {
+        if (!part.ok) {
+            done(part);
+            return;
+        }
+        doneParts << part.text;
+        translateAiChunks(std::move(chunks), toChinese, std::move(doneParts), std::move(done));
+    });
+}
+
 void translateChunks(QStringList chunks, const QString& pair, QStringList doneParts,
                      std::function<void(Translator::Result)> done)
 {
@@ -158,6 +257,16 @@ Target suggestTarget(const QString& text)
     return Logic::mostlyCjk(text) ? Target::English : Target::Chinese;
 }
 
+void runMemory(const QString& text, Target target, bool fellBack, std::function<void(Result)> done)
+{
+    const QString pair = QStringLiteral("autodetect|") + langCode(target);
+    translateChunks(chunkText(text), pair, {}, [fellBack, done = std::move(done)](Result r) {
+        r.engine = QStringLiteral("mymemory");
+        r.fellBack = fellBack;
+        done(r);
+    });
+}
+
 void translate(const QString& text, Target target, std::function<void(Result)> done)
 {
     if (!Settings::translateEnabled()) {
@@ -173,8 +282,24 @@ void translate(const QString& text, Target target, std::function<void(Result)> d
         done(r);
         return;
     }
-    // autodetect 由 MyMemory 判断源语言；显式目标为 zh-CN 或 en
-    const QString pair = QStringLiteral("autodetect|") + langCode(target);
-    translateChunks(chunkText(text), pair, {}, std::move(done));
+    const bool wantAi = Settings::aiTranslateEnabled();
+    if (wantAi && Settings::aiTranslateReady()) {
+        const bool toChinese = target == Target::Chinese;
+        translateAiChunks(TranslateText::chunkForModel(text), toChinese, {}, [text, target, done](Result r) {
+            if (r.ok || !Settings::memoryFallback()) {
+                done(r);
+                return;
+            }
+            runMemory(text, target, true, done);
+        });
+        return;
+    }
+    if (wantAi && !Settings::memoryFallback()) {
+        Result r;
+        r.error = QCoreApplication::translate("QingYing", "请在设置中填写 AI 翻译的接口地址、密钥和模型，或打开 MyMemory 兜底");
+        done(r);
+        return;
+    }
+    runMemory(text, target, false, std::move(done));
 }
 }

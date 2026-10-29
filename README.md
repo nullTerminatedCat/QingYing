@@ -4,7 +4,7 @@
 
 简洁、好看的 Windows 桌面截图工具。靛蓝主色、悬浮圆角工具条，只在需要时出现二级选项。
 
-> 当前版本：0.6.6（放大镜色值完整显示、双屏 Tab 跟随光标）。
+> 当前版本：0.7.0（RapidOCR 本地识别、OpenAI 兼容翻译）。下方下载仍是已发布的 0.6.6；0.7.0 安装包在打上 `v0.7.0` 标签后出现在 Releases。
 >
 > **国内下载（推荐，免翻墙）**
 > - 安装包直链：[QingYing-0.6.6-windows-x64-setup.exe](https://gitee.com/liner123/qing-ying/releases/download/v0.6.6/QingYing-0.6.6-windows-x64-setup.exe)
@@ -32,8 +32,8 @@
 - **定时截图**：托盘「定时截图」→ 每 10 秒 / 30 秒 / 1 分钟 / 5 分钟自动保存全屏截图（多显示器各存一张）到保存位置，再选「停止定时截图」结束
 - **长截图（滚动）**：框选后点工具条「长截图」或按 `L`（或托盘「长截图」后框选再按 Enter），自动向选区发送滚轮并按重叠区域拼接；识别静态固定顶栏 / 底栏，最终各保留一份；单击鼠标或 `Esc` 停止，到底自动停止。分段存储新增内容，预览只绘制最新部分，并显示帧数与像素尺寸。停止后支持复制（`Ctrl+C` / `Enter`）、保存（`Ctrl+S`）、另存为（`Ctrl+Shift+S`）和钉图（`F3`）；保存失败会保留窗口与长图，可重试或更换位置
 - **截图历史**：每次复制 / 保存 / 钉图都会存入历史（默认保留 20 张）；托盘「最近截图」快速复制，「历史记录…」窗口可复制、钉图、打开文件夹、清空
-- **文字识别（OCR）**：框选后点工具条「识别文字」或按 `O`，也可在钉图右键菜单中识别；基于 Windows 自带的离线 OCR（Windows.Media.Ocr），优先简体中文，结果可编辑、保留换行、一键复制
-- **OCR 结果翻译**：识别面板可一键译成中文或英文（自动判断方向），使用 MyMemory 公开接口、无需密钥；设置 → 截图中可关闭；支持还原原文与失败提示
+- **文字识别（OCR）**：框选后点工具条「识别文字」或按 `O`，也可在钉图右键菜单中识别。默认使用 RapidOCR（PP-OCRv4 ONNX，适合中文和界面混排）；可在设置里改回 Windows 系统 OCR。模型约 16 MB，不随安装包附带，首次识别或在设置中下载。结果可编辑、保留换行、一键复制
+- **OCR 结果翻译**：识别面板可一键译成中文或英文（自动判断方向）。在设置中填写 OpenAI 兼容接口的地址、密钥和模型后优先走 AI；未配置或调用失败时使用 MyMemory（无需密钥）。密钥用 Windows DPAPI 加密保存在本机，不会写入日志。设置 → 截图中可关闭联网翻译；支持还原原文与失败提示
 - **二维码 / 条码识别**：框选后点「识别二维码」或按 `Q`（钉图右键菜单同样可用）；支持 QR、Data Matrix、PDF417、EAN、Code128 等；识别到网址时可确认后在浏览器打开
 - **取色器**：托盘「取色」，在多显示器上用放大镜定位，点击或 `C` 复制颜色；`[` / `]` 或滚轮切换格式（不占用 `Tab`）。支持 `#4F6BFF` / `#4f6bff` / `#4F6BFFFF`、`rgb(...)` / `rgba(...)`、`79, 107, 255`、`hsl(...)` / `hsv(...)`、Windows `0xBBGGRR`；默认格式可在设置里改
 - **录屏 / GIF**：全局热键 `Ctrl+Alt+R`（可改）开始框选录制 MP4，录制中再按一次停止保存；或托盘「录屏」→「录制 MP4 / GIF」。框选后按 Enter 开始；悬浮迷你控制条可暂停 / 继续 / 停止并显示计时，控制条和虚线框不会被录进画面；`Esc` 停止；帧率 10 / 15 / 30 可设，可选录制鼠标指针与麦克风（仅 MP4）；优先使用 Desktop Duplication（DXGI）抓帧，不可用时回退 GDI；GIF 在后台线程编码并可用抖动减少色带；文件保存到设置的保存位置
@@ -68,11 +68,51 @@
 | 文字工具中 `Enter` / `Ctrl+Enter` | 换行 / 完成输入（点击别处也会完成） |
 | 方向键 | 光标微移 1 像素 |
 
-## OCR 语言包
+## 文字识别模型（RapidOCR）
 
-文字识别使用 Windows 系统自带的 OCR 引擎，不随软件附带模型。若提示"没有可用的 OCR 语言包"：
-打开 **设置 → 时间和语言 → 语言和区域**，添加 **中文(简体)**（或在已有语言的"语言选项"中安装 **光学字符识别**），完成后重试即可。
-没有中文语言包时会退回到系统当前语言（如英文），中文将无法识别。
+默认引擎是 RapidOCR，模型来自 [RapidAI/RapidOCR](https://github.com/RapidAI/RapidOCR) 的 PP-OCRv4 mobile（Apache-2.0），不放进仓库。首次点「识别文字」，或在 **设置 → 截图 → 文字识别** 里点「下载模型」，会下载到下面第一个可写目录（也可用环境变量 `QINGYING_OCR_MODELS` 指定）：
+
+1. 程序所在目录的 `models`
+2. `%LOCALAPPDATA%\QingYing\QingYing\models`
+
+需要这四个文件（SHA256 与 RapidOCR v3.10.0 发布一致）：
+
+| 文件 | SHA256 |
+|---|---|
+| `ch_PP-OCRv4_det_mobile.onnx` | `d2a7720d45a54257208b1e13e36a8479894cb74155a5efe29462512d42f49da9` |
+| `ch_PP-OCRv4_rec_mobile.onnx` | `48fc40f24f6d2a207a2b1091d3437eb3cc3eb6b676dc3ef9c37384005483683b` |
+| `ch_ppocr_mobile_v2.0_cls_mobile.onnx` | `e47acedf663230f8863ff1ab0e64dd2d82b838fceb5957146dab185a89d6215c` |
+| `ppocr_keys_v1.txt` | `28b2362ad4ab2dc38769aa72feb535e3a9ddb3fd2a7585a05920e6393b1dc7f7` |
+
+手动下载（ModelScope）：
+
+```powershell
+$dir = "$env:LOCALAPPDATA\QingYing\QingYing\models"
+New-Item -ItemType Directory -Force $dir | Out-Null
+$base = "https://www.modelscope.cn/models/RapidAI/RapidOCR/resolve/v3.10.0"
+Invoke-WebRequest "$base/onnx/PP-OCRv4/det/ch_PP-OCRv4_det_mobile.onnx" -OutFile "$dir\ch_PP-OCRv4_det_mobile.onnx"
+Invoke-WebRequest "$base/onnx/PP-OCRv4/rec/ch_PP-OCRv4_rec_mobile.onnx" -OutFile "$dir\ch_PP-OCRv4_rec_mobile.onnx"
+Invoke-WebRequest "$base/onnx/PP-OCRv4/cls/ch_ppocr_mobile_v2.0_cls_mobile.onnx" -OutFile "$dir\ch_ppocr_mobile_v2.0_cls_mobile.onnx"
+Invoke-WebRequest "$base/paddle/PP-OCRv4/rec/ch_PP-OCRv4_rec_mobile/ppocr_keys_v1.txt" -OutFile "$dir\ppocr_keys_v1.txt"
+```
+
+也接受旧文件名 `ch_PP-OCRv4_det_infer.onnx`、`ch_PP-OCRv4_rec_infer.onnx`、`ch_ppocr_mobile_v2.0_cls_infer.onnx`。模型缺失、校验失败或当前构建没有 ONNX Runtime 时，自动改用系统 OCR。
+
+推理库是 [ONNX Runtime 1.23.2](https://github.com/microsoft/onnxruntime/releases/tag/v1.23.2) Windows x64，CMake 配置时从 GitHub 下载并复制到 exe 旁边，不提交进仓库。没有网络时可 `-DQINGYING_WITH_ONNX=OFF`，或用 `-DONNXRUNTIME_ROOT=` 指向已解压的 SDK。
+
+## 系统 OCR 语言包
+
+设置里把引擎改成「系统 OCR」后，使用 Windows.Media.Ocr，不需要上面的模型。若提示没有可用的 OCR 语言包：打开 **设置 → 时间和语言 → 语言和区域**，添加 **中文(简体)**，并在语言选项里安装 **光学字符识别**。没有中文语言包时会退回系统当前语言。
+
+## AI 翻译
+
+**设置 → 截图 → 翻译** 打开「使用 AI 翻译」，填写：
+
+- 接口地址：OpenAI 兼容根路径，例如 `https://api.openai.com/v1`（程序会请求 `/chat/completions`）
+- API 密钥：只在设置页输入。程序用 Windows DPAPI 加密后写入本机 QSettings，不明文落盘，也不写入日志
+- 模型名：由服务商提供，例如 `gpt-4o-mini`
+
+不要把密钥写进仓库、截图或问题描述。未填完整，或接口失败时，若「失败时用 MyMemory」开着（默认开），会改用 MyMemory。关掉「联网翻译」后识别面板不再显示翻译按钮。
 
 ## 已知限制
 
@@ -109,9 +149,9 @@ powershell -ExecutionPolicy Bypass -File scripts/build.ps1 -QtDir C:/Qt/6.9.1/ms
 
 GitHub Actions 会在每次推送时于 windows-latest 构建并上传 `QingYing-windows-x64` 产物。
 
-首次配置时 CMake 会通过 FetchContent 从 GitHub 下载 ZXing-cpp v2.2.1。
+首次配置时 CMake 会通过 FetchContent 从 GitHub 下载 ZXing-cpp v2.2.1，并下载 ONNX Runtime 1.23.2（Windows x64）供 RapidOCR 链接。单元测试不需要这些模型。
 
-单元测试：`ctest --test-dir build`（QtTest，覆盖拼接位移、文件名规则、取色格式、版本比较、SHA256SUMS 解析、JSON 路径），CI 每次推送都会运行。
+单元测试：`ctest --test-dir build`（QtTest，覆盖拼接位移、文件名规则、取色格式、版本比较、SHA256SUMS 解析、JSON 路径、OCR 检测框 / CTC / 翻译请求解析），CI 每次推送都会运行。模型与 API 密钥不参与测试。
 
 长图性能基准：`build/qingying_scroll_bench.exe`（需要 Qt DLL 在可执行文件目录或 PATH 中）。对比 v0.5.2 的整图拷贝 / 缩放循环与分段缓冲 / 局部预览，包含最终合成并验证像素一致，不包含屏幕抓取、滚动等待与位移匹配；耗时受机器负载影响。
 
@@ -135,7 +175,8 @@ src/
   ScrollCapture.*     滚动长截图与拼接
   ScrollStitcher.*    固定栏匹配、分段长图缓冲与局部预览
   History.* HistoryWindow.*  截图历史
-  Ocr.* QrDecoder.* Recognize.* ResultDialog.* Translator.*  OCR / 二维码 / 翻译与结果面板
+  Ocr.* OcrPost.* OcrModels.* RapidOcr.* OcrWin.*  RapidOCR（ONNX）与系统 OCR
+  QrDecoder.* Recognize.* ResultDialog.* Translator.* TranslateText.*  二维码 / 翻译与结果面板
   Recorder.* RecordSession.*  录屏（MP4 / GIF）与控制条
 third_party/gif/      gif.h（公有领域）
   SettingsDialog.*    设置窗口（侧栏导航、即时生效）
@@ -165,7 +206,7 @@ QingYing (青影) is a simple, good-looking screenshot tool for Windows: an indi
 - Annotations: rectangle, ellipse, arrow, pen, text, mosaic, and numbered steps, with undo and redo
 - Output: copy, quick save (`Ctrl+S`), save as, and pin to desktop (`F3`); pins can be zoomed, made translucent, rotated, and flipped
 - Scrolling capture (`L`) with static fixed header/footer handling, incremental image buffering and a live size/frame counter; copy (`Ctrl+C` / Enter), save (`Ctrl+S`), save as (`Ctrl+Shift+S`) or pin (`F3`) after capture. Failed saves keep the image available for retry. Delayed capture and capture history are also supported.
-- Offline OCR (`O`, via Windows.Media.Ocr) with optional online translation (MyMemory, no API key; toggle in Settings), and QR / barcode scanning (`Q`, via ZXing-cpp)
+- Offline OCR (`O`): RapidOCR (PP-OCRv4 ONNX, models downloaded on first use, about 16 MB) with Windows.Media.Ocr as fallback. Optional translation via an OpenAI-compatible API (base URL, key and model in Settings; key stored with DPAPI, never logged) or MyMemory when AI is not configured. QR / barcode scanning (`Q`, via ZXing-cpp)
 - Color picker, plus MP4 / GIF screen recording (Desktop Duplication with GDI fallback)
 - Re-annotate a pin (`E`) or a history item; default tool and color; timed full-screen capture
 - Light, dark, or follow-system themes

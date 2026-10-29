@@ -10,7 +10,9 @@ struct Result {
     bool ok = false;
     QString text;
     QString error;
-    QString pair; // 实际使用的 langpair，如 en|zh-CN
+    QString pair; // MyMemory 的 langpair，如 en|zh-CN；AI 时为空
+    QString engine; // "ai" 或 "mymemory"
+    bool fellBack = false; // AI 失败或未配置后改用了 MyMemory
 };
 
 // 按文本是否以中日韩为主，建议译成英文或中文

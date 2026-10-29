@@ -22,7 +22,11 @@ void ocr(const QImage& image)
     QPointer<ResultDialog> guard(dlg);
     // 在全局线程池中识别：退出时 main() 会等待其结束，避免分离线程在 QApplication 析构后回调
     QThreadPool::globalInstance()->start([image, guard] {
-        const Ocr::Result r = Ocr::recognize(image);
+        const Ocr::Result r = Ocr::recognize(image, [guard](const QString& status) {
+            QMetaObject::invokeMethod(qApp, [guard, status] {
+                if (guard) guard->setStatus(status);
+            }, Qt::QueuedConnection);
+        });
         QMetaObject::invokeMethod(qApp, [guard, r] {
             if (!guard) return;
             guard->setWorking(false);
@@ -31,12 +35,12 @@ void ocr(const QImage& image)
                 return;
             }
             guard->setText(r.text);
-            guard->setStatus(r.text.isEmpty()
-                                 ? QCoreApplication::translate("QingYing", "未识别到文字（语言：%1）。可换更清晰的选区再试。")
-                                       .arg(r.language)
-                                 : QCoreApplication::translate("QingYing", "识别语言：%1 · 共 %2 行，可直接编辑后复制")
-                                       .arg(r.language)
-                                       .arg(r.text.count(QLatin1Char('\n')) + 1));
+            const QString base = r.text.isEmpty()
+                                     ? QCoreApplication::translate("QingYing", "未识别到文字（%1）。可换更清晰的选区再试。").arg(r.language)
+                                     : QCoreApplication::translate("QingYing", "识别语言：%1 · 共 %2 行，可直接编辑后复制")
+                                           .arg(r.language)
+                                           .arg(r.text.count(QLatin1Char('\n')) + 1);
+            guard->setStatus(r.fellBack && !r.note.isEmpty() ? r.note + QLatin1Char(' ') + base : base);
         }, Qt::QueuedConnection);
     });
 }
