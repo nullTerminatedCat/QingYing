@@ -4,7 +4,7 @@
 
 简洁、好看的 Windows 桌面截图工具。靛蓝主色、悬浮圆角工具条，只在需要时出现二级选项。
 
-> 当前版本：0.7.0（RapidOCR 本地识别、OpenAI 兼容翻译）。下方下载仍是已发布的 0.6.6；0.7.0 安装包在打上 `v0.7.0` 标签后出现在 Releases。
+> 当前版本：0.7.1（AI 翻译说明、省 API、识别并翻译）。下方下载仍是已发布的 0.6.6；0.7.1 安装包在打上 `v0.7.1` 标签后出现在 Releases。
 >
 > **国内下载（推荐，免翻墙）**
 > - 安装包直链：[QingYing-0.6.6-windows-x64-setup.exe](https://gitee.com/liner123/qing-ying/releases/download/v0.6.6/QingYing-0.6.6-windows-x64-setup.exe)
