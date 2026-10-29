@@ -15,6 +15,9 @@
 #include <QUrlQuery>
 
 namespace {
+TranslateText::TranslationMemory g_recall;
+unsigned g_recallEpoch = 0;
+
 QNetworkAccessManager* net()
 {
     static auto* n = new QNetworkAccessManager(qApp);
@@ -267,6 +270,12 @@ void runMemory(const QString& text, Target target, bool fellBack, std::function<
     });
 }
 
+void forgetRecall()
+{
+    g_recall = {};
+    ++g_recallEpoch;
+}
+
 void translate(const QString& text, Target target, std::function<void(Result)> done)
 {
     if (!Settings::translateEnabled()) {
@@ -282,24 +291,45 @@ void translate(const QString& text, Target target, std::function<void(Result)> d
         done(r);
         return;
     }
+    const bool toChinese = target == Target::Chinese;
+    const TranslateText::Reuse saved = TranslateText::reuseTranslation(text, toChinese, g_recall);
+    if (saved.hit) {
+        Result r;
+        r.ok = true;
+        r.text = saved.text;
+        r.engine = QStringLiteral("local");
+        r.local = saved.kind;
+        done(r);
+        return;
+    }
+    const unsigned epoch = g_recallEpoch;
+    auto finish = [text, toChinese, epoch, done = std::move(done)](Result r) {
+        // 识别面板已换了新文本时，不要把这次结果记成下一次的往返缓存
+        if (epoch == g_recallEpoch && r.ok && r.local == TranslateText::ReuseKind::None && !r.text.trimmed().isEmpty()) {
+            g_recall.valid = true;
+            g_recall.toChinese = toChinese;
+            g_recall.source = text;
+            g_recall.translated = r.text;
+        }
+        done(r);
+    };
     const bool wantAi = Settings::aiTranslateEnabled();
     if (wantAi && Settings::aiTranslateReady()) {
-        const bool toChinese = target == Target::Chinese;
-        translateAiChunks(TranslateText::chunkForModel(text), toChinese, {}, [text, target, done](Result r) {
+        translateAiChunks(TranslateText::chunkForModel(text), toChinese, {}, [text, target, finish](Result r) {
             if (r.ok || !Settings::memoryFallback()) {
-                done(r);
+                finish(r);
                 return;
             }
-            runMemory(text, target, true, done);
+            runMemory(text, target, true, finish);
         });
         return;
     }
     if (wantAi && !Settings::memoryFallback()) {
         Result r;
         r.error = QCoreApplication::translate("QingYing", "请在设置中填写 AI 翻译的接口地址、密钥和模型，或打开 MyMemory 兜底");
-        done(r);
+        finish(r);
         return;
     }
-    runMemory(text, target, false, std::move(done));
+    runMemory(text, target, false, std::move(finish));
 }
 }

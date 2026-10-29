@@ -2019,6 +2019,18 @@ Press the capture hotkey or click the tray icon to take one</translation>
         <translation>Translated to %1 with AI · Edit and copy, or restore the original</translation>
     </message>
     <message>
+        <source>已是%1，未请求翻译</source>
+        <translation>Already in %1. No translation request was sent.</translation>
+    </message>
+    <message>
+        <source>已改回翻译前的文字，未再请求翻译</source>
+        <translation>Restored the text from before that translation. No new request was sent.</translation>
+    </message>
+    <message>
+        <source>与刚才的译文相同，未再请求翻译</source>
+        <translation>Same as the translation just now. No new request was sent.</translation>
+    </message>
+    <message>
         <source>未识别到文字（%1）。可换更清晰的选区再试。</source>
         <translation>No text found (%1). Try a sharper selection.</translation>
     </message>

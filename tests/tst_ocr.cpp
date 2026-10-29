@@ -105,6 +105,57 @@ private slots:
         QCOMPARE(TranslateText::redactSecret(err, QStringLiteral("unit-test-token")), QStringLiteral("bad key ***"));
     }
 
+    void skipSameLanguage()
+    {
+        const QString zh = QString::fromUtf8(u8"你好世界");
+        const QString en = QStringLiteral("Hello World");
+        QVERIFY(TranslateText::alreadyInTargetLanguage(zh, true));
+        QVERIFY(!TranslateText::alreadyInTargetLanguage(zh, false));
+        QVERIFY(TranslateText::alreadyInTargetLanguage(en, false));
+        QVERIFY(!TranslateText::alreadyInTargetLanguage(en, true));
+        QVERIFY(TranslateText::alreadyInTargetLanguage(QStringLiteral("123-456"), true));
+        QVERIFY(TranslateText::alreadyInTargetLanguage(QStringLiteral("123-456"), false));
+        QVERIFY(!TranslateText::alreadyInTargetLanguage(QString(), true));
+        QVERIFY(!TranslateText::alreadyInTargetLanguage(QString::fromUtf8(u8"你好 Hello"), true));
+        QVERIFY(!TranslateText::alreadyInTargetLanguage(QString::fromUtf8(u8"你好 Hello"), false));
+        QVERIFY(!TranslateText::alreadyInTargetLanguage(QString::fromUtf8(u8"こんにちは"), true));
+        QVERIFY(TranslateText::alreadyInTargetLanguage(QString::fromUtf8(u8"Ｈｅｌｌｏ"), false));
+        QVERIFY(!TranslateText::alreadyInTargetLanguage(QString::fromUtf8(u8"Ｈｅｌｌｏ"), true));
+
+        TranslateText::TranslationMemory none;
+        const auto sameZh = TranslateText::reuseTranslation(zh, true, none);
+        QVERIFY(sameZh.hit);
+        QCOMPARE(int(sameZh.kind), int(TranslateText::ReuseKind::Already));
+        QCOMPARE(sameZh.text, zh);
+        const auto toEn = TranslateText::reuseTranslation(zh, false, none);
+        QVERIFY(!toEn.hit);
+        const auto toZh = TranslateText::reuseTranslation(en, true, none);
+        QVERIFY(!toZh.hit);
+
+        const QString padded = QStringLiteral("  Hello  ");
+        const auto keepSpaces = TranslateText::reuseTranslation(padded, false, none);
+        QVERIFY(keepSpaces.hit);
+        QCOMPARE(keepSpaces.text, padded);
+
+        TranslateText::TranslationMemory mem;
+        mem.valid = true;
+        mem.toChinese = false;
+        mem.source = zh;
+        mem.translated = en;
+        const auto back = TranslateText::reuseTranslation(en, true, mem);
+        QVERIFY(back.hit);
+        QCOMPARE(int(back.kind), int(TranslateText::ReuseKind::RoundTrip));
+        QCOMPARE(back.text, zh);
+        const auto again = TranslateText::reuseTranslation(zh, false, mem);
+        QVERIFY(again.hit);
+        QCOMPARE(int(again.kind), int(TranslateText::ReuseKind::Repeat));
+        QCOMPARE(again.text, en);
+        QVERIFY(!TranslateText::reuseTranslation(QStringLiteral("Hello there"), true, mem).hit);
+        const auto stillEn = TranslateText::reuseTranslation(en, false, mem);
+        QVERIFY(stillEn.hit);
+        QCOMPARE(int(stillEn.kind), int(TranslateText::ReuseKind::Already));
+    }
+
     void chunksKeepBreaks()
     {
         QString text;

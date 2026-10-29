@@ -198,11 +198,28 @@ void ResultDialog::startTranslate(bool toChinese)
             guard->setStatus(QCoreApplication::translate("QingYing", "翻译失败：%1").arg(r.error), true);
             return;
         }
-        guard->m_edit->setPlainText(r.text);
-        guard->m_restore->show();
-        guard->m_restore->setEnabled(true);
         const QString lang = toChinese ? QCoreApplication::translate("QingYing", "中文")
                                        : QCoreApplication::translate("QingYing", "英文");
+        if (r.local == TranslateText::ReuseKind::Already) {
+            guard->setStatus(QCoreApplication::translate("QingYing", "已是%1，未请求翻译").arg(lang));
+            return;
+        }
+        guard->m_edit->setPlainText(r.text);
+        const bool backToOriginal = !guard->m_original.isEmpty() && r.text == guard->m_original;
+        if (backToOriginal)
+            guard->m_restore->hide();
+        else {
+            guard->m_restore->show();
+            guard->m_restore->setEnabled(true);
+        }
+        if (r.local == TranslateText::ReuseKind::RoundTrip) {
+            guard->setStatus(QCoreApplication::translate("QingYing", "已改回翻译前的文字，未再请求翻译"));
+            return;
+        }
+        if (r.local == TranslateText::ReuseKind::Repeat) {
+            guard->setStatus(QCoreApplication::translate("QingYing", "与刚才的译文相同，未再请求翻译"));
+            return;
+        }
         if (r.fellBack)
             guard->setStatus(QCoreApplication::translate("QingYing", "AI 不可用，已改用 MyMemory · 已译成%1").arg(lang));
         else if (r.engine == QLatin1String("ai"))
@@ -225,6 +242,7 @@ void ResultDialog::setStatus(const QString& s, bool error)
 
 void ResultDialog::setText(const QString& text)
 {
+    Translator::forgetRecall();
     m_original.clear();
     m_restore->hide();
     m_edit->setPlainText(text);
