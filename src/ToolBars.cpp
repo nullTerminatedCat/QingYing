@@ -3,6 +3,7 @@
 #include "Style.h"
 #include "Settings.h"
 
+#include <QKeySequence>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QToolTip>
@@ -28,6 +29,7 @@ ToolBar::ToolBar(QWidget* parent) : QWidget(parent)
         {Redo, Icon::Redo, QCoreApplication::translate("QingYing", "重做  Ctrl+Y"), {}, false},
         {-1, Icon::Rect, {}, {}, true},
         {OcrBtn, Icon::Ocr, QCoreApplication::translate("QingYing", "识别文字（OCR）  O"), {}, false},
+        {OcrTrBtn, Icon::Translate, QCoreApplication::translate("QingYing", "识别并翻译  %1").arg(Settings::ocrTranslateHotkey().toString(QKeySequence::NativeText)), {}, false},
         {QrBtn, Icon::Qr, QCoreApplication::translate("QingYing", "识别二维码 / 条码  Q"), {}, false},
         {LongShot, Icon::Scroll, QCoreApplication::translate("QingYing", "长截图（滚动）  L"), {}, false},
         {Pin, Icon::Pin, QCoreApplication::translate("QingYing", "钉在桌面  F3"), {}, false},

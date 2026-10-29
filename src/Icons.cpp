@@ -118,6 +118,12 @@ void paintIcon(QPainter& p, Icon icon, const QRectF& r, const QColor& color)
         path.moveTo(8, 9); path.lineTo(16, 9);
         path.moveTo(12, 9); path.lineTo(12, 16);
         break;
+    case Icon::Translate: // A →
+        path.moveTo(4.5, 17); path.lineTo(8, 7); path.lineTo(11.5, 17);
+        path.moveTo(6, 13.5); path.lineTo(10, 13.5);
+        path.moveTo(13, 12); path.lineTo(19.5, 12);
+        path.moveTo(16.5, 9); path.lineTo(19.5, 12); path.lineTo(16.5, 15);
+        break;
     case Icon::Qr:
         path.addRoundedRect(4, 4, 6, 6, 1, 1);
         path.addRoundedRect(14, 4, 6, 6, 1, 1);

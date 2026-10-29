@@ -34,7 +34,9 @@
 #include <QSettings>
 #include <QSpinBox>
 #include <QStackedWidget>
+#include <QDialog>
 #include <QStyle>
+#include <QTextBrowser>
 #include <QTimer>
 #include <QToolButton>
 #include <QUrl>
@@ -144,12 +146,118 @@ ToggleSwitch* toggle(bool on, std::function<void(bool)> f)
 const QStringList kThemes = {QStringLiteral("system"), QStringLiteral("light"), QStringLiteral("dark")};
 const QStringList kActions = {QStringLiteral("copy"), QStringLiteral("save"), QStringLiteral("pin")};
 const int kFps[3] = {10, 15, 30};
+
+// 帮助文案里的 %1 会换成可点击链接，翻译时需保留 %1。此处不包含任何真实密钥。
+QString helpText(const char* source)
+{
+    return QCoreApplication::translate("QingYing", source).toHtmlEscaped();
+}
+
+QString helpLink(const char* url)
+{
+    const QString href = QString::fromLatin1(url);
+    const QString text = href.mid(QStringLiteral("https://").size());
+    return QStringLiteral("<a href=\"%1\" style=\"color:#4F6BFF;text-decoration:underline;\">%2</a>")
+        .arg(href, text.toHtmlEscaped());
+}
+
+QString helpSection(const QString& title, std::initializer_list<QString> lines, bool first)
+{
+    QString body;
+    for (const QString& line : lines) {
+        if (!body.isEmpty()) body += QStringLiteral("<br>");
+        body += line;
+    }
+    return QStringLiteral("<p style=\"margin-top:%1px;margin-bottom:2px;\"><b>%2</b></p>"
+                          "<p style=\"margin-top:0;margin-bottom:0;\">%3</p>")
+        .arg(QString::number(first ? 0 : 14), title, body);
+}
+
+QString aiHelpHtml()
+{
+    return helpSection(helpText("通用"), {
+        helpText("接口地址填 OpenAI 兼容根路径，到 /v1 为止，程序会再请求 /chat/completions。模型名由服务商提供。"),
+        helpText("密钥只用 Windows DPAPI 加密保存在本机，不会写入日志。请勿分享或截图外发。"),
+        helpText("未填完整或调用失败时，可回退到无需密钥的 MyMemory（见下方开关，默认开启）。平台可能要充值，或提供免费额度，以各官网为准。"),
+    }, true)
+        + helpSection(QStringLiteral("OpenAI"), {
+            helpText("1. 打开 %1（也可从 platform.openai.com 进入 API keys）。").arg(helpLink("https://platform.openai.com/api-keys")),
+            helpText("2. 登录或注册，创建 API key 并复制。密钥通常只显示一次。"),
+            helpText("3. 粘贴到青影「API 密钥」。地址填 https://api.openai.com/v1，模型如 gpt-4o-mini。"),
+        }, false)
+        + helpSection(QStringLiteral("DeepSeek"), {
+            helpText("1. 打开 %1。").arg(helpLink("https://platform.deepseek.com/api_keys")),
+            helpText("2. 登录或注册，创建 API Key 并复制。"),
+            helpText("3. 粘贴到青影「API 密钥」。地址填 https://api.deepseek.com/v1，模型填 deepseek-chat（也可用 deepseek-reasoner）。"),
+        }, false)
+        + helpSection(helpText("其他兼容服务"), {
+            helpText("按对方文档填写 base URL（到 /v1）和模型名即可。"),
+        }, false);
+}
+
+void showAiHelpDialog(QWidget* parent)
+{
+    QDialog dlg(parent);
+    dlg.setWindowTitle(QCoreApplication::translate("QingYing", "如何接入 AI 翻译"));
+    dlg.setWindowIcon(appIcon());
+    dlg.setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+    dlg.setSizeGripEnabled(false);
+    dlg.setFixedWidth(500);
+    Theme::setSheet(&dlg, QStringLiteral(R"(
+        QDialog { background: #F6F7FB; }
+        QTextBrowser { color: #1C1C1E; font-size: 13px; background: transparent; border: none; }
+        QPushButton { background: #FFFFFF; border: 1px solid rgba(0,0,0,30); border-radius: 8px;
+            padding: 5px 14px; font-size: 13px; color: #1C1C1E; min-height: 20px; }
+        QPushButton:hover { background: #F0F2FA; }
+        QPushButton#primary { background: #4F6BFF; border: 1px solid #4F6BFF; color: white; font-weight: 600; }
+        QPushButton#primary:hover { background: #3D57E8; }
+        QScrollBar:vertical { background: transparent; width: 10px; margin: 4px 2px 4px 0; }
+        QScrollBar::handle:vertical { background: rgba(0,0,0,45); border-radius: 4px; min-height: 32px; }
+        QScrollBar::handle:vertical:hover { background: rgba(0,0,0,80); }
+        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }
+        QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background: none; }
+    )"));
+
+    const QString html = aiHelpHtml();
+    constexpr int textWidth = 440;
+    auto* body = new QTextBrowser;
+    body->setOpenExternalLinks(true);
+    body->setOpenLinks(true);
+    body->setFrameShape(QFrame::NoFrame);
+    body->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    body->setLineWrapMode(QTextEdit::WidgetWidth);
+    QFont font = body->font();
+    font.setPixelSize(13);
+    body->setFont(font);
+    body->document()->setDocumentMargin(2);
+    body->setHtml(html);
+    body->document()->setTextWidth(textWidth);
+    const int textHeight = qRound(body->document()->size().height()) + 8;
+    body->setFixedHeight(qBound(240, textHeight, 520));
+
+    auto* lay = new QVBoxLayout(&dlg);
+    lay->setContentsMargins(20, 16, 20, 16);
+    lay->setSpacing(14);
+    lay->addWidget(body);
+    auto* ok = new QPushButton(QCoreApplication::translate("QingYing", "知道了"));
+    ok->setObjectName(QStringLiteral("primary"));
+    ok->setDefault(true);
+    ok->setCursor(Qt::PointingHandCursor);
+    QObject::connect(ok, &QPushButton::clicked, &dlg, &QDialog::accept);
+    auto* buttons = new QHBoxLayout;
+    buttons->addStretch(1);
+    buttons->addWidget(ok);
+    lay->addLayout(buttons);
+    dlg.exec();
+}
 }
 
 SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> applyCapture,
                                std::function<bool(const QKeySequence&)> applyRecord,
+                               std::function<bool(const QKeySequence&)> applyOcrTranslate,
                                QWidget* parent)
-    : QDialog(parent), m_applyCapture(std::move(applyCapture)), m_applyRecord(std::move(applyRecord))
+    : QDialog(parent), m_applyCapture(std::move(applyCapture)), m_applyRecord(std::move(applyRecord)),
+      m_applyOcrTranslate(std::move(applyOcrTranslate))
 {
     setWindowTitle(QCoreApplication::translate("QingYing", "设置"));
     setWindowIcon(appIcon());
@@ -191,6 +299,10 @@ SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> applyCap
         QPushButton#hotkey[recording="true"] { border: 1px solid #4F6BFF; color: #4F6BFF; background: rgba(79,107,255,18); }
         QToolButton#iconBtn { background: #FFFFFF; border: 1px solid rgba(0,0,0,30); border-radius: 8px; padding: 5px; }
         QToolButton#iconBtn:hover { background: #F0F2FA; }
+        QToolButton#helpBtn { background: transparent; color: #6E6E73; border: 1px solid rgba(0,0,0,30);
+            border-radius: 11px; font-size: 12px; font-weight: 600; padding: 0; }
+        QToolButton#helpBtn:hover, QToolButton#helpBtn:focus { background: #F0F2FA; color: #4F6BFF; border-color: #4F6BFF; }
+        QLabel#aiSection { font-size: 12px; color: #6E6E73; font-weight: 600; padding: 0; }
         QFrame#seg { background: #F0F2FA; border-radius: 9px; }
         QPushButton#segBtn { background: transparent; border: none; border-radius: 7px; padding: 4px 14px; color: #6E6E73; min-height: 20px; }
         QPushButton#segBtn:hover { color: #1C1C1E; }
@@ -284,7 +396,9 @@ SettingsDialog::~SettingsDialog()
 {
     if (m_upTimer && m_upTimer->isActive()) saveUpload(); // 关闭时写入未保存的请求头
     if (m_aiUrl) saveAi();
-    if (((m_hotkey && m_hotkey->isRecording()) || (m_recordHotkey && m_recordHotkey->isRecording())) && m_suspend)
+    if (((m_hotkey && m_hotkey->isRecording()) || (m_recordHotkey && m_recordHotkey->isRecording())
+         || (m_ocrTrHotkey && m_ocrTrHotkey->isRecording()))
+        && m_suspend)
         m_suspend(false);
     QSettings st(QStringLiteral("QingYing"), QStringLiteral("QingYing"));
     if (!isMaximized()) st.setValue("settingsSize", size());
@@ -340,6 +454,10 @@ QWidget* SettingsDialog::buildGeneral()
             setStatus(m_hotkeyHint, QCoreApplication::translate("QingYing", "不能与录屏热键相同"), true);
             return;
         }
+        if (k == Settings::ocrTranslateHotkey()) {
+            setStatus(m_hotkeyHint, QCoreApplication::translate("QingYing", "不能与识别并翻译热键相同"), true);
+            return;
+        }
         if (!m_applyCapture || !m_applyCapture(k)) {
             setStatus(m_hotkeyHint, QCoreApplication::translate("QingYing", "%1 已被其他程序占用，请换一个组合").arg(k.toString(QKeySequence::NativeText)), true);
             return;
@@ -370,6 +488,10 @@ QWidget* SettingsDialog::buildGeneral()
             setStatus(m_recordHotkeyHint, QCoreApplication::translate("QingYing", "不能与截图热键相同"), true);
             return;
         }
+        if (k == Settings::ocrTranslateHotkey()) {
+            setStatus(m_recordHotkeyHint, QCoreApplication::translate("QingYing", "不能与识别并翻译热键相同"), true);
+            return;
+        }
         if (!m_applyRecord || !m_applyRecord(k)) {
             setStatus(m_recordHotkeyHint, QCoreApplication::translate("QingYing", "%1 已被其他程序占用，请换一个组合").arg(k.toString(QKeySequence::NativeText)), true);
             return;
@@ -384,6 +506,42 @@ QWidget* SettingsDialog::buildGeneral()
     });
     connect(m_recordHotkey, &HotkeyEdit::recorded, this, tryApplyRecord);
     connect(resetRec, &QPushButton::clicked, this, [tryApplyRecord] { tryApplyRecord(Settings::defaultRecordHotkey()); });
+
+    m_ocrTrHotkey = new HotkeyEdit;
+    m_ocrTrHotkey->setSequence(Settings::ocrTranslateHotkey());
+    auto* resetOcrTr = new QPushButton(QCoreApplication::translate("QingYing", "恢复默认"));
+    addRow(c, QCoreApplication::translate("QingYing", "识别并翻译"),
+           QCoreApplication::translate("QingYing", "框选后识别文字并自动翻译。翻译未开启或调用失败时仍完成识别并提示。默认 Ctrl+Alt+T"),
+           hbox({m_ocrTrHotkey, resetOcrTr}, -1), false, &m_ocrTrHotkeyHint);
+    auto tryApplyOcrTr = [this](QKeySequence k) {
+        if (k.isEmpty()) k = Settings::defaultOcrTranslateHotkey();
+        unsigned m = 0, v = 0;
+        if (!HotkeyManager::toNative(k, m, v) || m == 0) {
+            setStatus(m_ocrTrHotkeyHint, QCoreApplication::translate("QingYing", "需要包含 Ctrl / Alt / Shift / Win 之一，并使用字母、数字或功能键"), true);
+            return;
+        }
+        if (k == Settings::hotkey()) {
+            setStatus(m_ocrTrHotkeyHint, QCoreApplication::translate("QingYing", "不能与截图热键相同"), true);
+            return;
+        }
+        if (k == Settings::recordHotkey()) {
+            setStatus(m_ocrTrHotkeyHint, QCoreApplication::translate("QingYing", "不能与录屏热键相同"), true);
+            return;
+        }
+        if (!m_applyOcrTranslate || !m_applyOcrTranslate(k)) {
+            setStatus(m_ocrTrHotkeyHint, QCoreApplication::translate("QingYing", "%1 已被其他程序占用，请换一个组合").arg(k.toString(QKeySequence::NativeText)), true);
+            return;
+        }
+        Settings::setOcrTranslateHotkey(k);
+        m_ocrTrHotkey->setSequence(k);
+        setStatus(m_ocrTrHotkeyHint, QCoreApplication::translate("QingYing", "已生效：%1").arg(k.toString(QKeySequence::NativeText)), false);
+        emit changed();
+    };
+    connect(m_ocrTrHotkey, &HotkeyEdit::recordingChanged, this, [this](bool on) {
+        if (m_suspend) m_suspend(on);
+    });
+    connect(m_ocrTrHotkey, &HotkeyEdit::recorded, this, tryApplyOcrTr);
+    connect(resetOcrTr, &QPushButton::clicked, this, [tryApplyOcrTr] { tryApplyOcrTr(Settings::defaultOcrTranslateHotkey()); });
 
     c = addCard(b, QCoreApplication::translate("QingYing", "启动"));
     addRow(c, QCoreApplication::translate("QingYing", "开机自动启动"), QCoreApplication::translate("QingYing", "登录 Windows 后在托盘中待命"), toggle(Settings::autostart(), [this](bool on) {
@@ -542,7 +700,27 @@ QWidget* SettingsDialog::buildCapture()
     aiLay->setContentsMargins(0, 0, 0, 0);
     aiLay->setSpacing(0);
     b->addWidget(m_aiBody);
-    Card ai = addCard(aiLay, QCoreApplication::translate("QingYing", "AI 接口"));
+    auto* aiHead = new QWidget(m_aiBody);
+    auto* aiHeadLay = new QHBoxLayout(aiHead);
+    aiHeadLay->setContentsMargins(4, 0, 0, 6);
+    aiHeadLay->setSpacing(6);
+    auto* aiTitle = new QLabel(QCoreApplication::translate("QingYing", "AI 接口"), aiHead);
+    aiTitle->setObjectName(QStringLiteral("aiSection"));
+    auto* aiHelp = new QToolButton(aiHead);
+    aiHelp->setObjectName(QStringLiteral("helpBtn"));
+    aiHelp->setText(QStringLiteral("?"));
+    aiHelp->setToolTip(QCoreApplication::translate("QingYing", "如何接入 DeepSeek、OpenAI 等"));
+    aiHelp->setAccessibleName(aiHelp->toolTip());
+    aiHelp->setCursor(Qt::PointingHandCursor);
+    aiHelp->setFocusPolicy(Qt::TabFocus);
+    aiHelp->setFixedSize(22, 22);
+    aiHelp->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    connect(aiHelp, &QToolButton::clicked, this, [this] { showAiHelpDialog(this); });
+    aiHeadLay->addWidget(aiTitle, 0, Qt::AlignVCenter);
+    aiHeadLay->addWidget(aiHelp, 0, Qt::AlignVCenter);
+    aiHeadLay->addStretch(1);
+    aiLay->addWidget(aiHead);
+    Card ai = addCard(aiLay, QString());
     m_aiUrl = new QLineEdit(Settings::aiBaseUrl());
     m_aiUrl->setPlaceholderText(QStringLiteral("https://api.openai.com/v1"));
     addRow(ai, QCoreApplication::translate("QingYing", "接口地址"),

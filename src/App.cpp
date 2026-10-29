@@ -101,10 +101,13 @@ App::App()
     });
     connect(&m_hotkey, &HotkeyManager::activated, this, [this] { startCapture(); });
     connect(&m_recordHotkey, &HotkeyManager::activated, this, &App::onRecordHotkey);
+    connect(&m_ocrTrHotkey, &HotkeyManager::activated, this, &App::onOcrTranslateHotkey);
     const QKeySequence hk = Settings::hotkey();
     const QKeySequence rhk = Settings::recordHotkey();
+    const QKeySequence thk = Settings::ocrTranslateHotkey();
     const bool ok = m_hotkey.setHotkey(hk);
     const bool rok = m_recordHotkey.setHotkey(rhk);
+    const bool tok = thk != hk && thk != rhk && m_ocrTrHotkey.setHotkey(thk);
     updateMenu();
     const QString hkText = hk.toString(QKeySequence::NativeText);
     const QString rhkText = rhk.toString(QKeySequence::NativeText);
@@ -126,6 +129,10 @@ App::App()
     if (ok && !rok)
         m_tray->showMessage(QCoreApplication::translate("QingYing", "录屏热键冲突"),
                             QCoreApplication::translate("QingYing", "%1 已被占用，请在设置中更换录屏热键。").arg(rhkText),
+                            QSystemTrayIcon::Warning, 6000);
+    if (!tok)
+        m_tray->showMessage(QCoreApplication::translate("QingYing", "识别并翻译热键冲突"),
+                            QCoreApplication::translate("QingYing", "%1 已被占用，请在设置中更换识别并翻译热键。").arg(thk.toString(QKeySequence::NativeText)),
                             QSystemTrayIcon::Warning, 6000);
     writeSmokeReport();
     if (qEnvironmentVariableIsSet("QINGYING_SMOKE_EDIT") && qEnvironmentVariableIsSet("QINGYING_SMOKE_REPORT")) {
@@ -335,7 +342,8 @@ void App::writeSmokeReport()
         const QString dir = qEnvironmentVariable("QINGYING_SMOKE_SHOTS");
         QDir().mkpath(dir);
         {
-            SettingsDialog sd([](const QKeySequence&) { return true; }, [](const QKeySequence&) { return true; });
+            SettingsDialog sd([](const QKeySequence&) { return true; }, [](const QKeySequence&) { return true; },
+                               [](const QKeySequence&) { return true; });
             sd.resize(780, 560);
             sd.show();
             for (int i = 0; i < sd.pageCount(); ++i) {
@@ -438,6 +446,7 @@ void App::updateMenu()
 bool App::applyHotkey(const QKeySequence& seq)
 {
     if (seq == Settings::recordHotkey() || seq == m_recordHotkey.current()) return false;
+    if (seq == Settings::ocrTranslateHotkey() || seq == m_ocrTrHotkey.current()) return false;
     const QKeySequence old = m_hotkey.current();
     if (m_hotkey.isRegistered() && old == seq) return true;
     if (m_hotkey.setHotkey(seq)) {
@@ -451,6 +460,7 @@ bool App::applyHotkey(const QKeySequence& seq)
 bool App::applyRecordHotkey(const QKeySequence& seq)
 {
     if (seq == Settings::hotkey() || seq == m_hotkey.current()) return false;
+    if (seq == Settings::ocrTranslateHotkey() || seq == m_ocrTrHotkey.current()) return false;
     const QKeySequence old = m_recordHotkey.current();
     if (m_recordHotkey.isRegistered() && old == seq) return true;
     if (m_recordHotkey.setHotkey(seq)) {
@@ -459,6 +469,28 @@ bool App::applyRecordHotkey(const QKeySequence& seq)
     }
     if (!old.isEmpty()) m_recordHotkey.setHotkey(old);
     return false;
+}
+
+bool App::applyOcrTranslateHotkey(const QKeySequence& seq)
+{
+    if (seq == Settings::hotkey() || seq == m_hotkey.current()) return false;
+    if (seq == Settings::recordHotkey() || seq == m_recordHotkey.current()) return false;
+    const QKeySequence old = m_ocrTrHotkey.current();
+    if (m_ocrTrHotkey.isRegistered() && old == seq) return true;
+    if (m_ocrTrHotkey.setHotkey(seq)) return true;
+    if (!old.isEmpty()) m_ocrTrHotkey.setHotkey(old);
+    return false;
+}
+
+void App::onOcrTranslateHotkey()
+{
+    for (const auto& o : m_overlays) {
+        if (o && o->recognizeAndTranslate()) return;
+    }
+    if (m_tray)
+        m_tray->showMessage(QCoreApplication::translate("QingYing", "识别并翻译"),
+                            QCoreApplication::translate("QingYing", "请先框选区域，再按 %1。").arg(Settings::ocrTranslateHotkey().toString(QKeySequence::NativeText)),
+                            appIcon(), 3000);
 }
 
 void App::onRecordHotkey()
@@ -746,16 +778,19 @@ void App::openSettings()
         return;
     }
     m_settings = new SettingsDialog([this](const QKeySequence& k) { return applyHotkey(k); },
-                                    [this](const QKeySequence& k) { return applyRecordHotkey(k); });
+                                    [this](const QKeySequence& k) { return applyRecordHotkey(k); },
+                                    [this](const QKeySequence& k) { return applyOcrTranslateHotkey(k); });
     m_settings->setAttribute(Qt::WA_DeleteOnClose);
     m_settings->setCheckUpdate([this] { m_updater->check(true); });
     m_settings->setSuspendHotkey([this](bool on) {
         if (on) {
             m_hotkey.unregister();
             m_recordHotkey.unregister();
+            m_ocrTrHotkey.unregister();
         } else {
             if (!m_hotkey.isRegistered()) m_hotkey.setHotkey(Settings::hotkey());
             if (!m_recordHotkey.isRegistered()) m_recordHotkey.setHotkey(Settings::recordHotkey());
+            if (!m_ocrTrHotkey.isRegistered()) m_ocrTrHotkey.setHotkey(Settings::ocrTranslateHotkey());
         }
     });
     connect(m_settings, &SettingsDialog::changed, this, &App::updateMenu);

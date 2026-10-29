@@ -1063,6 +1063,18 @@ Actual: %2</translation>
         <translation>Recognize text (OCR)  O</translation>
     </message>
     <message>
+        <source>识别并翻译  %1</source>
+        <translation>Recognize and translate  %1</translation>
+    </message>
+    <message>
+        <source>识别并翻译</source>
+        <translation>Recognize and translate</translation>
+    </message>
+    <message>
+        <source>联网翻译未开启，未自动翻译</source>
+        <translation>Online translation is off, so nothing was translated automatically.</translation>
+    </message>
+    <message>
         <location filename="../src/Recognize.cpp" line="-21"/>
         <source>识别语言：%1 · 共 %2 行，可直接编辑后复制</source>
         <translation>Language: %1 · %2 lines, edit and copy as needed</translation>
@@ -1723,6 +1735,26 @@ Press the capture hotkey or click the tray icon to take one</translation>
         <translation>Cannot match the capture hotkey</translation>
     </message>
     <message>
+        <source>不能与识别并翻译热键相同</source>
+        <translation>Cannot match the recognize-and-translate hotkey</translation>
+    </message>
+    <message>
+        <source>框选后识别文字并自动翻译。翻译未开启或调用失败时仍完成识别并提示。默认 Ctrl+Alt+T</source>
+        <translation>After you select a region, recognize the text and translate it. If translation is off or the call fails, recognition still finishes and the reason is shown. Default: Ctrl+Alt+T</translation>
+    </message>
+    <message>
+        <source>识别并翻译热键冲突</source>
+        <translation>Recognize-and-translate hotkey conflict</translation>
+    </message>
+    <message>
+        <source>%1 已被占用，请在设置中更换识别并翻译热键。</source>
+        <translation>%1 is already in use. Change the recognize-and-translate hotkey in Settings.</translation>
+    </message>
+    <message>
+        <source>请先框选区域，再按 %1。</source>
+        <translation>Select a region first, then press %1.</translation>
+    </message>
+    <message>
         <source>开始框选录制；录制中再次按下可停止保存</source>
         <translation>Start region recording; press again while recording to stop and save</translation>
     </message>
@@ -1761,6 +1793,66 @@ Press the capture hotkey or click the tray icon to take one</translation>
     <message>
         <source>AI 接口</source>
         <translation>AI endpoint</translation>
+    </message>
+    <message>
+        <source>如何接入 DeepSeek、OpenAI 等</source>
+        <translation>How to connect DeepSeek, OpenAI, and similar APIs</translation>
+    </message>
+    <message>
+        <source>如何接入 AI 翻译</source>
+        <translation>How to connect AI translation</translation>
+    </message>
+    <message>
+        <source>知道了</source>
+        <translation>Got it</translation>
+    </message>
+    <message>
+        <source>通用</source>
+        <translation>General</translation>
+    </message>
+    <message>
+        <source>接口地址填 OpenAI 兼容根路径，到 /v1 为止，程序会再请求 /chat/completions。模型名由服务商提供。</source>
+        <translation>Enter the OpenAI-compatible root URL, ending at /v1. The app then calls /chat/completions. Use the model name from your provider.</translation>
+    </message>
+    <message>
+        <source>密钥只用 Windows DPAPI 加密保存在本机，不会写入日志。请勿分享或截图外发。</source>
+        <translation>The key is encrypted with Windows DPAPI and stays on this PC. It is never written to logs. Do not share it or send a screenshot of it.</translation>
+    </message>
+    <message>
+        <source>未填完整或调用失败时，可回退到无需密钥的 MyMemory（见下方开关，默认开启）。平台可能要充值，或提供免费额度，以各官网为准。</source>
+        <translation>If the fields are incomplete or the call fails, QingYing can fall back to MyMemory when the switch below is on (it is on by default). Providers may require credit or offer a free quota; check their sites.</translation>
+    </message>
+    <message>
+        <source>1. 打开 %1（也可从 platform.openai.com 进入 API keys）。</source>
+        <translation>1. Open %1 (or go to platform.openai.com → API keys).</translation>
+    </message>
+    <message>
+        <source>2. 登录或注册，创建 API key 并复制。密钥通常只显示一次。</source>
+        <translation>2. Sign in or create an account, create an API key, and copy it. It is usually shown only once.</translation>
+    </message>
+    <message>
+        <source>3. 粘贴到青影「API 密钥」。地址填 https://api.openai.com/v1，模型如 gpt-4o-mini。</source>
+        <translation>3. Paste it into QingYing's API key field. Base URL: https://api.openai.com/v1. Model, for example gpt-4o-mini.</translation>
+    </message>
+    <message>
+        <source>1. 打开 %1。</source>
+        <translation>1. Open %1.</translation>
+    </message>
+    <message>
+        <source>2. 登录或注册，创建 API Key 并复制。</source>
+        <translation>2. Sign in or create an account, create an API key, and copy it.</translation>
+    </message>
+    <message>
+        <source>3. 粘贴到青影「API 密钥」。地址填 https://api.deepseek.com/v1，模型填 deepseek-chat（也可用 deepseek-reasoner）。</source>
+        <translation>3. Paste it into QingYing's API key field. Base URL: https://api.deepseek.com/v1. Model: deepseek-chat (deepseek-reasoner also works).</translation>
+    </message>
+    <message>
+        <source>其他兼容服务</source>
+        <translation>Other compatible services</translation>
+    </message>
+    <message>
+        <source>按对方文档填写 base URL（到 /v1）和模型名即可。</source>
+        <translation>Use the base URL (ending at /v1) and model name from that provider's docs.</translation>
     </message>
     <message>
         <source>接口地址</source>
@@ -1957,6 +2049,26 @@ Press the capture hotkey or click the tray icon to take one</translation>
     <message>
         <source>已用 AI 译成%1 · 可编辑后复制，或点“还原原文”</source>
         <translation>Translated to %1 with AI · Edit and copy, or restore the original</translation>
+    </message>
+    <message>
+        <source>已是%1，未请求翻译</source>
+        <translation>Already in %1. No translation request was sent.</translation>
+    </message>
+    <message>
+        <source>无需翻译</source>
+        <translation>Nothing to translate</translation>
+    </message>
+    <message>
+        <source>当前已是译文，请用「译成中文」或「译成英文」选择方向</source>
+        <translation>This is already a translation. Choose Translate to Chinese or Translate to English.</translation>
+    </message>
+    <message>
+        <source>已改回翻译前的文字，未再请求翻译</source>
+        <translation>Restored the text from before that translation. No new request was sent.</translation>
+    </message>
+    <message>
+        <source>与刚才的译文相同，未再请求翻译</source>
+        <translation>Same as the translation just now. No new request was sent.</translation>
     </message>
     <message>
         <source>未识别到文字（%1）。可换更清晰的选区再试。</source>

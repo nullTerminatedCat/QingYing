@@ -78,6 +78,7 @@ CaptureOverlay::CaptureOverlay(QScreen* screen, const QImage& shot, const QRect&
         case ToolBar::Confirm: doDefault(); break;
         case ToolBar::LongShot: doLongShot(); break;
         case ToolBar::OcrBtn: doRecognize(false); break;
+        case ToolBar::OcrTrBtn: doRecognize(false, true); break;
         case ToolBar::QrBtn: doRecognize(true); break;
         case ToolBar::UploadBtn: doUpload(); break;
         }
@@ -500,14 +501,22 @@ void CaptureOverlay::doDefault()
     else doCopy();
 }
 
-void CaptureOverlay::doRecognize(bool qr)
+void CaptureOverlay::doRecognize(bool qr, bool autoTranslate)
 {
     if (m_state != State::Selected) return;
     if (m_editing) commitText();
     const QImage img = renderResult();
     emit finished();
     if (qr) Recognize::qr(img);
+    else if (autoTranslate) Recognize::ocrAndTranslate(img);
     else Recognize::ocr(img);
+}
+
+bool CaptureOverlay::recognizeAndTranslate()
+{
+    if (m_passive || m_state != State::Selected) return false;
+    doRecognize(false, true);
+    return true;
 }
 
 void CaptureOverlay::doUpload()

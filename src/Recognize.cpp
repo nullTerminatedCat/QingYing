@@ -10,9 +10,10 @@
 #include <QThreadPool>
 
 namespace Recognize {
-void ocr(const QImage& image)
+void showOcr(const QImage& image, bool autoTranslate)
 {
-    auto* dlg = new ResultDialog(QCoreApplication::translate("QingYing", "文字识别"));
+    auto* dlg = new ResultDialog(autoTranslate ? QCoreApplication::translate("QingYing", "识别并翻译")
+                                               : QCoreApplication::translate("QingYing", "文字识别"));
     dlg->setTranslateEnabled(true);
     dlg->setWorking(true);
     dlg->setStatus(QCoreApplication::translate("QingYing", "正在识别，请稍候…"));
@@ -21,13 +22,13 @@ void ocr(const QImage& image)
     dlg->activateWindow();
     QPointer<ResultDialog> guard(dlg);
     // 在全局线程池中识别：退出时 main() 会等待其结束，避免分离线程在 QApplication 析构后回调
-    QThreadPool::globalInstance()->start([image, guard] {
+    QThreadPool::globalInstance()->start([image, guard, autoTranslate] {
         const Ocr::Result r = Ocr::recognize(image, [guard](const QString& status) {
             QMetaObject::invokeMethod(qApp, [guard, status] {
                 if (guard) guard->setStatus(status);
             }, Qt::QueuedConnection);
         });
-        QMetaObject::invokeMethod(qApp, [guard, r] {
+        QMetaObject::invokeMethod(qApp, [guard, r, autoTranslate] {
             if (!guard) return;
             guard->setWorking(false);
             if (!r.ok) {
@@ -41,9 +42,14 @@ void ocr(const QImage& image)
                                            .arg(r.language)
                                            .arg(r.text.count(QLatin1Char('\n')) + 1);
             guard->setStatus(r.fellBack && !r.note.isEmpty() ? r.note + QLatin1Char(' ') + base : base);
+            // 空结果不翻译。自动翻译走 ResultDialog::translateSuggested → Translator::translate，跳过与缓存同样生效。
+            if (autoTranslate && !r.text.trimmed().isEmpty()) guard->translateSuggested();
         }, Qt::QueuedConnection);
     });
 }
+
+void ocr(const QImage& image) { showOcr(image, false); }
+void ocrAndTranslate(const QImage& image) { showOcr(image, true); }
 }
 
 namespace Recognize {

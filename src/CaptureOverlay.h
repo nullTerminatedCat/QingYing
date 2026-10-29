@@ -84,10 +84,12 @@ private:
     void doPin();
     void doDefault();
     void doLongShot();
-    void doRecognize(bool qr);
+    void doRecognize(bool qr, bool autoTranslate = false);
     void doUpload();
 public:
     void setMode(CaptureMode m) { m_mode = m; }
+    // 当前屏有选区时识别并自动翻译，然后关闭遮罩。没有选区返回 false。
+    bool recognizeAndTranslate();
     // 编辑模式：预先选中 localPhysical（相对本显示器的物理像素），pinResult=true 时完成动作改为钉图
     void presetSelection(const QRect& localPhysical, bool pinResult);
 signals:
