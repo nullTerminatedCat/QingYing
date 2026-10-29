@@ -45,10 +45,11 @@ QKeySequence recordHotkey()
 }
 void setRecordHotkey(const QKeySequence& seq) { store().setValue("recordHotkey", seq.toString()); }
 
-QKeySequence defaultOcrTranslateHotkey() { return QKeySequence(QStringLiteral("Ctrl+Alt+T")); }
+QKeySequence defaultOcrTranslateHotkey() { return QKeySequence(Qt::Key_F); }
 
 QKeySequence ocrTranslateHotkey()
 {
+    // 键不存在或为空时才用出厂默认；已写入的自定义热键（含旧的 Ctrl+Alt+T）保持不变
     const QString s = store().value("ocrTranslateHotkey", defaultOcrTranslateHotkey().toString()).toString();
     QKeySequence k(s);
     return k.isEmpty() ? defaultOcrTranslateHotkey() : k;
