@@ -1763,6 +1763,66 @@ Press the capture hotkey or click the tray icon to take one</translation>
         <translation>AI endpoint</translation>
     </message>
     <message>
+        <source>如何接入 DeepSeek、OpenAI 等</source>
+        <translation>How to connect DeepSeek, OpenAI, and similar APIs</translation>
+    </message>
+    <message>
+        <source>如何接入 AI 翻译</source>
+        <translation>How to connect AI translation</translation>
+    </message>
+    <message>
+        <source>知道了</source>
+        <translation>Got it</translation>
+    </message>
+    <message>
+        <source>通用</source>
+        <translation>General</translation>
+    </message>
+    <message>
+        <source>接口地址填 OpenAI 兼容根路径，到 /v1 为止，程序会再请求 /chat/completions。模型名由服务商提供。</source>
+        <translation>Enter the OpenAI-compatible root URL, ending at /v1. The app then calls /chat/completions. Use the model name from your provider.</translation>
+    </message>
+    <message>
+        <source>密钥只用 Windows DPAPI 加密保存在本机，不会写入日志。请勿分享或截图外发。</source>
+        <translation>The key is encrypted with Windows DPAPI and stays on this PC. It is never written to logs. Do not share it or send a screenshot of it.</translation>
+    </message>
+    <message>
+        <source>未填完整或调用失败时，可回退到无需密钥的 MyMemory（见下方开关，默认开启）。平台可能要充值，或提供免费额度，以各官网为准。</source>
+        <translation>If the fields are incomplete or the call fails, QingYing can fall back to MyMemory when the switch below is on (it is on by default). Providers may require credit or offer a free quota; check their sites.</translation>
+    </message>
+    <message>
+        <source>1. 打开 %1（也可从 platform.openai.com 进入 API keys）。</source>
+        <translation>1. Open %1 (or go to platform.openai.com → API keys).</translation>
+    </message>
+    <message>
+        <source>2. 登录或注册，创建 API key 并复制。密钥通常只显示一次。</source>
+        <translation>2. Sign in or create an account, create an API key, and copy it. It is usually shown only once.</translation>
+    </message>
+    <message>
+        <source>3. 粘贴到青影「API 密钥」。地址填 https://api.openai.com/v1，模型如 gpt-4o-mini。</source>
+        <translation>3. Paste it into QingYing's API key field. Base URL: https://api.openai.com/v1. Model, for example gpt-4o-mini.</translation>
+    </message>
+    <message>
+        <source>1. 打开 %1。</source>
+        <translation>1. Open %1.</translation>
+    </message>
+    <message>
+        <source>2. 登录或注册，创建 API Key 并复制。</source>
+        <translation>2. Sign in or create an account, create an API key, and copy it.</translation>
+    </message>
+    <message>
+        <source>3. 粘贴到青影「API 密钥」。地址填 https://api.deepseek.com/v1，模型填 deepseek-chat（也可用 deepseek-reasoner）。</source>
+        <translation>3. Paste it into QingYing's API key field. Base URL: https://api.deepseek.com/v1. Model: deepseek-chat (deepseek-reasoner also works).</translation>
+    </message>
+    <message>
+        <source>其他兼容服务</source>
+        <translation>Other compatible services</translation>
+    </message>
+    <message>
+        <source>按对方文档填写 base URL（到 /v1）和模型名即可。</source>
+        <translation>Use the base URL (ending at /v1) and model name from that provider's docs.</translation>
+    </message>
+    <message>
         <source>接口地址</source>
         <translation>Base URL</translation>
     </message>
