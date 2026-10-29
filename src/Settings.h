@@ -56,6 +56,19 @@ bool uploadEnabled();
 void setUploadEnabled(bool on);
 bool translateEnabled(); // OCR 结果联网翻译，默认开
 void setTranslateEnabled(bool on);
+QString ocrEngine(); // rapid / system，默认 rapid
+void setOcrEngine(const QString& engine);
+bool aiTranslateEnabled();
+void setAiTranslateEnabled(bool on);
+QString aiBaseUrl();
+void setAiBaseUrl(const QString& url);
+QString aiModel();
+void setAiModel(const QString& model);
+QString aiApiKey(); // DPAPI 解密后的明文，仅存在于内存
+void setAiApiKey(const QString& key);
+bool memoryFallback(); // AI 未配置或失败时改用 MyMemory，默认开
+void setMemoryFallback(bool on);
+bool aiTranslateReady(); // 已启用且地址、密钥、模型都可用
 Uploads::Config uploadConfig(); // 密钥经 DPAPI 解密
 void setUploadConfig(const Uploads::Config& c); // 密钥经 DPAPI 加密后保存
 QString expandPattern(const QString& pattern);

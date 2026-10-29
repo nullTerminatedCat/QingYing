@@ -42,6 +42,9 @@ private:
     void updatePreview();
     void updateUploadUi();
     void saveUpload();
+    void saveAi();
+    void refreshOcrHint(const QString& error = {});
+    void downloadOcrModels();
     void setStatus(QLabel* l, const QString& text, bool warn);
 
     std::function<bool(const QKeySequence&)> m_applyCapture;
@@ -69,4 +72,12 @@ private:
     QWidget* m_upPreset = nullptr;
     QWidget* m_upBody = nullptr;
     QLabel* m_upHint = nullptr;
+    QLabel* m_ocrHint = nullptr;
+    QPushButton* m_ocrDownload = nullptr;
+    bool m_ocrBusy = false;
+    QWidget* m_aiBody = nullptr;
+    QLineEdit* m_aiUrl = nullptr;
+    QLineEdit* m_aiKey = nullptr;
+    QLineEdit* m_aiModel = nullptr;
+    QLabel* m_aiHint = nullptr;
 };

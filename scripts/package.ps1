@@ -46,7 +46,7 @@ $payload = Join-Path $stage $name
 New-Item -ItemType Directory -Force $payload | Out-Null
 Copy-Item (Join-Path $BuildDirectory 'QingYing.exe') $payload
 Get-ChildItem $BuildDirectory -Filter 'Qt6*.dll' | Copy-Item -Destination $payload
-foreach ($f in 'd3dcompiler_47.dll', 'opengl32sw.dll') {
+foreach ($f in 'd3dcompiler_47.dll', 'opengl32sw.dll', 'onnxruntime.dll', 'onnxruntime_providers_shared.dll') {
     $p = Join-Path $BuildDirectory $f; if (Test-Path $p) { Copy-Item $p $payload }
 }
 foreach ($d in 'platforms', 'styles', 'imageformats', 'iconengines', 'generic', 'tls', 'networkinformation') {

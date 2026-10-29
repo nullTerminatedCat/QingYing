@@ -7,3 +7,6 @@ out/
 *.user
 CMakeUserPresets.json
 *.aps
+# RapidOCR 模型体积大，首次运行或设置页下载，不提交
+models/
+*.onnx

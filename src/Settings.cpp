@@ -1,6 +1,7 @@
 #include <QLocale>
 #include "Settings.h"
 #include "Logic.h"
+#include "TranslateText.h"
 
 #include <QCoreApplication>
 #include <QDateTime>
@@ -100,6 +101,37 @@ bool uploadEnabled() { return store().value("upload/enabled", false).toBool(); }
 void setUploadEnabled(bool on) { store().setValue("upload/enabled", on); }
 bool translateEnabled() { return store().value("translate/enabled", true).toBool(); }
 void setTranslateEnabled(bool on) { store().setValue("translate/enabled", on); }
+QString ocrEngine()
+{
+    return store().value("ocr/engine").toString() == QLatin1String("system") ? QStringLiteral("system") : QStringLiteral("rapid");
+}
+void setOcrEngine(const QString& engine)
+{
+    store().setValue("ocr/engine", engine == QLatin1String("system") ? QStringLiteral("system") : QStringLiteral("rapid"));
+}
+bool aiTranslateEnabled() { return store().value("translate/aiEnabled", false).toBool(); }
+void setAiTranslateEnabled(bool on) { store().setValue("translate/aiEnabled", on); }
+QString aiBaseUrl() { return store().value("translate/aiBaseUrl").toString(); }
+void setAiBaseUrl(const QString& url) { store().setValue("translate/aiBaseUrl", url.trimmed()); }
+QString aiModel() { return store().value("translate/aiModel").toString(); }
+void setAiModel(const QString& model) { store().setValue("translate/aiModel", model.trimmed()); }
+QString aiApiKey() { return Secret::unprotect(store().value("translate/aiKey").toString()); }
+void setAiApiKey(const QString& key)
+{
+    const QString plain = key.trimmed();
+    if (plain.isEmpty()) {
+        store().remove(QStringLiteral("translate/aiKey"));
+        return;
+    }
+    const QString enc = Secret::protect(plain);
+    if (!enc.isEmpty()) store().setValue(QStringLiteral("translate/aiKey"), enc);
+}
+bool memoryFallback() { return store().value("translate/memoryFallback", true).toBool(); }
+void setMemoryFallback(bool on) { store().setValue("translate/memoryFallback", on); }
+bool aiTranslateReady()
+{
+    return aiTranslateEnabled() && !aiApiKey().isEmpty() && !aiModel().isEmpty() && TranslateText::chatCompletionsUrl(aiBaseUrl()).isValid();
+}
 Uploads::Config uploadConfig()
 {
     Uploads::Config c;

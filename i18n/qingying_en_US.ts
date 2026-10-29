@@ -1284,8 +1284,8 @@ Actual: %2</translation>
     </message>
     <message>
         <location line="-224"/>
-        <source>保存位置、文件名与截图完成后的动作</source>
-        <translation>Save location, file name and what happens after a capture</translation>
+        <source>保存位置、完成动作、文字识别与翻译</source>
+        <translation>Save location, what happens after a capture, OCR and translation</translation>
     </message>
     <message>
         <location line="-12"/>
@@ -1519,13 +1519,13 @@ Actual: %2</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>联网翻译 OCR 结果</source>
-        <translation>Online translation for OCR</translation>
+        <source>联网翻译</source>
+        <translation>Online translation</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>识别面板提供译成中文 / 英文；使用 MyMemory 公开接口，无需密钥，可随时关闭</source>
-        <translation>Adds Chinese / English translation on the OCR panel via MyMemory (no API key). Can be turned off anytime.</translation>
+        <source>识别面板可译成中文或英文。未启用 AI 时使用 MyMemory，无需密钥。</source>
+        <translation>The OCR panel can translate to Chinese or English. Without AI, MyMemory is used and no key is required.</translation>
     </message>
     <message>
         <location line="+23"/>
@@ -1725,6 +1725,242 @@ Press the capture hotkey or click the tray icon to take one</translation>
     <message>
         <source>开始框选录制；录制中再次按下可停止保存</source>
         <translation>Start region recording; press again while recording to stop and save</translation>
+    </message>
+    <message>
+        <source>系统 OCR</source>
+        <translation>System OCR</translation>
+    </message>
+    <message>
+        <source>识别引擎</source>
+        <translation>OCR engine</translation>
+    </message>
+    <message>
+        <source>RapidOCR 对中文和界面混排更准。模型缺失或识别失败时自动改用系统 OCR。</source>
+        <translation>RapidOCR is more accurate for Chinese and mixed UI text. If models are missing or recognition fails, system OCR is used.</translation>
+    </message>
+    <message>
+        <source>打开目录</source>
+        <translation>Open folder</translation>
+    </message>
+    <message>
+        <source>识别模型</source>
+        <translation>OCR models</translation>
+    </message>
+    <message>
+        <source>PP-OCRv4 检测 / 识别 / 方向 / 字典，约 16 MB，不随安装包附带</source>
+        <translation>PP-OCRv4 detection, recognition, angle and dictionary, about 16 MB. Not bundled with the installer.</translation>
+    </message>
+    <message>
+        <source>使用 AI 翻译</source>
+        <translation>Use AI translation</translation>
+    </message>
+    <message>
+        <source>OpenAI 兼容的 Chat Completions。密钥只保存在本机。</source>
+        <translation>OpenAI-compatible Chat Completions. The key stays on this PC.</translation>
+    </message>
+    <message>
+        <source>AI 接口</source>
+        <translation>AI endpoint</translation>
+    </message>
+    <message>
+        <source>接口地址</source>
+        <translation>Base URL</translation>
+    </message>
+    <message>
+        <source>填写到 /v1 即可，程序会请求 /chat/completions</source>
+        <translation>End the URL at /v1. The app calls /chat/completions.</translation>
+    </message>
+    <message>
+        <source>粘贴密钥</source>
+        <translation>Paste key</translation>
+    </message>
+    <message>
+        <source>API 密钥</source>
+        <translation>API key</translation>
+    </message>
+    <message>
+        <source>使用 Windows DPAPI 加密保存，仅当前用户可解密，不会写入日志</source>
+        <translation>Stored with Windows DPAPI for the current user only. Never written to logs.</translation>
+    </message>
+    <message>
+        <source>模型</source>
+        <translation>Model</translation>
+    </message>
+    <message>
+        <source>服务商提供的模型名</source>
+        <translation>Model name from your provider</translation>
+    </message>
+    <message>
+        <source>失败时用 MyMemory</source>
+        <translation>Fall back to MyMemory</translation>
+    </message>
+    <message>
+        <source>AI 未填完整或调用失败时，改用无需密钥的 MyMemory</source>
+        <translation>If AI is incomplete or the call fails, use MyMemory (no key).</translation>
+    </message>
+    <message>
+        <source>请输入以 http:// 或 https:// 开头的地址</source>
+        <translation>Enter a full http:// or https:// address</translation>
+    </message>
+    <message>
+        <source>模型已就绪：%1</source>
+        <translation>Models ready: %1</translation>
+    </message>
+    <message>
+        <source>尚未下载（约 16 MB）。首次识别会自动下载，也可点此提前下载。</source>
+        <translation>Not downloaded yet (about 16 MB). The first OCR downloads them, or download now.</translation>
+    </message>
+    <message>
+        <source>重新下载</source>
+        <translation>Download again</translation>
+    </message>
+    <message>
+        <source>下载模型</source>
+        <translation>Download models</translation>
+    </message>
+    <message>
+        <source>正在下载文字识别模型…</source>
+        <translation>Downloading OCR models…</translation>
+    </message>
+    <message>
+        <source>下载失败（HTTP %1）</source>
+        <translation>Download failed (HTTP %1)</translation>
+    </message>
+    <message>
+        <source>模型校验失败：%1</source>
+        <translation>Model check failed: %1</translation>
+    </message>
+    <message>
+        <source>无法写入 %1</source>
+        <translation>Cannot write %1</translation>
+    </message>
+    <message>
+        <source>无法创建模型目录</source>
+        <translation>Cannot create the models folder</translation>
+    </message>
+    <message>
+        <source>正在下载检测模型…</source>
+        <translation>Downloading the detection model…</translation>
+    </message>
+    <message>
+        <source>正在下载识别模型…</source>
+        <translation>Downloading the recognition model…</translation>
+    </message>
+    <message>
+        <source>正在下载方向模型…</source>
+        <translation>Downloading the angle model…</translation>
+    </message>
+    <message>
+        <source>正在下载字典…</source>
+        <translation>Downloading the dictionary…</translation>
+    </message>
+    <message>
+        <source>下载 %1 失败</source>
+        <translation>Failed to download %1</translation>
+    </message>
+    <message>
+        <source>模型文件不完整</source>
+        <translation>Model files are incomplete</translation>
+    </message>
+    <message>
+        <source>没有可识别的图像</source>
+        <translation>Nothing to recognize</translation>
+    </message>
+    <message>
+        <source>%1（系统 OCR：%2）</source>
+        <translation>%1 (system OCR: %2)</translation>
+    </message>
+    <message>
+        <source>当前构建未包含 ONNX Runtime，已改用系统 OCR。</source>
+        <translation>This build has no ONNX Runtime. Using system OCR.</translation>
+    </message>
+    <message>
+        <source>RapidOCR 模型不可用（%1），已改用系统 OCR。</source>
+        <translation>RapidOCR models are unavailable (%1). Using system OCR.</translation>
+    </message>
+    <message>
+        <source>正在识别…</source>
+        <translation>Recognizing…</translation>
+    </message>
+    <message>
+        <source>RapidOCR 失败（%1），已改用系统 OCR。</source>
+        <translation>RapidOCR failed (%1). Using system OCR.</translation>
+    </message>
+    <message>
+        <source>系统 OCR 仅在 Windows 上可用</source>
+        <translation>System OCR is only available on Windows</translation>
+    </message>
+    <message>
+        <source>当前构建未链接 ONNX Runtime</source>
+        <translation>This build is not linked with ONNX Runtime</translation>
+    </message>
+    <message>
+        <source>未找到 RapidOCR 模型</source>
+        <translation>RapidOCR models were not found</translation>
+    </message>
+    <message>
+        <source>检测模型输出异常</source>
+        <translation>Unexpected detection model output</translation>
+    </message>
+    <message>
+        <source>识别字典与模型不匹配（%1 / %2）</source>
+        <translation>Dictionary does not match the model (%1 / %2)</translation>
+    </message>
+    <message>
+        <source>RapidOCR 失败：%1</source>
+        <translation>RapidOCR failed: %1</translation>
+    </message>
+    <message>
+        <source>RapidOCR · 简体中文</source>
+        <translation>RapidOCR · Simplified Chinese</translation>
+    </message>
+    <message>
+        <source>连接超时，请检查网络或接口地址</source>
+        <translation>Timed out. Check the network or the base URL.</translation>
+    </message>
+    <message>
+        <source>无法连接 AI 接口，请检查地址和网络</source>
+        <translation>Cannot reach the AI endpoint. Check the URL and network.</translation>
+    </message>
+    <message>
+        <source>API 密钥被拒绝（HTTP %1）</source>
+        <translation>API key was rejected (HTTP %1)</translation>
+    </message>
+    <message>
+        <source>AI 接口返回错误（HTTP %1）：%2</source>
+        <translation>AI endpoint error (HTTP %1): %2</translation>
+    </message>
+    <message>
+        <source>AI 没有返回文字</source>
+        <translation>The AI returned no text</translation>
+    </message>
+    <message>
+        <source>请在设置中填写 AI 翻译的接口地址、密钥和模型</source>
+        <translation>Enter the AI base URL, key and model in Settings</translation>
+    </message>
+    <message>
+        <source>AI 返回无法使用：%1</source>
+        <translation>Unusable AI response: %1</translation>
+    </message>
+    <message>
+        <source>请在设置中填写 AI 翻译的接口地址、密钥和模型，或打开 MyMemory 兜底</source>
+        <translation>Enter the AI base URL, key and model in Settings, or turn on the MyMemory fallback</translation>
+    </message>
+    <message>
+        <source>正在用 AI 翻译…</source>
+        <translation>Translating with AI…</translation>
+    </message>
+    <message>
+        <source>AI 不可用，已改用 MyMemory · 已译成%1</source>
+        <translation>AI was unavailable, used MyMemory · translated to %1</translation>
+    </message>
+    <message>
+        <source>已用 AI 译成%1 · 可编辑后复制，或点“还原原文”</source>
+        <translation>Translated to %1 with AI · Edit and copy, or restore the original</translation>
+    </message>
+    <message>
+        <source>未识别到文字（%1）。可换更清晰的选区再试。</source>
+        <translation>No text found (%1). Try a sharper selection.</translation>
     </message>
 </context>
 </TS>
