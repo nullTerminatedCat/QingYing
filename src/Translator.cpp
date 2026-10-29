@@ -5,12 +5,14 @@
 
 #include "TranslateText.h"
 
+#include <QList>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
+#include <QPointer>
 #include <QUrl>
 #include <QUrlQuery>
 
@@ -22,6 +24,17 @@ QNetworkAccessManager* net()
 {
     static auto* n = new QNetworkAccessManager(qApp);
     return n;
+}
+
+QList<QPointer<QNetworkReply>> g_inflight;
+
+void trackReply(QNetworkReply* reply)
+{
+    QList<QPointer<QNetworkReply>> live;
+    for (const QPointer<QNetworkReply>& r : g_inflight)
+        if (r) live.append(r);
+    if (reply) live.append(reply);
+    g_inflight = live;
 }
 
 QString langCode(Translator::Target t)
@@ -78,6 +91,7 @@ void translateChunk(const QString& chunk, const QString& pair, std::function<voi
                   QStringLiteral("QingYing/%1").arg(QCoreApplication::applicationVersion()));
     req.setTransferTimeout(20000);
     QNetworkReply* reply = net()->get(req);
+    trackReply(reply);
     QObject::connect(reply, &QNetworkReply::finished, reply, [reply, pair, done] {
         reply->deleteLater();
         Translator::Result r;
@@ -185,6 +199,7 @@ void translateAiChunk(const QString& chunk, bool toChinese, std::function<void(T
     req.setRawHeader("Authorization", QByteArray("Bearer ") + key.toUtf8());
     req.setTransferTimeout(45000);
     QNetworkReply* reply = net()->post(req, QJsonDocument(body).toJson(QJsonDocument::Compact));
+    trackReply(reply);
     QObject::connect(reply, &QNetworkReply::finished, reply, [reply, key, done] {
         reply->deleteLater();
         Translator::Result r;
@@ -276,18 +291,30 @@ void forgetRecall()
     ++g_recallEpoch;
 }
 
+bool textIsCachedTranslation(const QString& text)
+{
+    return TranslateText::isCachedOutput(text, g_recall);
+}
+
+void cancelInFlight()
+{
+    // 先断开再 abort：finished 是同步的，析构或换文本时不能再回调进界面。
+    // 分块翻译停在当前块，不会再发下一块。已经送到服务端的这一次仍可能计费。
+    const QList<QPointer<QNetworkReply>> copy = g_inflight;
+    g_inflight.clear();
+    for (const QPointer<QNetworkReply>& reply : copy) {
+        if (!reply || reply->isFinished()) continue;
+        reply->disconnect();
+        reply->abort();
+        reply->deleteLater();
+    }
+}
+
 void translate(const QString& text, Target target, std::function<void(Result)> done)
 {
     if (!Settings::translateEnabled()) {
         Result r;
         r.error = QCoreApplication::translate("QingYing", "已在设置中关闭联网翻译");
-        done(r);
-        return;
-    }
-    const QString trimmed = text.trimmed();
-    if (trimmed.isEmpty()) {
-        Result r;
-        r.error = QCoreApplication::translate("QingYing", "没有可翻译的文字");
         done(r);
         return;
     }
@@ -305,16 +332,13 @@ void translate(const QString& text, Target target, std::function<void(Result)> d
     const unsigned epoch = g_recallEpoch;
     auto finish = [text, toChinese, epoch, done = std::move(done)](Result r) {
         // 识别面板已换了新文本时，不要把这次结果记成下一次的往返缓存
-        if (epoch == g_recallEpoch && r.ok && r.local == TranslateText::ReuseKind::None && !r.text.trimmed().isEmpty()) {
-            g_recall.valid = true;
-            g_recall.toChinese = toChinese;
-            g_recall.source = text;
-            g_recall.translated = r.text;
-        }
+        if (epoch == g_recallEpoch && r.ok && r.local == TranslateText::ReuseKind::None)
+            TranslateText::rememberTranslation(g_recall, text, toChinese, r.text);
         done(r);
     };
     const bool wantAi = Settings::aiTranslateEnabled();
     if (wantAi && Settings::aiTranslateReady()) {
+        // 默认约 3500 字一块。不要改成 MyMemory 的 450，否则长文会拆成许多次请求。
         translateAiChunks(TranslateText::chunkForModel(text), toChinese, {}, [text, target, finish](Result r) {
             if (r.ok || !Settings::memoryFallback()) {
                 finish(r);

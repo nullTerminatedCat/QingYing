@@ -21,9 +21,13 @@ struct Result {
 // 按文本是否以中日韩为主，建议译成英文或中文
 Target suggestTarget(const QString& text);
 
-// 异步翻译；done 在主线程调用。空文本或未启用时直接失败提示。
-// 已是目标语言，或能用上一次结果往返还原时，同步回调且不访问网络。
+// 异步翻译；done 在主线程调用。未启用时直接失败提示。
+// 已是目标语言、没有正文、或能用本次识别里的缓存往返/复用时，同步回调且不访问网络。
 void translate(const QString& text, Target target, std::function<void(Result)> done);
-// 识别面板换了新文本时丢掉往返缓存
+// 识别面板换了新文本时丢掉本次缓存
 void forgetRecall();
+// 当前文字是不是本次缓存里的译文。自动「翻译」用来避免立刻翻回去。
+bool textIsCachedTranslation(const QString& text);
+// 断开并中止进行中的请求，不再发后续分块。已送到服务端的单次调用可能仍会计费。
+void cancelInFlight();
 }

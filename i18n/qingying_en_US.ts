@@ -2023,6 +2023,14 @@ Press the capture hotkey or click the tray icon to take one</translation>
         <translation>Already in %1. No translation request was sent.</translation>
     </message>
     <message>
+        <source>无需翻译</source>
+        <translation>Nothing to translate</translation>
+    </message>
+    <message>
+        <source>当前已是译文，请用「译成中文」或「译成英文」选择方向</source>
+        <translation>This is already a translation. Choose Translate to Chinese or Translate to English.</translation>
+    </message>
+    <message>
         <source>已改回翻译前的文字，未再请求翻译</source>
         <translation>Restored the text from before that translation. No new request was sent.</translation>
     </message>

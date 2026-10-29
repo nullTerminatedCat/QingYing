@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include <QJsonArray>
+#include <QRegularExpression>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
@@ -112,54 +113,118 @@ bool isFullwidthLatin(uint u)
     return (u >= 0xFF21 && u <= 0xFF3A) || (u >= 0xFF41 && u <= 0xFF5A);
 }
 
-bool alreadyInTargetLanguage(const QString& text, bool toChinese)
-{
-    if (text.trimmed().isEmpty()) return false;
+struct LetterCount {
     int han = 0;
     int latin = 0;
-    int otherLetters = 0;
+    int other = 0;
+};
+
+LetterCount countLetters(const QString& text)
+{
+    LetterCount n;
     for (const QChar ch : text) {
         if (ch.isHighSurrogate() || ch.isLowSurrogate()) continue;
         const bool fullwidthLatin = isFullwidthLatin(ch.unicode());
         if (ch.script() == QChar::Script_Han)
-            ++han;
+            ++n.han;
         else if (ch.script() == QChar::Script_Latin || fullwidthLatin)
-            ++latin;
+            ++n.latin;
         else if (ch.isLetter())
-            ++otherLetters;
+            ++n.other;
     }
+    return n;
+}
+
+QString stripAddresses(QString text)
+{
+    static const QRegularExpression url(QStringLiteral(R"((?:https?://|www\.)\S+)"),
+                                        QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression email(QStringLiteral(R"([\w.+-]+@[\w.-]+\.[A-Za-z]{2,})"));
+    text.replace(url, QString());
+    text.replace(email, QString());
+    return text;
+}
+
+bool alreadyInTargetLanguage(const QString& text, bool toChinese)
+{
+    if (text.trimmed().isEmpty()) return false;
+    const LetterCount n = countLetters(text);
     // 假名、谚文、西里尔字母等：不是「已经是中文或英文」
-    if (otherLetters > 0) return false;
-    if (han == 0 && latin == 0) return true;
-    if (toChinese) return han > 0 && latin == 0;
-    return latin > 0 && han == 0;
+    if (n.other > 0) return false;
+    if (n.han == 0 && n.latin == 0) return true;
+    if (toChinese) return n.han > 0 && n.latin == 0;
+    return n.latin > 0 && n.han == 0;
+}
+
+bool lacksProse(const QString& text)
+{
+    if (text.trimmed().isEmpty()) return true;
+    const LetterCount n = countLetters(stripAddresses(text));
+    return n.han == 0 && n.latin == 0 && n.other == 0;
+}
+
+void rememberTranslation(TranslationMemory& memory, const QString& source, bool toChinese, const QString& translated)
+{
+    if (source.trimmed().isEmpty() || translated.trimmed().isEmpty()) return;
+    for (int i = 0; i < memory.entries.size(); ++i) {
+        if (memory.entries.at(i).toChinese == toChinese && memory.entries.at(i).source.trimmed() == source.trimmed()) {
+            memory.entries.removeAt(i);
+            break;
+        }
+    }
+    CacheEntry entry;
+    entry.source = source;
+    entry.toChinese = toChinese;
+    entry.translated = translated;
+    memory.entries.append(entry);
+    while (memory.entries.size() > kSessionCache) memory.entries.removeFirst();
+}
+
+bool isCachedOutput(const QString& text, const TranslationMemory& memory)
+{
+    const QString cur = text.trimmed();
+    if (cur.isEmpty()) return false;
+    for (const CacheEntry& e : memory.entries) {
+        if (!e.translated.trimmed().isEmpty() && e.translated.trimmed() == cur) return true;
+    }
+    return false;
 }
 
 Reuse reuseTranslation(const QString& text, bool toChinese, const TranslationMemory& memory)
 {
     Reuse out;
-    if (text.trimmed().isEmpty()) return out;
+    if (lacksProse(text)) {
+        out.hit = true;
+        out.kind = ReuseKind::NoProse;
+        out.text = text;
+        return out;
+    }
     if (alreadyInTargetLanguage(text, toChinese)) {
         out.hit = true;
         out.kind = ReuseKind::Already;
         out.text = text;
         return out;
     }
-    if (!memory.valid) return out;
     const QString cur = text.trimmed();
-    const bool back = !memory.translated.trimmed().isEmpty() && !memory.source.trimmed().isEmpty()
-                      && cur == memory.translated.trimmed() && memory.toChinese != toChinese;
-    if (back) {
-        out.hit = true;
-        out.kind = ReuseKind::RoundTrip;
-        out.text = memory.source;
-        return out;
+    for (int i = memory.entries.size() - 1; i >= 0; --i) {
+        const CacheEntry& e = memory.entries.at(i);
+        if (e.translated.trimmed().isEmpty() || e.source.trimmed().isEmpty()) continue;
+        if (cur == e.translated.trimmed() && e.toChinese != toChinese) {
+            out.hit = true;
+            out.kind = ReuseKind::RoundTrip;
+            out.text = e.source;
+            return out;
+        }
     }
-    if (!memory.translated.trimmed().isEmpty() && !memory.source.trimmed().isEmpty() && cur == memory.source.trimmed()
-        && memory.toChinese == toChinese) {
-        out.hit = true;
-        out.kind = ReuseKind::Repeat;
-        out.text = memory.translated;
+    for (int i = memory.entries.size() - 1; i >= 0; --i) {
+        const CacheEntry& e = memory.entries.at(i);
+        if (e.translated.trimmed().isEmpty() || e.source.trimmed().isEmpty()) continue;
+        if (cur == e.source.trimmed() && e.toChinese == toChinese) {
+            out.hit = true;
+            out.kind = ReuseKind::Repeat;
+            out.text = e.translated;
+            return out;
+        }
     }
     return out;
 }

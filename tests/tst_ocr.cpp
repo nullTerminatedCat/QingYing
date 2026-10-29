@@ -138,10 +138,7 @@ private slots:
         QCOMPARE(keepSpaces.text, padded);
 
         TranslateText::TranslationMemory mem;
-        mem.valid = true;
-        mem.toChinese = false;
-        mem.source = zh;
-        mem.translated = en;
+        TranslateText::rememberTranslation(mem, zh, false, en);
         const auto back = TranslateText::reuseTranslation(en, true, mem);
         QVERIFY(back.hit);
         QCOMPARE(int(back.kind), int(TranslateText::ReuseKind::RoundTrip));
@@ -154,6 +151,73 @@ private slots:
         const auto stillEn = TranslateText::reuseTranslation(en, false, mem);
         QVERIFY(stillEn.hit);
         QCOMPARE(int(stillEn.kind), int(TranslateText::ReuseKind::Already));
+    }
+
+    void skipNoProse()
+    {
+        QVERIFY(TranslateText::lacksProse(QStringLiteral("  \n")));
+        QVERIFY(TranslateText::lacksProse(QStringLiteral("123-456, 78.")));
+        QVERIFY(TranslateText::lacksProse(QStringLiteral("https://example.com/a?x=1")));
+        QVERIFY(TranslateText::lacksProse(QStringLiteral("www.example.com/path")));
+        QVERIFY(TranslateText::lacksProse(QStringLiteral("user@example.com")));
+        QVERIFY(!TranslateText::lacksProse(QStringLiteral("See https://example.com")));
+        QVERIFY(!TranslateText::lacksProse(QString::fromUtf8(u8"订单 12")));
+        QVERIFY(!TranslateText::lacksProse(QStringLiteral("Hello")));
+
+        TranslateText::TranslationMemory none;
+        const auto url = TranslateText::reuseTranslation(QStringLiteral("https://example.com/a?x=1"), true, none);
+        QVERIFY(url.hit);
+        QCOMPARE(int(url.kind), int(TranslateText::ReuseKind::NoProse));
+        const auto mail = TranslateText::reuseTranslation(QStringLiteral("user@example.com"), false, none);
+        QCOMPARE(int(mail.kind), int(TranslateText::ReuseKind::NoProse));
+        const auto words = TranslateText::reuseTranslation(QStringLiteral("See https://example.com"), true, none);
+        QVERIFY(!words.hit);
+    }
+
+    void sessionCache()
+    {
+        const QString zh = QString::fromUtf8(u8"你好世界");
+        const QString en = QStringLiteral("Hello World");
+        const QString zh2 = QString::fromUtf8(u8"再见");
+        const QString en2 = QStringLiteral("Goodbye");
+        TranslateText::TranslationMemory mem;
+        TranslateText::rememberTranslation(mem, zh, false, en);
+        TranslateText::rememberTranslation(mem, en2, true, zh2);
+        QCOMPARE(mem.entries.size(), 2);
+        const auto again = TranslateText::reuseTranslation(zh, false, mem);
+        QCOMPARE(int(again.kind), int(TranslateText::ReuseKind::Repeat));
+        QCOMPARE(again.text, en);
+        const auto other = TranslateText::reuseTranslation(en2, true, mem);
+        QCOMPARE(int(other.kind), int(TranslateText::ReuseKind::Repeat));
+        QCOMPARE(other.text, zh2);
+        QVERIFY(TranslateText::isCachedOutput(en, mem));
+        QVERIFY(TranslateText::isCachedOutput(zh2, mem));
+        QVERIFY(!TranslateText::isCachedOutput(zh, mem));
+        QVERIFY(!TranslateText::isCachedOutput(QStringLiteral("Hello World!"), mem));
+
+        TranslateText::rememberTranslation(mem, zh, false, QStringLiteral("Hi there"));
+        QCOMPARE(mem.entries.size(), 2);
+        QCOMPARE(TranslateText::reuseTranslation(zh, false, mem).text, QStringLiteral("Hi there"));
+
+        TranslateText::TranslationMemory many;
+        const QString stem = QString::fromUtf8(u8"文");
+        for (int i = 0; i < TranslateText::kSessionCache + 3; ++i)
+            TranslateText::rememberTranslation(many, stem + QString::number(i), false, QStringLiteral("out%1").arg(i));
+        QCOMPARE(many.entries.size(), TranslateText::kSessionCache);
+        QVERIFY(!TranslateText::reuseTranslation(stem + QStringLiteral("0"), false, many).hit);
+        const auto kept = TranslateText::reuseTranslation(stem + QString::number(TranslateText::kSessionCache + 2), false, many);
+        QCOMPARE(int(kept.kind), int(TranslateText::ReuseKind::Repeat));
+    }
+
+    void aiChunksStayLarge()
+    {
+        QString text;
+        for (int i = 0; i < 20; ++i) text += QString(400, QLatin1Char('a')) + QLatin1Char('\n');
+        const auto chunks = TranslateText::chunkForModel(text);
+        QVERIFY(chunks.size() >= 2);
+        QVERIFY(chunks.size() <= 3);
+        QVERIFY(chunks.size() < text.size() / 450);
+        QCOMPARE(chunks.join(QString()), text);
     }
 
     void chunksKeepBreaks()
