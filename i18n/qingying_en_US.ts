@@ -1196,6 +1196,10 @@ Actual: %2</translation>
         <translation>Needs Ctrl / Alt / Shift / Win plus a letter, digit, or function key</translation>
     </message>
     <message>
+        <source>请使用字母、数字或功能键，修饰键可选</source>
+        <translation>Use a letter, digit, or function key; a modifier is optional</translation>
+    </message>
+    <message>
         <location filename="../src/App.cpp" line="+49"/>
         <location line="+411"/>
         <location filename="../src/CaptureOverlay.cpp" line="-378"/>
@@ -1739,8 +1743,8 @@ Press the capture hotkey or click the tray icon to take one</translation>
         <translation>Cannot match the recognize-and-translate hotkey</translation>
     </message>
     <message>
-        <source>框选后识别文字并自动翻译。翻译未开启或调用失败时仍完成识别并提示。默认 Ctrl+Alt+T</source>
-        <translation>After you select a region, recognize the text and translate it. If translation is off or the call fails, recognition still finishes and the reason is shown. Default: Ctrl+Alt+T</translation>
+        <source>框选后识别文字并自动翻译。翻译未开启或调用失败时仍完成识别并提示。默认 F</source>
+        <translation>After you select a region, recognize the text and translate it. If translation is off or the call fails, recognition still finishes and the reason is shown. Default: F</translation>
     </message>
     <message>
         <source>识别并翻译热键冲突</source>

@@ -16,7 +16,7 @@
 ## 功能
 
 - **托盘常驻**：单击托盘图标截图；右键菜单包含截图、设置、开机自启、关于、退出
-- **全局热键**：截图默认 `Ctrl+Alt+A`，录屏默认 `Ctrl+Alt+R`，识别并翻译默认 `Ctrl+Alt+T`，截图秒答默认 `Ctrl+Alt+D`，均可在设置中修改，被占用或彼此冲突时会提示
+- **全局热键**：截图默认 `Ctrl+Alt+A`，录屏默认 `Ctrl+Alt+R`，识别并翻译默认 `F`，均可在设置中修改，被占用或彼此冲突时会提示
 - **区域截图**
   - 冻结所有显示器，每块屏幕按各自 DPI 像素精确截取
   - 自动识别光标下的窗口和控件，单击即可选中；`Tab` 切换"窗口 / 窗口+控件"识别
@@ -33,9 +33,7 @@
 - **长截图（滚动）**：框选后点工具条「长截图」或按 `L`（或托盘「长截图」后框选再按 Enter），自动向选区发送滚轮并按重叠区域拼接；识别静态固定顶栏 / 底栏，最终各保留一份；单击鼠标或 `Esc` 停止，到底自动停止。分段存储新增内容，预览只绘制最新部分，并显示帧数与像素尺寸。停止后支持复制（`Ctrl+C` / `Enter`）、保存（`Ctrl+S`）、另存为（`Ctrl+Shift+S`）和钉图（`F3`）；保存失败会保留窗口与长图，可重试或更换位置
 - **截图历史**：每次复制 / 保存 / 钉图都会存入历史（默认保留 20 张）；托盘「最近截图」快速复制，「历史记录…」窗口可复制、钉图、打开文件夹、清空
 - **文字识别（OCR）**：框选后点工具条「识别文字」或按 `O`，也可在钉图右键菜单中识别。默认使用 RapidOCR（PP-OCRv4 ONNX，适合中文和界面混排）；可在设置里改回 Windows 系统 OCR。模型约 16 MB，不随安装包附带，首次识别或在设置中下载。结果可编辑、保留换行、一键复制
-- **识别并翻译**：工具条「识别文字」旁的「识别并翻译」，或全局热键 `Ctrl+Alt+T`（设置 → 常规可改，与截图 / 录屏冲突时会提示）。框选后一次完成识别，并按文字语言自动翻译。翻译未开启、或 AI 未配好且没有 MyMemory 兜底时，仍显示识别结果并说明原因。已是目标语言、无正文、以及本次识别里的译文缓存同样生效，不会多打请求
-- **截图秒答**：工具条「截图秒答」，或全局热键 `Ctrl+Alt+D`（设置 → 常规可改，不与截图 `Ctrl+Alt+A` 冲突）。框选后识别文字，在结果面板里输入问题再提问（例如这是什么、怎么修）。没有文字或问题为空时不请求。钉图右键同样可用，结果面板会贴在钉图旁边
-- **改文案**：工具条「改文案」、钉图菜单或识别面板，预设「更礼貌 / 更短 / 更正式 / 润色」。识别后改写并方便复制。与翻译、秒答共用同一套 AI 地址、密钥和模型；两分钟内相同提示和正文不重复请求
+- **识别并翻译**：工具条「识别文字」旁的「识别并翻译」，或全局热键 `F`（设置 → 常规可改，与截图 / 录屏冲突时会提示）。框选后一次完成识别，并按文字语言自动翻译。翻译未开启、或 AI 未配好且没有 MyMemory 兜底时，仍显示识别结果并说明原因。已是目标语言、无正文、以及本次识别里的译文缓存同样生效，不会多打请求
 - **OCR 结果翻译**：识别面板可一键译成中文或英文（自动判断方向）。在设置中填写 OpenAI 兼容接口的地址、密钥和模型后优先走 AI；未配置或调用失败时使用 MyMemory（无需密钥）。密钥用 Windows DPAPI 加密保存在本机，不会写入日志。设置 → 截图中可关闭联网翻译；支持还原原文与失败提示
 - **二维码 / 条码识别**：框选后点「识别二维码」或按 `Q`（钉图右键菜单同样可用）；支持 QR、Data Matrix、PDF417、EAN、Code128 等；识别到网址时可确认后在浏览器打开
 - **取色器**：托盘「取色」，在多显示器上用放大镜定位，点击或 `C` 复制颜色；`[` / `]` 或滚轮切换格式（不占用 `Tab`）。支持 `#4F6BFF` / `#4f6bff` / `#4F6BFFFF`、`rgb(...)` / `rgba(...)`、`79, 107, 255`、`hsl(...)` / `hsv(...)`、Windows `0xBBGGRR`；默认格式可在设置里改
@@ -54,8 +52,8 @@
 | `Ctrl+C` | 复制到剪贴板并退出 |
 | `L` | 对选区进行滚动长截图 |
 | `O` | 识别选区文字（OCR） |
-| `Ctrl+Alt+T` | 识别选区文字并自动翻译（全局热键，可在设置中修改；未框选时会提示） |
 | `Ctrl+Alt+D` | 识别选区文字后提问（截图秒答，全局热键，可在设置中修改；未框选时会提示） |
+| `F` | 识别选区文字并自动翻译（全局热键，可在设置中修改；未框选时会提示） |
 | `Q` | 识别选区二维码 / 条码 |
 | `Ctrl+S` | 快速保存到设置的文件夹（不弹窗） |
 | `Ctrl+Shift+S` | 另存为… |
@@ -208,12 +206,12 @@ docs/design/          UI 设计稿与规范
 QingYing (青影) is a simple, good-looking screenshot tool for Windows: an indigo accent (`#4F6BFF`), a floating rounded toolbar, and secondary options only when you need them.
 
 **Features**
-- Tray app with global hotkeys (capture `Ctrl+Alt+A`, record `Ctrl+Alt+R`, recognize-and-translate `Ctrl+Alt+T`, ask-about-selection `Ctrl+Alt+D`, all configurable with conflict detection)
+- Tray app with global hotkeys (capture `Ctrl+Alt+A`, record `Ctrl+Alt+R`, recognize-and-translate `F`, all configurable with conflict detection)
 - Region capture that freezes every monitor at native DPI, detects windows and controls (`Tab`), and shows a pixel magnifier (`[`/`]` or wheel cycles color formats while picking)
 - Annotations: rectangle, ellipse, arrow, pen, text, mosaic, and numbered steps, with undo and redo
 - Output: copy, quick save (`Ctrl+S`), save as, and pin to desktop (`F3`); pins can be zoomed, made translucent, rotated, and flipped
 - Scrolling capture (`L`) with static fixed header/footer handling, incremental image buffering and a live size/frame counter; copy (`Ctrl+C` / Enter), save (`Ctrl+S`), save as (`Ctrl+Shift+S`) or pin (`F3`) after capture. Failed saves keep the image available for retry. Delayed capture and capture history are also supported.
-- Offline OCR (`O`): RapidOCR (PP-OCRv4 ONNX, models downloaded on first use, about 16 MB) with Windows.Media.Ocr as fallback. Optional translation via an OpenAI-compatible API (base URL, key and model in Settings; key stored with DPAPI, never logged) or MyMemory when AI is not configured. The toolbar action “Recognize and translate”, or the global hotkey `Ctrl+Alt+T`, runs OCR and then translates in one step. “Ask” (`Ctrl+Alt+D`) and “Rewrite” (polite / shorter / formal / polish) reuse that same AI setup: empty OCR text is not sent, and an identical prompt is reused for two minutes. QR / barcode scanning (`Q`, via ZXing-cpp)
+- Offline OCR (`O`): RapidOCR (PP-OCRv4 ONNX, models downloaded on first use, about 16 MB) with Windows.Media.Ocr as fallback. Optional translation via an OpenAI-compatible API (base URL, key and model in Settings; key stored with DPAPI, never logged) or MyMemory when AI is not configured. The toolbar action “Recognize and translate”, or the global hotkey `F`, runs OCR and then translates in one step. QR / barcode scanning (`Q`, via ZXing-cpp)
 - Color picker, plus MP4 / GIF screen recording (Desktop Duplication with GDI fallback)
 - Re-annotate a pin (`E`) or a history item; default tool and color; timed full-screen capture
 - Light, dark, or follow-system themes
