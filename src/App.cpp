@@ -342,7 +342,8 @@ void App::writeSmokeReport()
         const QString dir = qEnvironmentVariable("QINGYING_SMOKE_SHOTS");
         QDir().mkpath(dir);
         {
-            SettingsDialog sd([](const QKeySequence&) { return true; }, [](const QKeySequence&) { return true; });
+            SettingsDialog sd([](const QKeySequence&) { return true; }, [](const QKeySequence&) { return true; },
+                               [](const QKeySequence&) { return true; });
             sd.resize(780, 560);
             sd.show();
             for (int i = 0; i < sd.pageCount(); ++i) {
