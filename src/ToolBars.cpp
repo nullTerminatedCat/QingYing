@@ -31,7 +31,7 @@ ToolBar::ToolBar(QWidget* parent) : QWidget(parent)
         {OcrBtn, Icon::Ocr, QCoreApplication::translate("QingYing", "识别文字（OCR）  O"), {}, false},
         {OcrTrBtn, Icon::Translate, QCoreApplication::translate("QingYing", "识别并翻译  %1").arg(Settings::ocrTranslateHotkey().toString(QKeySequence::NativeText)), {}, false},
         {AskBtn, Icon::Ask, QCoreApplication::translate("QingYing", "截图秒答  %1").arg(Settings::askHotkey().toString(QKeySequence::NativeText)), {}, false},
-        {RewriteBtn, Icon::Rewrite, QCoreApplication::translate("QingYing", "改文案：更礼貌、更短、更正式、润色"), {}, false},
+        {RewriteBtn, Icon::Rewrite, QCoreApplication::translate("QingYing", "改文案：在按钮旁选择更礼貌、更短、更正式或润色"), {}, false},
         {QrBtn, Icon::Qr, QCoreApplication::translate("QingYing", "识别二维码 / 条码  Q"), {}, false},
         {LongShot, Icon::Scroll, QCoreApplication::translate("QingYing", "长截图（滚动）  L"), {}, false},
         {Pin, Icon::Pin, QCoreApplication::translate("QingYing", "钉在桌面  F3"), {}, false},
@@ -68,6 +68,13 @@ void ToolBar::setUndoRedo(bool u, bool r)
     m_canUndo = u;
     m_canRedo = r;
     update();
+}
+
+QRect ToolBar::buttonRect(int id) const
+{
+    for (const Item& it : m_items)
+        if (it.id == id) return it.rect;
+    return {};
 }
 
 bool ToolBar::isEnabled(int id) const

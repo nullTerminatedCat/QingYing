@@ -28,6 +28,8 @@ public:
     int page() const;
     void setPage(int i);
     int pageCount() const;
+    // 打开「截图」页并滚到 AI 接口（未启用时停在翻译开关上）。
+    void showAiSection();
 signals:
     void languageChanged(); // 界面语言已切换，调用方负责重建窗口
     void changed();         // 任一设置被修改
@@ -83,6 +85,7 @@ private:
     QLabel* m_ocrHint = nullptr;
     QPushButton* m_ocrDownload = nullptr;
     bool m_ocrBusy = false;
+    QWidget* m_translateCard = nullptr;
     QWidget* m_aiBody = nullptr;
     QLineEdit* m_aiUrl = nullptr;
     QLineEdit* m_aiKey = nullptr;

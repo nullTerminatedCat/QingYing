@@ -7,6 +7,7 @@
 #include <QWidget>
 
 class QPlainTextEdit;
+class QPushButton;
 class QWheelEvent;
 class QScreen;
 class StyleBar;
@@ -87,6 +88,7 @@ private:
     void doRecognize(bool qr, bool autoTranslate = false);
     void doAsk();
     void popupRewrite();
+    void placeRewritePop();
     void doUpload();
 public:
     void setMode(CaptureMode m) { m_mode = m; }
@@ -141,6 +143,8 @@ private:
 
     ToolBar* m_bar;
     StyleBar* m_styleBar;
+    QWidget* m_rewritePop = nullptr;
+    QList<QPushButton*> m_rewriteBtns;
     QPlainTextEdit* m_editor;
     QPoint m_editorPos;
     bool m_editing = false;

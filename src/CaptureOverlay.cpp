@@ -14,8 +14,10 @@
 #include <QClipboard>
 #include <QCursor>
 #include <QDir>
+#include <QHBoxLayout>
 #include <QFileDialog>
 #include <QGuiApplication>
+#include <QPushButton>
 #include <QTimer>
 #include <QDateTime>
 #include <QEnterEvent>
@@ -23,7 +25,6 @@
 #include <QWheelEvent>
 #include <QPlainTextEdit>
 #include <QTextDocument>
-#include <QMenu>
 #include <QMessageBox>
 #include <QPainter>
 #include <QPainterPath>
@@ -65,6 +66,7 @@ CaptureOverlay::CaptureOverlay(QScreen* screen, const QImage& shot, const QRect&
     m_bar = new ToolBar(this);
     m_bar->hide();
     connect(m_bar, &ToolBar::triggered, this, [this](int id) {
+        if (id != ToolBar::RewriteBtn && m_rewritePop) m_rewritePop->hide();
         switch (id) {
         case ToolBar::TRect: setTool(Tool::Rect); break;
         case ToolBar::TEllipse: setTool(Tool::Ellipse); break;
@@ -266,6 +268,7 @@ void CaptureOverlay::placeBars()
     if (m_state != State::Selected || m_sel.isEmpty()) {
         m_bar->hide();
         m_styleBar->hide();
+        if (m_rewritePop) m_rewritePop->hide();
         return;
     }
     const QSize bv = m_bar->visualSize();
@@ -295,6 +298,7 @@ void CaptureOverlay::placeBars()
     } else {
         m_styleBar->hide();
     }
+    if (m_rewritePop && m_rewritePop->isVisible()) placeRewritePop();
 }
 
 void CaptureOverlay::resetSelection()
@@ -540,21 +544,72 @@ bool CaptureOverlay::askSelection()
     return true;
 }
 
+void CaptureOverlay::placeRewritePop()
+{
+    if (!m_rewritePop || !m_bar) return;
+    const QRect br = m_bar->buttonRect(ToolBar::RewriteBtn);
+    if (br.isNull()) {
+        m_rewritePop->hide();
+        return;
+    }
+    m_rewritePop->ensurePolished();
+    const QSize hint = m_rewritePop->sizeHint();
+    const QSize sz = hint.isValid() && hint.width() > 40 ? hint : QSize(360, 44);
+    m_rewritePop->resize(sz);
+    const QPoint below = m_bar->mapTo(this, br.bottomLeft());
+    const QPoint above = m_bar->mapTo(this, br.topLeft());
+    int x = below.x() + br.width() / 2 - sz.width() / 2;
+    int y = below.y() + 8;
+    if (y + sz.height() > height() - 4) y = above.y() - sz.height() - 8;
+    x = qBound(4, x, qMax(4, width() - sz.width() - 4));
+    y = qBound(4, y, qMax(4, height() - sz.height() - 4));
+    m_rewritePop->move(x, y);
+    m_rewritePop->raise();
+}
+
 void CaptureOverlay::popupRewrite()
 {
     if (m_passive || m_state != State::Selected) return;
-    QMenu menu(this);
-    menu.setWindowFlag(Qt::WindowStaysOnTopHint, true);
-    for (AskText::Mode mode : AskText::rewriteModes()) {
-        menu.addAction(AskText::modeTitle(mode), this, [this, mode] {
-            if (m_state != State::Selected) return;
-            if (m_editing) commitText();
-            const QImage img = renderResult();
-            emit finished();
-            Recognize::ocrAndRewrite(img, mode);
-        });
+    if (!m_rewritePop) {
+        m_rewritePop = new QWidget(this);
+        m_rewritePop->setObjectName(QStringLiteral("rewritePop"));
+        m_rewritePop->setAttribute(Qt::WA_StyledBackground, true);
+        m_rewritePop->setCursor(Qt::ArrowCursor);
+        Theme::setSheet(m_rewritePop, QStringLiteral(R"(
+            QWidget#rewritePop { background: #FFFFFF; border: 1px solid rgba(0,0,0,28); border-radius: 12px; }
+            QPushButton { background: #FFFFFF; border: 1px solid rgba(0,0,0,30); border-radius: 8px; padding: 5px 12px; color: #1C1C1E; font-size: 13px; }
+            QPushButton:hover { background: #F0F2FA; border-color: #4F6BFF; color: #4F6BFF; }
+        )"));
+        auto* lay = new QHBoxLayout(m_rewritePop);
+        lay->setContentsMargins(8, 6, 8, 6);
+        lay->setSpacing(6);
+        for (AskText::Mode mode : AskText::rewriteModes()) {
+            auto* button = new QPushButton(m_rewritePop);
+            button->setCursor(Qt::PointingHandCursor);
+            m_rewriteBtns.append(button);
+            lay->addWidget(button);
+            connect(button, &QPushButton::clicked, this, [this, mode] {
+                if (m_rewritePop) m_rewritePop->hide();
+                if (m_passive || m_state != State::Selected) return;
+                if (m_editing) commitText();
+                const QImage img = renderResult();
+                emit finished();
+                Recognize::ocrAndRewrite(img, mode);
+            });
+        }
+        m_rewritePop->hide();
     }
-    menu.exec(QCursor::pos());
+    if (m_rewritePop->isVisible()) {
+        m_rewritePop->hide();
+        return;
+    }
+    const QList<AskText::Mode> modes = AskText::rewriteModes();
+    for (int i = 0; i < m_rewriteBtns.size() && i < modes.size(); ++i)
+        m_rewriteBtns.at(i)->setText(AskText::modeTitle(modes.at(i)));
+    m_rewritePop->adjustSize();
+    placeRewritePop();
+    m_rewritePop->show();
+    m_rewritePop->raise();
 }
 
 void CaptureOverlay::doUpload()
@@ -616,6 +671,11 @@ void CaptureOverlay::mousePressEvent(QMouseEvent* e)
 {
     const QPoint pos = e->position().toPoint();
     m_cursor = pos;
+    if (m_rewritePop && m_rewritePop->isVisible()) {
+        m_rewritePop->hide();
+        if (e->button() == Qt::RightButton) return;
+        if (e->button() == Qt::LeftButton && (m_state != State::Selected || !m_sel.contains(pos))) return;
+    }
     if (e->button() == Qt::RightButton) {
         // 右键：编辑文字时取消输入，否则退出截图
         if (m_editing) cancelText();
@@ -769,6 +829,10 @@ void CaptureOverlay::mouseDoubleClickEvent(QMouseEvent* e)
 
 void CaptureOverlay::keyPressEvent(QKeyEvent* e)
 {
+    if (m_rewritePop && m_rewritePop->isVisible()) {
+        m_rewritePop->hide();
+        return;
+    }
     const bool ctrl = e->modifiers() & Qt::ControlModifier;
     switch (e->key()) {
     case Qt::Key_Escape: emit finished(); return;

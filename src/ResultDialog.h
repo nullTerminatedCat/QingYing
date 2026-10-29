@@ -2,8 +2,10 @@
 #include "AskText.h"
 
 #include <QDialog>
+#include <QList>
 
 class QEvent;
+class QKeyEvent;
 class QLabel;
 class QLineEdit;
 class QPlainTextEdit;
@@ -31,9 +33,17 @@ public:
     void focusQuestion();
     // 按当前正文改写，或在提问框有内容时提问。没有文字 / 问题为空时不请求。
     void startAssist(AskText::Mode mode);
+    // 配好 AI 回到面板后要接上的动作。Continue 只收起提示。
+    enum class SetupNext { Continue, Ask, Rewrite };
+    // 只亮出「打开设置」，不改当前状态（识别进行中就能点）。
+    void showAiSettingsButton(SetupNext next);
+    // 用一句说明替换状态行，并聚焦「打开设置」。status 为空时用默认的 AI 未配置说明。
+    void showAiSetupNeeded(SetupNext next, const QString& status = {});
 
 protected:
     void changeEvent(QEvent* event) override;
+    void keyPressEvent(QKeyEvent* event) override;
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
 private:
     void startTranslate(bool toChinese);
@@ -41,6 +51,8 @@ private:
     void retranslateUi();
     void flashCopyDone();
     void syncAssistButtons();
+    void noteSettingsReturned();
+    bool handleAssistKey(QKeyEvent* key);
     QString sourceForAssist() const;
 
     QString m_panelTitle;
@@ -57,12 +69,15 @@ private:
     QWidget* m_askRow = nullptr;
     QLineEdit* m_question = nullptr;
     QPushButton* m_ask = nullptr;
-    QPushButton* m_rewrite = nullptr;
+    QWidget* m_rewriteRow = nullptr;
+    QList<QPushButton*> m_rewriteChips;
+    QPushButton* m_openAi = nullptr;
     QTimer* m_copyFlash = nullptr;
     QString m_url;
     QString m_original;
     bool m_busy = false;
     bool m_wantTranslate = false;
     bool m_wantAssist = false;
+    SetupNext m_setupNext = SetupNext::Continue;
     int m_translateGen = 0;
 };
