@@ -15,9 +15,10 @@ class HotkeyEdit;
 class SettingsDialog : public QDialog {
     Q_OBJECT
 public:
-    // applyCapture / applyRecord：尝试注册新热键，失败（冲突）返回 false
+    // apply*：尝试注册新热键，失败（冲突）返回 false
     explicit SettingsDialog(std::function<bool(const QKeySequence&)> applyCapture,
                             std::function<bool(const QKeySequence&)> applyRecord,
+                            std::function<bool(const QKeySequence&)> applyOcrTranslate,
                             QWidget* parent = nullptr);
     ~SettingsDialog() override;
     void setCheckUpdate(std::function<void()> f) { m_checkUpdate = std::move(f); }
@@ -49,6 +50,7 @@ private:
 
     std::function<bool(const QKeySequence&)> m_applyCapture;
     std::function<bool(const QKeySequence&)> m_applyRecord;
+    std::function<bool(const QKeySequence&)> m_applyOcrTranslate;
     std::function<void()> m_checkUpdate;
     std::function<void(bool)> m_suspend;
     class QTimer* m_upTimer = nullptr;
@@ -58,6 +60,8 @@ private:
     QLabel* m_hotkeyHint = nullptr;
     HotkeyEdit* m_recordHotkey = nullptr;
     QLabel* m_recordHotkeyHint = nullptr;
+    HotkeyEdit* m_ocrTrHotkey = nullptr;
+    QLabel* m_ocrTrHotkeyHint = nullptr;
     QLineEdit* m_dir = nullptr;
     QLabel* m_dirHint = nullptr;
     QLineEdit* m_pattern = nullptr;

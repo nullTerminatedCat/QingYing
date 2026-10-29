@@ -14,6 +14,9 @@ void setHotkey(const QKeySequence& seq);
 QKeySequence defaultRecordHotkey();
 QKeySequence recordHotkey();
 void setRecordHotkey(const QKeySequence& seq);
+QKeySequence defaultOcrTranslateHotkey(); // Ctrl+Alt+T，不与截图 / 录屏默认键冲突
+QKeySequence ocrTranslateHotkey();
+void setOcrTranslateHotkey(const QKeySequence& seq);
 QString saveDir();
 void setSaveDir(const QString& dir);
 QString filePattern();

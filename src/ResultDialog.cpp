@@ -184,6 +184,19 @@ void ResultDialog::setBusy(bool busy)
     m_open->setEnabled(!busy && !m_url.isEmpty());
 }
 
+void ResultDialog::translateSuggested()
+{
+    if (m_edit->toPlainText().trimmed().isEmpty()) return;
+    if (!Settings::translateEnabled()) {
+        const QString cur = m_status ? m_status->text() : QString();
+        const QString extra = QCoreApplication::translate("QingYing", "联网翻译未开启，未自动翻译");
+        setStatus(cur.isEmpty() ? extra : cur + QStringLiteral(" · ") + extra);
+        return;
+    }
+    const bool toZh = Translator::suggestTarget(m_edit->toPlainText()) == Translator::Target::Chinese;
+    startTranslate(toZh);
+}
+
 void ResultDialog::startTranslate(bool toChinese)
 {
     // 按钮在 busy 时已禁用；这里再挡一次，避免重复点击发出第二次请求。

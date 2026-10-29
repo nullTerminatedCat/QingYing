@@ -20,6 +20,8 @@ public:
     void setTranslateEnabled(bool on);
     // 识别进行中：编辑框只读、禁用操作，避免空结果误点
     void setWorking(bool working);
+    // 按文本语言自动翻译。未开启联网翻译时只提示，不请求。已是目标语言等跳过逻辑与手动翻译相同。
+    void translateSuggested();
 
 protected:
     void changeEvent(QEvent* event) override;

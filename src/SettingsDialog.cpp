@@ -254,8 +254,10 @@ void showAiHelpDialog(QWidget* parent)
 
 SettingsDialog::SettingsDialog(std::function<bool(const QKeySequence&)> applyCapture,
                                std::function<bool(const QKeySequence&)> applyRecord,
+                               std::function<bool(const QKeySequence&)> applyOcrTranslate,
                                QWidget* parent)
-    : QDialog(parent), m_applyCapture(std::move(applyCapture)), m_applyRecord(std::move(applyRecord))
+    : QDialog(parent), m_applyCapture(std::move(applyCapture)), m_applyRecord(std::move(applyRecord)),
+      m_applyOcrTranslate(std::move(applyOcrTranslate))
 {
     setWindowTitle(QCoreApplication::translate("QingYing", "设置"));
     setWindowIcon(appIcon());
@@ -394,7 +396,9 @@ SettingsDialog::~SettingsDialog()
 {
     if (m_upTimer && m_upTimer->isActive()) saveUpload(); // 关闭时写入未保存的请求头
     if (m_aiUrl) saveAi();
-    if (((m_hotkey && m_hotkey->isRecording()) || (m_recordHotkey && m_recordHotkey->isRecording())) && m_suspend)
+    if (((m_hotkey && m_hotkey->isRecording()) || (m_recordHotkey && m_recordHotkey->isRecording())
+         || (m_ocrTrHotkey && m_ocrTrHotkey->isRecording()))
+        && m_suspend)
         m_suspend(false);
     QSettings st(QStringLiteral("QingYing"), QStringLiteral("QingYing"));
     if (!isMaximized()) st.setValue("settingsSize", size());
@@ -450,6 +454,10 @@ QWidget* SettingsDialog::buildGeneral()
             setStatus(m_hotkeyHint, QCoreApplication::translate("QingYing", "不能与录屏热键相同"), true);
             return;
         }
+        if (k == Settings::ocrTranslateHotkey()) {
+            setStatus(m_hotkeyHint, QCoreApplication::translate("QingYing", "不能与识别并翻译热键相同"), true);
+            return;
+        }
         if (!m_applyCapture || !m_applyCapture(k)) {
             setStatus(m_hotkeyHint, QCoreApplication::translate("QingYing", "%1 已被其他程序占用，请换一个组合").arg(k.toString(QKeySequence::NativeText)), true);
             return;
@@ -480,6 +488,10 @@ QWidget* SettingsDialog::buildGeneral()
             setStatus(m_recordHotkeyHint, QCoreApplication::translate("QingYing", "不能与截图热键相同"), true);
             return;
         }
+        if (k == Settings::ocrTranslateHotkey()) {
+            setStatus(m_recordHotkeyHint, QCoreApplication::translate("QingYing", "不能与识别并翻译热键相同"), true);
+            return;
+        }
         if (!m_applyRecord || !m_applyRecord(k)) {
             setStatus(m_recordHotkeyHint, QCoreApplication::translate("QingYing", "%1 已被其他程序占用，请换一个组合").arg(k.toString(QKeySequence::NativeText)), true);
             return;
@@ -494,6 +506,42 @@ QWidget* SettingsDialog::buildGeneral()
     });
     connect(m_recordHotkey, &HotkeyEdit::recorded, this, tryApplyRecord);
     connect(resetRec, &QPushButton::clicked, this, [tryApplyRecord] { tryApplyRecord(Settings::defaultRecordHotkey()); });
+
+    m_ocrTrHotkey = new HotkeyEdit;
+    m_ocrTrHotkey->setSequence(Settings::ocrTranslateHotkey());
+    auto* resetOcrTr = new QPushButton(QCoreApplication::translate("QingYing", "恢复默认"));
+    addRow(c, QCoreApplication::translate("QingYing", "识别并翻译"),
+           QCoreApplication::translate("QingYing", "框选后识别文字并自动翻译。翻译未开启或调用失败时仍完成识别并提示。默认 Ctrl+Alt+T"),
+           hbox({m_ocrTrHotkey, resetOcrTr}, -1), false, &m_ocrTrHotkeyHint);
+    auto tryApplyOcrTr = [this](QKeySequence k) {
+        if (k.isEmpty()) k = Settings::defaultOcrTranslateHotkey();
+        unsigned m = 0, v = 0;
+        if (!HotkeyManager::toNative(k, m, v) || m == 0) {
+            setStatus(m_ocrTrHotkeyHint, QCoreApplication::translate("QingYing", "需要包含 Ctrl / Alt / Shift / Win 之一，并使用字母、数字或功能键"), true);
+            return;
+        }
+        if (k == Settings::hotkey()) {
+            setStatus(m_ocrTrHotkeyHint, QCoreApplication::translate("QingYing", "不能与截图热键相同"), true);
+            return;
+        }
+        if (k == Settings::recordHotkey()) {
+            setStatus(m_ocrTrHotkeyHint, QCoreApplication::translate("QingYing", "不能与录屏热键相同"), true);
+            return;
+        }
+        if (!m_applyOcrTranslate || !m_applyOcrTranslate(k)) {
+            setStatus(m_ocrTrHotkeyHint, QCoreApplication::translate("QingYing", "%1 已被其他程序占用，请换一个组合").arg(k.toString(QKeySequence::NativeText)), true);
+            return;
+        }
+        Settings::setOcrTranslateHotkey(k);
+        m_ocrTrHotkey->setSequence(k);
+        setStatus(m_ocrTrHotkeyHint, QCoreApplication::translate("QingYing", "已生效：%1").arg(k.toString(QKeySequence::NativeText)), false);
+        emit changed();
+    };
+    connect(m_ocrTrHotkey, &HotkeyEdit::recordingChanged, this, [this](bool on) {
+        if (m_suspend) m_suspend(on);
+    });
+    connect(m_ocrTrHotkey, &HotkeyEdit::recorded, this, tryApplyOcrTr);
+    connect(resetOcrTr, &QPushButton::clicked, this, [tryApplyOcrTr] { tryApplyOcrTr(Settings::defaultOcrTranslateHotkey()); });
 
     c = addCard(b, QCoreApplication::translate("QingYing", "启动"));
     addRow(c, QCoreApplication::translate("QingYing", "开机自动启动"), QCoreApplication::translate("QingYing", "登录 Windows 后在托盘中待命"), toggle(Settings::autostart(), [this](bool on) {

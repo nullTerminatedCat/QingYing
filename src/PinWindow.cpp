@@ -227,6 +227,7 @@ void PinWindow::contextMenuEvent(QContextMenuEvent* e)
             EditRequest::request(m_img, mapToGlobal(imageRect().topLeft().toPoint()), true, this);
         });
     menu.addAction(menuIcon(Icon::Ocr), QCoreApplication::translate("QingYing", "识别文字（OCR）"), this, [this] { Recognize::ocr(m_img); });
+    menu.addAction(menuIcon(Icon::Translate), QCoreApplication::translate("QingYing", "识别并翻译"), this, [this] { Recognize::ocrAndTranslate(m_img); });
     menu.addAction(menuIcon(Icon::Qr), QCoreApplication::translate("QingYing", "识别二维码 / 条码"), this, [this] { Recognize::qr(m_img); });
     if (Settings::uploadEnabled())
         menu.addAction(menuIcon(Icon::Upload), QCoreApplication::translate("QingYing", "上传并复制链接"), this, [this] { Uploads::uploadWithSettings(m_img); });

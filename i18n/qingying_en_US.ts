@@ -1063,6 +1063,18 @@ Actual: %2</translation>
         <translation>Recognize text (OCR)  O</translation>
     </message>
     <message>
+        <source>识别并翻译  %1</source>
+        <translation>Recognize and translate  %1</translation>
+    </message>
+    <message>
+        <source>识别并翻译</source>
+        <translation>Recognize and translate</translation>
+    </message>
+    <message>
+        <source>联网翻译未开启，未自动翻译</source>
+        <translation>Online translation is off, so nothing was translated automatically.</translation>
+    </message>
+    <message>
         <location filename="../src/Recognize.cpp" line="-21"/>
         <source>识别语言：%1 · 共 %2 行，可直接编辑后复制</source>
         <translation>Language: %1 · %2 lines, edit and copy as needed</translation>
@@ -1721,6 +1733,26 @@ Press the capture hotkey or click the tray icon to take one</translation>
     <message>
         <source>不能与截图热键相同</source>
         <translation>Cannot match the capture hotkey</translation>
+    </message>
+    <message>
+        <source>不能与识别并翻译热键相同</source>
+        <translation>Cannot match the recognize-and-translate hotkey</translation>
+    </message>
+    <message>
+        <source>框选后识别文字并自动翻译。翻译未开启或调用失败时仍完成识别并提示。默认 Ctrl+Alt+T</source>
+        <translation>After you select a region, recognize the text and translate it. If translation is off or the call fails, recognition still finishes and the reason is shown. Default: Ctrl+Alt+T</translation>
+    </message>
+    <message>
+        <source>识别并翻译热键冲突</source>
+        <translation>Recognize-and-translate hotkey conflict</translation>
+    </message>
+    <message>
+        <source>%1 已被占用，请在设置中更换识别并翻译热键。</source>
+        <translation>%1 is already in use. Change the recognize-and-translate hotkey in Settings.</translation>
+    </message>
+    <message>
+        <source>请先框选区域，再按 %1。</source>
+        <translation>Select a region first, then press %1.</translation>
     </message>
     <message>
         <source>开始框选录制；录制中再次按下可停止保存</source>
