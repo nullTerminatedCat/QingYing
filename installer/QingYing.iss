@@ -1,7 +1,7 @@
 ; 青影安装脚本：由 scripts/package.ps1 调用 ISCC 编译
 #define AppName "青影"
 #ifndef AppVersion
-  #define AppVersion "0.7.1"
+  #define AppVersion "0.7.2"
 #endif
 #define AppExe "QingYing.exe"
 #ifndef AppArchitecture

@@ -4,11 +4,11 @@
 
 简洁、好看的 Windows 桌面截图工具。靛蓝主色、悬浮圆角工具条，只在需要时出现二级选项。
 
-> 当前版本：0.7.1（AI 翻译说明、省 API、识别并翻译）。下方下载仍是已发布的 0.6.6；0.7.1 安装包在打上 `v0.7.1` 标签后出现在 Releases。
+> 当前版本：0.7.2（识别并翻译默认热键 F、截图秒答、一键改文案）。安装包见下方 Gitee / GitHub Releases。
 >
 > **国内下载（推荐，免翻墙）**
-> - 安装包直链：[QingYing-0.6.6-windows-x64-setup.exe](https://gitee.com/liner123/qing-ying/releases/download/v0.6.6/QingYing-0.6.6-windows-x64-setup.exe)
-> - 免安装 ZIP：[QingYing-0.6.6-windows-x64-portable.zip](https://gitee.com/liner123/qing-ying/releases/download/v0.6.6/QingYing-0.6.6-windows-x64-portable.zip)
+> - 安装包直链：[QingYing-0.7.2-windows-x64-setup.exe](https://gitee.com/liner123/qing-ying/releases/download/v0.7.2/QingYing-0.7.2-windows-x64-setup.exe)
+> - 免安装 ZIP：[QingYing-0.7.2-windows-x64-portable.zip](https://gitee.com/liner123/qing-ying/releases/download/v0.7.2/QingYing-0.7.2-windows-x64-portable.zip)
 > - 全部版本：[Gitee Releases](https://gitee.com/liner123/qing-ying/releases)
 >
 > GitHub 镜像同步；应用内「检查更新」仍使用 GitHub Releases。
@@ -134,10 +134,10 @@ Invoke-WebRequest "$base/paddle/PP-OCRv4/rec/ch_PP-OCRv4_rec_mobile/ppocr_keys_v
 
 **国内下载（推荐）：**
 
-- 安装包直链：[QingYing-0.6.6-windows-x64-setup.exe](https://gitee.com/liner123/qing-ying/releases/download/v0.6.6/QingYing-0.6.6-windows-x64-setup.exe)
-- 免安装 ZIP：[QingYing-0.6.6-windows-x64-portable.zip](https://gitee.com/liner123/qing-ying/releases/download/v0.6.6/QingYing-0.6.6-windows-x64-portable.zip)
-- 校验和：[SHA256SUMS-0.6.6-x64.txt](https://gitee.com/liner123/qing-ying/releases/download/v0.6.6/SHA256SUMS-0.6.6-x64.txt)
-- 全部版本：[Gitee Releases](https://gitee.com/liner123/qing-ying/releases) · [v0.6.6](https://gitee.com/liner123/qing-ying/releases/tag/v0.6.6)
+- 安装包直链：[QingYing-0.7.2-windows-x64-setup.exe](https://gitee.com/liner123/qing-ying/releases/download/v0.7.2/QingYing-0.7.2-windows-x64-setup.exe)
+- 免安装 ZIP：[QingYing-0.7.2-windows-x64-portable.zip](https://gitee.com/liner123/qing-ying/releases/download/v0.7.2/QingYing-0.7.2-windows-x64-portable.zip)
+- 校验和：[SHA256SUMS-0.7.2-x64.txt](https://gitee.com/liner123/qing-ying/releases/download/v0.7.2/SHA256SUMS-0.7.2-x64.txt)
+- 全部版本：[Gitee Releases](https://gitee.com/liner123/qing-ying/releases) · [v0.7.2](https://gitee.com/liner123/qing-ying/releases/tag/v0.7.2)
 
 GitHub：[Releases](https://github.com/nullTerminatedCat/QingYing/releases)（应用内「检查更新」仍走 GitHub）。
 
@@ -221,8 +221,8 @@ QingYing (青影) is a simple, good-looking screenshot tool for Windows: an indi
 - Optional upload (off by default): SM.MS, Imgur, or custom HTTP multipart. The link is copied to the clipboard, and secrets are encrypted with Windows DPAPI.
 
 **Download (China, recommended):**
-- Setup: [QingYing-0.6.6-windows-x64-setup.exe](https://gitee.com/liner123/qing-ying/releases/download/v0.6.6/QingYing-0.6.6-windows-x64-setup.exe)
-- Portable: [QingYing-0.6.6-windows-x64-portable.zip](https://gitee.com/liner123/qing-ying/releases/download/v0.6.6/QingYing-0.6.6-windows-x64-portable.zip)
+- Setup: [QingYing-0.7.2-windows-x64-setup.exe](https://gitee.com/liner123/qing-ying/releases/download/v0.7.2/QingYing-0.7.2-windows-x64-setup.exe)
+- Portable: [QingYing-0.7.2-windows-x64-portable.zip](https://gitee.com/liner123/qing-ying/releases/download/v0.7.2/QingYing-0.7.2-windows-x64-portable.zip)
 - All releases: [Gitee Releases](https://gitee.com/liner123/qing-ying/releases)
 
 GitHub: [Releases](https://github.com/nullTerminatedCat/QingYing/releases) (in-app auto-update still uses GitHub).
