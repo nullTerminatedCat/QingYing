@@ -17,6 +17,9 @@ void setRecordHotkey(const QKeySequence& seq);
 QKeySequence defaultOcrTranslateHotkey(); // 单键 F；仅未保存过该热键时使用
 QKeySequence ocrTranslateHotkey();
 void setOcrTranslateHotkey(const QKeySequence& seq);
+QKeySequence defaultAskHotkey(); // Ctrl+Alt+D，不占用截图的 Ctrl+Alt+A，也不占用 F
+QKeySequence askHotkey();
+void setAskHotkey(const QKeySequence& seq);
 QString saveDir();
 void setSaveDir(const QString& dir);
 QString filePattern();

@@ -52,6 +52,7 @@
 | `Ctrl+C` | 复制到剪贴板并退出 |
 | `L` | 对选区进行滚动长截图 |
 | `O` | 识别选区文字（OCR） |
+| `Ctrl+Alt+D` | 识别选区文字后提问（截图秒答，全局热键，可在设置中修改；未框选时会提示） |
 | `F` | 识别选区文字并自动翻译（全局热键，可在设置中修改；未框选时会提示） |
 | `Q` | 识别选区二维码 / 条码 |
 | `Ctrl+S` | 快速保存到设置的文件夹（不弹窗） |
@@ -116,6 +117,8 @@ Invoke-WebRequest "$base/paddle/PP-OCRv4/rec/ch_PP-OCRv4_rec_mobile/ppocr_keys_v
 
 不要把密钥写进仓库、截图或问题描述。未填完整，或接口失败时，若「失败时用 MyMemory」开着（默认开），会改用 MyMemory。关掉「联网翻译」后识别面板不再显示翻译按钮。
 
+截图秒答和改文案使用同一套地址、密钥和模型，不会改走 MyMemory。没有识别到文字，或提问时问题为空，都不会发请求。相同提示和正文会在两分钟内直接复用上一次结果。
+
 ## 已知限制
 
 - 选区暂不支持跨显示器：每块屏幕独立冻结并按各自 DPI 显示。若把各屏拼成一张物理像素虚拟桌面，混合 DPI（如 100% + 150%）下遮罩在其中一块屏幕上必然被缩放，放大镜与标注无法做到像素精确，因此保留按屏选区。需要跨屏内容时可分别截图，或使用定时截图保存每块屏幕。
@@ -178,7 +181,7 @@ src/
   ScrollStitcher.*    固定栏匹配、分段长图缓冲与局部预览
   History.* HistoryWindow.*  截图历史
   Ocr.* OcrPost.* OcrModels.* RapidOcr.* OcrWin.*  RapidOCR（ONNX）与系统 OCR
-  QrDecoder.* Recognize.* ResultDialog.* Translator.* TranslateText.*  二维码 / 翻译与结果面板
+  QrDecoder.* Recognize.* ResultDialog.* Translator.* TranslateText.* AskText.*  二维码 / 翻译 / 秒答 / 改文案与结果面板
   Recorder.* RecordSession.*  录屏（MP4 / GIF）与控制条
 third_party/gif/      gif.h（公有领域）
   SettingsDialog.*    设置窗口（侧栏导航、即时生效）

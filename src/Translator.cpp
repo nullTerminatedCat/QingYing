@@ -3,8 +3,10 @@
 #include "Settings.h"
 #include "Logic.h"
 
+#include "AskText.h"
 #include "TranslateText.h"
 
+#include <QDateTime>
 #include <QList>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -19,6 +21,7 @@
 namespace {
 TranslateText::TranslationMemory g_recall;
 unsigned g_recallEpoch = 0;
+AskText::Cache g_assistCache;
 
 QNetworkAccessManager* net()
 {
@@ -169,7 +172,7 @@ QString aiFailure(QNetworkReply* reply, const QString& key)
     return QCoreApplication::translate("QingYing", "AI 没有返回文字");
 }
 
-void translateAiChunk(const QString& chunk, bool toChinese, std::function<void(Translator::Result)> done)
+void postChat(const QString& systemText, const QString& userText, double temperature, std::function<void(Translator::Result)> done)
 {
     const QUrl url = TranslateText::chatCompletionsUrl(Settings::aiBaseUrl());
     const QString key = Settings::aiApiKey();
@@ -182,16 +185,16 @@ void translateAiChunk(const QString& chunk, bool toChinese, std::function<void(T
     }
     QJsonObject system;
     system.insert(QStringLiteral("role"), QStringLiteral("system"));
-    system.insert(QStringLiteral("content"), TranslateText::systemPrompt(toChinese));
+    system.insert(QStringLiteral("content"), systemText);
     QJsonObject user;
     user.insert(QStringLiteral("role"), QStringLiteral("user"));
-    user.insert(QStringLiteral("content"), chunk);
+    user.insert(QStringLiteral("content"), userText);
     QJsonArray messages;
     messages.append(system);
     messages.append(user);
     QJsonObject body;
     body.insert(QStringLiteral("model"), model);
-    body.insert(QStringLiteral("temperature"), 0.2);
+    body.insert(QStringLiteral("temperature"), temperature);
     body.insert(QStringLiteral("stream"), false);
     body.insert(QStringLiteral("messages"), messages);
     QNetworkRequest req(url);
@@ -223,6 +226,11 @@ void translateAiChunk(const QString& chunk, bool toChinese, std::function<void(T
         r.text = text;
         done(r);
     });
+}
+
+void translateAiChunk(const QString& chunk, bool toChinese, std::function<void(Translator::Result)> done)
+{
+    postChat(TranslateText::systemPrompt(toChinese), chunk, 0.2, std::move(done));
 }
 
 void translateAiChunks(QStringList chunks, bool toChinese, QStringList doneParts, std::function<void(Translator::Result)> done)
@@ -355,5 +363,48 @@ void translate(const QString& text, Target target, std::function<void(Result)> d
         return;
     }
     runMemory(text, target, false, std::move(finish));
+}
+
+void assist(AskText::Mode mode, const QString& text, const QString& question, std::function<void(Result)> done)
+{
+    if (AskText::textEmpty(text)) {
+        Result r;
+        r.error = mode == AskText::Mode::Ask
+                      ? QCoreApplication::translate("QingYing", "没有可提问的文字")
+                      : QCoreApplication::translate("QingYing", "没有可改写的文字");
+        done(r);
+        return;
+    }
+    if (mode == AskText::Mode::Ask && AskText::questionEmpty(question)) {
+        Result r;
+        r.error = QCoreApplication::translate("QingYing", "请先输入问题");
+        done(r);
+        return;
+    }
+    if (!Settings::aiTranslateReady()) {
+        Result r;
+        r.error = QCoreApplication::translate("QingYing", "请先在设置 → 截图中打开「使用 AI 翻译」，并填写接口地址、密钥和模型");
+        done(r);
+        return;
+    }
+    bool truncated = false;
+    const QString user = AskText::userContent(mode, text, question, &truncated);
+    const QString key = AskText::cacheKey(mode, text, question);
+    const qint64 now = QDateTime::currentMSecsSinceEpoch();
+    QString cached;
+    if (AskText::lookup(g_assistCache, key, now, &cached)) {
+        Result r;
+        r.ok = true;
+        r.text = cached;
+        r.engine = QStringLiteral("local");
+        r.fromCache = true;
+        done(r);
+        return;
+    }
+    const double temperature = mode == AskText::Mode::Ask ? 0.4 : 0.3;
+    postChat(AskText::systemPrompt(mode, truncated), user, temperature, [key, done = std::move(done)](Result r) {
+        if (r.ok) AskText::remember(g_assistCache, key, r.text, QDateTime::currentMSecsSinceEpoch());
+        done(r);
+    });
 }
 }

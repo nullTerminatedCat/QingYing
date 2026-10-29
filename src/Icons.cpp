@@ -169,6 +169,19 @@ void paintIcon(QPainter& p, Icon icon, const QRectF& r, const QColor& color)
         path.addEllipse(QPointF(12, 12), 3, 3);
         path.addEllipse(QPointF(12, 12), 8, 8);
         break;
+    case Icon::Ask:
+        path.addRoundedRect(3, 4.5, 13.5, 10.5, 3, 3);
+        path.moveTo(7, 15); path.lineTo(5.5, 19.5); path.lineTo(11, 15);
+        path.moveTo(18, 5); path.lineTo(18, 9);
+        path.moveTo(16, 7); path.lineTo(20, 7);
+        break;
+    case Icon::Rewrite:
+        path.moveTo(4, 7); path.lineTo(13, 7);
+        path.moveTo(4, 12); path.lineTo(11, 12);
+        path.moveTo(4, 17); path.lineTo(9, 17);
+        path.moveTo(13.5, 16.5); path.lineTo(19.5, 10.5);
+        path.moveTo(17.2, 8.2); path.lineTo(19.8, 10.8); path.lineTo(14, 16.6);
+        break;
     }
     p.drawPath(path);
     p.restore();

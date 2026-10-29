@@ -1,5 +1,6 @@
 #include <QCoreApplication>
 #include "PinWindow.h"
+#include "AskText.h"
 #include "Icons.h"
 #include "Recognize.h"
 #include "Uploader.h"
@@ -228,6 +229,16 @@ void PinWindow::contextMenuEvent(QContextMenuEvent* e)
         });
     menu.addAction(menuIcon(Icon::Ocr), QCoreApplication::translate("QingYing", "识别文字（OCR）"), this, [this] { Recognize::ocr(m_img); });
     menu.addAction(menuIcon(Icon::Translate), QCoreApplication::translate("QingYing", "识别并翻译"), this, [this] { Recognize::ocrAndTranslate(m_img); });
+    menu.addAction(menuIcon(Icon::Ask), QCoreApplication::translate("QingYing", "截图秒答"), this, [this] {
+        const QRect anchor(mapToGlobal(imageRect().topLeft().toPoint()), imageRect().size().toSize());
+        Recognize::ocrAndAsk(m_img, anchor);
+    });
+    QMenu* rewrite = menu.addMenu(menuIcon(Icon::Rewrite), QCoreApplication::translate("QingYing", "改文案"));
+    for (AskText::Mode mode : AskText::rewriteModes())
+        rewrite->addAction(AskText::modeTitle(mode), this, [this, mode] {
+            const QRect anchor(mapToGlobal(imageRect().topLeft().toPoint()), imageRect().size().toSize());
+            Recognize::ocrAndRewrite(m_img, mode, anchor);
+        });
     menu.addAction(menuIcon(Icon::Qr), QCoreApplication::translate("QingYing", "识别二维码 / 条码"), this, [this] { Recognize::qr(m_img); });
     if (Settings::uploadEnabled())
         menu.addAction(menuIcon(Icon::Upload), QCoreApplication::translate("QingYing", "上传并复制链接"), this, [this] { Uploads::uploadWithSettings(m_img); });

@@ -2,6 +2,7 @@
 #include "Theme.h"
 #include "CaptureOverlay.h"
 #include "PinWindow.h"
+#include "AskText.h"
 #include "Recognize.h"
 #include "Uploader.h"
 #include "Settings.h"
@@ -11,6 +12,7 @@
 #include "WindowDetector.h"
 
 #include <QClipboard>
+#include <QCursor>
 #include <QDir>
 #include <QFileDialog>
 #include <QGuiApplication>
@@ -21,6 +23,7 @@
 #include <QWheelEvent>
 #include <QPlainTextEdit>
 #include <QTextDocument>
+#include <QMenu>
 #include <QMessageBox>
 #include <QPainter>
 #include <QPainterPath>
@@ -79,6 +82,8 @@ CaptureOverlay::CaptureOverlay(QScreen* screen, const QImage& shot, const QRect&
         case ToolBar::LongShot: doLongShot(); break;
         case ToolBar::OcrBtn: doRecognize(false); break;
         case ToolBar::OcrTrBtn: doRecognize(false, true); break;
+        case ToolBar::AskBtn: doAsk(); break;
+        case ToolBar::RewriteBtn: popupRewrite(); break;
         case ToolBar::QrBtn: doRecognize(true); break;
         case ToolBar::UploadBtn: doUpload(); break;
         }
@@ -517,6 +522,39 @@ bool CaptureOverlay::recognizeAndTranslate()
     if (m_passive || m_state != State::Selected) return false;
     doRecognize(false, true);
     return true;
+}
+
+void CaptureOverlay::doAsk()
+{
+    if (m_passive || m_state != State::Selected) return;
+    if (m_editing) commitText();
+    const QImage img = renderResult();
+    emit finished();
+    Recognize::ocrAndAsk(img);
+}
+
+bool CaptureOverlay::askSelection()
+{
+    if (m_passive || m_state != State::Selected) return false;
+    doAsk();
+    return true;
+}
+
+void CaptureOverlay::popupRewrite()
+{
+    if (m_passive || m_state != State::Selected) return;
+    QMenu menu(this);
+    menu.setWindowFlag(Qt::WindowStaysOnTopHint, true);
+    for (AskText::Mode mode : AskText::rewriteModes()) {
+        menu.addAction(AskText::modeTitle(mode), this, [this, mode] {
+            if (m_state != State::Selected) return;
+            if (m_editing) commitText();
+            const QImage img = renderResult();
+            emit finished();
+            Recognize::ocrAndRewrite(img, mode);
+        });
+    }
+    menu.exec(QCursor::pos());
 }
 
 void CaptureOverlay::doUpload()

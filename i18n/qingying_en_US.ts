@@ -1791,8 +1791,8 @@ Press the capture hotkey or click the tray icon to take one</translation>
         <translation>Use AI translation</translation>
     </message>
     <message>
-        <source>OpenAI 兼容的 Chat Completions。密钥只保存在本机。</source>
-        <translation>OpenAI-compatible Chat Completions. The key stays on this PC.</translation>
+        <source>OpenAI 兼容的 Chat Completions。密钥只保存在本机。翻译、截图秒答和改文案共用这一套。</source>
+        <translation>OpenAI-compatible Chat Completions. The key stays on this PC. Translation, Ask, and Rewrite share these settings.</translation>
     </message>
     <message>
         <source>AI 接口</source>
@@ -2077,6 +2077,122 @@ Press the capture hotkey or click the tray icon to take one</translation>
     <message>
         <source>未识别到文字（%1）。可换更清晰的选区再试。</source>
         <translation>No text found (%1). Try a sharper selection.</translation>
+    </message>
+    <message>
+        <source>截图秒答</source>
+        <translation>Ask</translation>
+    </message>
+    <message>
+        <source>截图秒答  %1</source>
+        <translation>Ask  %1</translation>
+    </message>
+    <message>
+        <source>改文案</source>
+        <translation>Rewrite</translation>
+    </message>
+    <message>
+        <source>改文案：更礼貌、更短、更正式、润色</source>
+        <translation>Rewrite: more polite, shorter, more formal, or polish</translation>
+    </message>
+    <message>
+        <source>更礼貌</source>
+        <translation>More polite</translation>
+    </message>
+    <message>
+        <source>更短</source>
+        <translation>Shorter</translation>
+    </message>
+    <message>
+        <source>更正式</source>
+        <translation>More formal</translation>
+    </message>
+    <message>
+        <source>润色</source>
+        <translation>Polish</translation>
+    </message>
+    <message>
+        <source>提问</source>
+        <translation>Ask</translation>
+    </message>
+    <message>
+        <source>例如：这是什么、怎么修、请解释这段话</source>
+        <translation>For example: what is this, how do I fix it, explain this</translation>
+    </message>
+    <message>
+        <source>没有可提问的文字</source>
+        <translation>No text to ask about</translation>
+    </message>
+    <message>
+        <source>没有可改写的文字</source>
+        <translation>No text to rewrite</translation>
+    </message>
+    <message>
+        <source>请先输入问题</source>
+        <translation>Enter a question first</translation>
+    </message>
+    <message>
+        <source>请先在设置 → 截图中打开「使用 AI 翻译」，并填写接口地址、密钥和模型</source>
+        <translation>Turn on Use AI translation under Settings → Capture, and fill in the base URL, key, and model</translation>
+    </message>
+    <message>
+        <source>正在提问…</source>
+        <translation>Asking…</translation>
+    </message>
+    <message>
+        <source>正在改写…</source>
+        <translation>Rewriting…</translation>
+    </message>
+    <message>
+        <source>提问失败：%1</source>
+        <translation>Couldn't ask: %1</translation>
+    </message>
+    <message>
+        <source>改写失败：%1</source>
+        <translation>Couldn't rewrite: %1</translation>
+    </message>
+    <message>
+        <source>已回答 · 可复制，或点「还原原文」</source>
+        <translation>Answered. Copy it, or restore the original</translation>
+    </message>
+    <message>
+        <source>已按「%1」改写 · 可复制，或点「还原原文」</source>
+        <translation>Rewritten (%1). Copy it, or restore the original</translation>
+    </message>
+    <message>
+        <source>与刚才的回答相同，未再请求</source>
+        <translation>Same answer as just now. No new request was sent.</translation>
+    </message>
+    <message>
+        <source>与刚才的改写相同，未再请求</source>
+        <translation>Same rewrite as just now. No new request was sent.</translation>
+    </message>
+    <message>
+        <source> 未请求 AI。</source>
+        <translation> AI was not called.</translation>
+    </message>
+    <message>
+        <source> 在下方输入问题后点「提问」。</source>
+        <translation> Type a question below, then choose Ask.</translation>
+    </message>
+    <message>
+        <source>截图秒答热键冲突</source>
+        <translation>Ask hotkey conflict</translation>
+    </message>
+    <message>
+        <source>%1 已被占用，请在设置中更换截图秒答热键。</source>
+        <translation>%1 is already in use. Change the Ask hotkey in Settings.</translation>
+    </message>
+    <message>
+        <source>不能与截图秒答热键相同</source>
+        <translation>Can't be the same as the Ask hotkey</translation>
+    </message>
+    <message>
+        <source>框选后识别文字，再针对内容提问。没有文字不会请求 AI。默认 Ctrl+Alt+D。</source>
+        <translation>Recognize the selection, then ask about it. Empty text is not sent. Default is Ctrl+Alt+D.</translation>
+    </message>
+    <message>
+        <source>截图秒答和改文案共用这里的地址、密钥和模型。没有识别到文字，或问题为空时不会请求，也不会改用 MyMemory。</source>
+        <translation>Ask and Rewrite use this base URL, key, and model. If no text is recognized, or the question is empty, nothing is sent and MyMemory is not used.</translation>
     </message>
 </context>
 </TS>

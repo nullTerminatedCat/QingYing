@@ -39,8 +39,10 @@ private:
     bool applyHotkey(const QKeySequence& seq);
     bool applyRecordHotkey(const QKeySequence& seq);
     bool applyOcrTranslateHotkey(const QKeySequence& seq);
+    bool applyAskHotkey(const QKeySequence& seq);
     void onRecordHotkey();
     void onOcrTranslateHotkey();
+    void onAskHotkey();
     void updateMenu();
     void buildMenu();
     void retranslate();
@@ -59,6 +61,7 @@ private:
     HotkeyManager m_hotkey;
     HotkeyManager m_recordHotkey;
     HotkeyManager m_ocrTrHotkey;
+    HotkeyManager m_askHotkey;
     WindowDetector m_detector;
     QList<QPointer<CaptureOverlay>> m_overlays;
     QPointer<SettingsDialog> m_settings;
