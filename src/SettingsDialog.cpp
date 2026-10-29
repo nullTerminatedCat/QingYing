@@ -511,13 +511,14 @@ QWidget* SettingsDialog::buildGeneral()
     m_ocrTrHotkey->setSequence(Settings::ocrTranslateHotkey());
     auto* resetOcrTr = new QPushButton(QCoreApplication::translate("QingYing", "恢复默认"));
     addRow(c, QCoreApplication::translate("QingYing", "识别并翻译"),
-           QCoreApplication::translate("QingYing", "框选后识别文字并自动翻译。翻译未开启或调用失败时仍完成识别并提示。默认 Ctrl+Alt+T"),
+           QCoreApplication::translate("QingYing", "框选后识别文字并自动翻译。翻译未开启或调用失败时仍完成识别并提示。默认 F"),
            hbox({m_ocrTrHotkey, resetOcrTr}, -1), false, &m_ocrTrHotkeyHint);
     auto tryApplyOcrTr = [this](QKeySequence k) {
         if (k.isEmpty()) k = Settings::defaultOcrTranslateHotkey();
         unsigned m = 0, v = 0;
-        if (!HotkeyManager::toNative(k, m, v) || m == 0) {
-            setStatus(m_ocrTrHotkeyHint, QCoreApplication::translate("QingYing", "需要包含 Ctrl / Alt / Shift / Win 之一，并使用字母、数字或功能键"), true);
+        // 出厂默认是单键 F，允许不带修饰键；截图 / 录屏仍要求组合键
+        if (!HotkeyManager::toNative(k, m, v)) {
+            setStatus(m_ocrTrHotkeyHint, QCoreApplication::translate("QingYing", "请使用字母、数字或功能键，修饰键可选"), true);
             return;
         }
         if (k == Settings::hotkey()) {
