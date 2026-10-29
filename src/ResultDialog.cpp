@@ -4,6 +4,7 @@
 #include "Icons.h"
 #include "Notify.h"
 #include "Settings.h"
+#include "SettingsRequest.h"
 #include "Translator.h"
 
 #include <QClipboard>
@@ -11,9 +12,9 @@
 #include <QEvent>
 #include <QGuiApplication>
 #include <QHBoxLayout>
+#include <QKeyEvent>
 #include <QLabel>
 #include <QLineEdit>
-#include <QMenu>
 #include <QMessageBox>
 #include <QPlainTextEdit>
 #include <QPointer>
@@ -22,6 +23,20 @@
 #include <QTimer>
 #include <QUrl>
 #include <QVBoxLayout>
+
+namespace {
+QString aiNeedText()
+{
+    return QCoreApplication::translate("QingYing", "请先在设置 → 截图中打开「使用 AI 翻译」，并填写接口地址、密钥和模型");
+}
+
+void disarm(QPushButton* button)
+{
+    if (!button) return;
+    button->setAutoDefault(false);
+    button->setDefault(false);
+}
+}
 
 ResultDialog::~ResultDialog()
 {
@@ -35,12 +50,13 @@ ResultDialog::ResultDialog(const QString& title, QWidget* parent) : QDialog(pare
     setWindowIcon(appIcon());
     setWindowFlag(Qt::WindowContextHelpButtonHint, false);
     setWindowFlag(Qt::WindowStaysOnTopHint, true);
-    resize(560, 400);
+    resize(640, 520);
     Theme::setSheet(this, QStringLiteral(R"(
         QDialog { background: #F6F7FB; }
         QLabel#title { font-size: 20px; font-weight: 600; color: #1C1C1E; }
         QLabel#status { font-size: 12px; color: #6E6E73; }
         QLabel#error { font-size: 12px; color: #FF453A; }
+        QLabel#hint { font-size: 12px; color: #6E6E73; background: transparent; }
         QPlainTextEdit { background: #FFFFFF; border: 1px solid rgba(0,0,0,15); border-radius: 10px; padding: 8px;
             font-size: 14px; color: #1C1C1E; selection-background-color: #4F6BFF; }
         QLineEdit { background: #FFFFFF; border: 1px solid rgba(0,0,0,15); border-radius: 10px; padding: 6px 10px;
@@ -52,6 +68,9 @@ ResultDialog::ResultDialog(const QString& title, QWidget* parent) : QDialog(pare
         QPushButton#accent { color: #4F6BFF; border: 1px solid #4F6BFF; font-weight: 600; background: #FFFFFF; }
         QPushButton#accent:hover { background: rgba(79,107,255,24); }
         QPushButton#accent:disabled { color: #A1A1A6; border-color: rgba(0,0,0,15); background: #FFFFFF; }
+        QPushButton#chip { padding: 5px 12px; border-radius: 8px; }
+        QPushButton#chip:hover { border-color: #4F6BFF; color: #4F6BFF; }
+        QPushButton#chip:disabled, QPushButton#chip:disabled:hover { color: #A1A1A6; border-color: rgba(0,0,0,15); background: #FFFFFF; }
         QPushButton:disabled { color: #A1A1A6; border-color: rgba(0,0,0,15); }
     )"));
     auto* root = new QVBoxLayout(this);
@@ -60,10 +79,21 @@ ResultDialog::ResultDialog(const QString& title, QWidget* parent) : QDialog(pare
     m_titleLabel = new QLabel(title, this);
     m_titleLabel->setObjectName(QStringLiteral("title"));
     root->addWidget(m_titleLabel);
+
+    auto* statusRow = new QHBoxLayout;
+    statusRow->setSpacing(8);
     m_status = new QLabel(this);
     m_status->setObjectName(QStringLiteral("status"));
     m_status->setWordWrap(true);
-    root->addWidget(m_status);
+    m_openAi = new QPushButton(this);
+    m_openAi->setObjectName(QStringLiteral("accent"));
+    m_openAi->setCursor(Qt::PointingHandCursor);
+    disarm(m_openAi);
+    m_openAi->hide();
+    statusRow->addWidget(m_status, 1);
+    statusRow->addWidget(m_openAi, 0, Qt::AlignTop);
+    root->addLayout(statusRow);
+
     m_edit = new QPlainTextEdit(this);
     root->addWidget(m_edit, 1);
 
@@ -75,21 +105,45 @@ ResultDialog::ResultDialog(const QString& title, QWidget* parent) : QDialog(pare
     m_ask = new QPushButton(m_askRow);
     m_ask->setObjectName(QStringLiteral("accent"));
     m_ask->setMinimumWidth(72);
+    m_ask->setCursor(Qt::PointingHandCursor);
+    disarm(m_ask);
     askLay->addWidget(m_question, 1);
     askLay->addWidget(m_ask);
     root->addWidget(m_askRow);
 
+    m_rewriteRow = new QWidget(this);
+    auto* rewriteLay = new QHBoxLayout(m_rewriteRow);
+    rewriteLay->setContentsMargins(0, 0, 0, 0);
+    rewriteLay->setSpacing(8);
+    auto* rewriteLabel = new QLabel(m_rewriteRow);
+    rewriteLabel->setObjectName(QStringLiteral("hint"));
+    rewriteLay->addWidget(rewriteLabel);
+    const QList<AskText::Mode> modes = AskText::rewriteModes();
+    for (AskText::Mode mode : modes) {
+        auto* chip = new QPushButton(m_rewriteRow);
+        chip->setObjectName(QStringLiteral("chip"));
+        chip->setCursor(Qt::PointingHandCursor);
+        disarm(chip);
+        m_rewriteChips.append(chip);
+        rewriteLay->addWidget(chip);
+        connect(chip, &QPushButton::clicked, this, [this, mode] { startAssist(mode); });
+    }
+    rewriteLay->addStretch();
+    root->addWidget(m_rewriteRow);
+
     auto* tools = new QHBoxLayout;
     tools->setSpacing(8);
     m_open = new QPushButton(this);
-    m_rewrite = new QPushButton(this);
     m_open->hide();
     m_auto = new QPushButton(this);
     m_toZh = new QPushButton(this);
     m_toEn = new QPushButton(this);
     m_restore = new QPushButton(this);
     m_restore->hide();
-    for (QPushButton* b : {m_open, m_rewrite, m_auto, m_toZh, m_toEn, m_restore}) tools->addWidget(b);
+    for (QPushButton* b : {m_open, m_auto, m_toZh, m_toEn, m_restore}) {
+        disarm(b);
+        tools->addWidget(b);
+    }
     tools->addStretch();
     root->addLayout(tools);
 
@@ -100,6 +154,8 @@ ResultDialog::ResultDialog(const QString& title, QWidget* parent) : QDialog(pare
     m_copy = new QPushButton(this);
     m_copy->setObjectName(QStringLiteral("primary"));
     m_copy->setEnabled(false);
+    disarm(m_close);
+    disarm(m_copy);
     row->addWidget(m_close);
     row->addWidget(m_copy);
     root->addLayout(row);
@@ -122,18 +178,9 @@ ResultDialog::ResultDialog(const QString& title, QWidget* parent) : QDialog(pare
         m_copy->setEnabled(!m_busy && !m_edit->toPlainText().isEmpty());
         if (!m_busy) syncAssistButtons();
     });
-    connect(m_question, &QLineEdit::textChanged, this, [this] {
-        if (!m_busy) syncAssistButtons();
-    });
     connect(m_question, &QLineEdit::returnPressed, this, [this] { startAssist(AskText::Mode::Ask); });
     connect(m_ask, &QPushButton::clicked, this, [this] { startAssist(AskText::Mode::Ask); });
-    connect(m_rewrite, &QPushButton::clicked, this, [this] {
-        if (m_busy) return;
-        QMenu menu(this);
-        for (AskText::Mode mode : AskText::rewriteModes())
-            menu.addAction(AskText::modeTitle(mode), this, [this, mode] { startAssist(mode); });
-        menu.exec(m_rewrite->mapToGlobal(QPoint(0, m_rewrite->height())));
-    });
+    connect(m_openAi, &QPushButton::clicked, this, [] { SettingsRequest::openAi(); });
     connect(m_open, &QPushButton::clicked, this, [this] {
         if (QMessageBox::question(this, QCoreApplication::translate("QingYing", "打开链接"),
                                   QCoreApplication::translate("QingYing", "确定在浏览器中打开以下链接？\n\n%1").arg(m_url))
@@ -162,6 +209,22 @@ ResultDialog::ResultDialog(const QString& title, QWidget* parent) : QDialog(pare
     retranslateUi();
     setTranslateEnabled(false);
     setAssistEnabled(false);
+    const auto watch = [this](QWidget* w) {
+        if (w) w->installEventFilter(this);
+    };
+    watch(m_edit);
+    watch(m_edit->viewport());
+    watch(m_question);
+    watch(m_ask);
+    watch(m_openAi);
+    watch(m_open);
+    watch(m_auto);
+    watch(m_toZh);
+    watch(m_toEn);
+    watch(m_restore);
+    watch(m_close);
+    watch(m_copy);
+    for (QPushButton* chip : m_rewriteChips) watch(chip);
 }
 
 void ResultDialog::retranslateUi()
@@ -169,14 +232,29 @@ void ResultDialog::retranslateUi()
     setWindowTitle(m_panelTitle);
     if (m_titleLabel) m_titleLabel->setText(m_panelTitle);
     m_open->setText(QCoreApplication::translate("QingYing", "打开链接"));
+    const QString askKeys = QCoreApplication::translate("QingYing", "Enter 发送。正在编辑正文时，用 Ctrl+Enter 提问。");
     m_question->setPlaceholderText(QCoreApplication::translate("QingYing", "例如：这是什么、怎么修、请解释这段话"));
+    m_question->setToolTip(askKeys);
     m_ask->setText(QCoreApplication::translate("QingYing", "提问"));
-    m_rewrite->setText(QCoreApplication::translate("QingYing", "改文案"));
+    m_ask->setToolTip(askKeys);
+    if (m_rewriteRow) {
+        const auto labels = m_rewriteRow->findChildren<QLabel*>();
+        if (!labels.isEmpty()) labels.first()->setText(QCoreApplication::translate("QingYing", "改文案"));
+    }
+    const QList<AskText::Mode> modes = AskText::rewriteModes();
+    for (int i = 0; i < m_rewriteChips.size() && i < modes.size(); ++i) {
+        const QString title = AskText::modeTitle(modes.at(i));
+        m_rewriteChips.at(i)->setText(title);
+        m_rewriteChips.at(i)->setToolTip(title + QStringLiteral("  ") + AskText::shortcutHint(modes.at(i)));
+    }
     m_auto->setText(QCoreApplication::translate("QingYing", "翻译"));
     m_toZh->setText(QCoreApplication::translate("QingYing", "译成中文"));
     m_toEn->setText(QCoreApplication::translate("QingYing", "译成英文"));
     m_restore->setText(QCoreApplication::translate("QingYing", "还原原文"));
     m_close->setText(QCoreApplication::translate("QingYing", "关闭"));
+    m_close->setToolTip(QCoreApplication::translate("QingYing", "Esc 关闭"));
+    m_openAi->setText(QCoreApplication::translate("QingYing", "打开设置"));
+    m_openAi->setToolTip(aiNeedText());
     if (!m_copyFlash->isActive()) m_copy->setText(QCoreApplication::translate("QingYing", "复制"));
 }
 
@@ -184,6 +262,43 @@ void ResultDialog::changeEvent(QEvent* event)
 {
     QDialog::changeEvent(event);
     if (event->type() == QEvent::LanguageChange) retranslateUi();
+    if (event->type() == QEvent::ActivationChange) noteSettingsReturned();
+}
+
+void ResultDialog::keyPressEvent(QKeyEvent* event)
+{
+    if (handleAssistKey(event)) return;
+    QDialog::keyPressEvent(event);
+}
+
+bool ResultDialog::eventFilter(QObject* watched, QEvent* event)
+{
+    if (watched != this && event->type() == QEvent::KeyPress) {
+        if (handleAssistKey(static_cast<QKeyEvent*>(event))) return true;
+    }
+    return QDialog::eventFilter(watched, event);
+}
+
+bool ResultDialog::handleAssistKey(QKeyEvent* key)
+{
+    if (!key) return false;
+    if (key->key() == Qt::Key_Escape && (key->modifiers() & ~Qt::KeypadModifier) == Qt::NoModifier) {
+        if (!m_busy) close();
+        return true;
+    }
+    const Qt::KeyboardModifiers mods = key->modifiers() & ~Qt::KeypadModifier;
+    if (!m_wantAssist || mods != Qt::ControlModifier) return false;
+    if (key->key() == Qt::Key_Return || key->key() == Qt::Key_Enter) {
+        startAssist(AskText::Mode::Ask);
+        return true;
+    }
+    if (key->key() >= Qt::Key_1 && key->key() <= Qt::Key_4) {
+        const QList<AskText::Mode> modes = AskText::rewriteModes();
+        const int index = int(key->key() - Qt::Key_1);
+        if (index >= 0 && index < modes.size()) startAssist(modes.at(index));
+        return true;
+    }
+    return false;
 }
 
 void ResultDialog::flashCopyDone()
@@ -206,16 +321,62 @@ void ResultDialog::setAssistEnabled(bool on)
 {
     m_wantAssist = on;
     if (m_askRow) m_askRow->setVisible(on);
-    if (m_rewrite) m_rewrite->setVisible(on);
+    if (m_rewriteRow) m_rewriteRow->setVisible(on);
     if (!on && m_question) m_question->clear();
+    if (!on && m_openAi) m_openAi->hide();
 }
 
 void ResultDialog::focusQuestion()
 {
     if (!m_question || !m_wantAssist) return;
-    raise();
-    activateWindow();
-    m_question->setFocus(Qt::OtherFocusReason);
+    QPointer<ResultDialog> guard(this);
+    const auto apply = [guard] {
+        if (!guard || !guard->m_question || !guard->m_wantAssist || !guard->isVisible() || guard->m_busy) return;
+        if (guard->m_openAi && guard->m_openAi->isVisible()) {
+            if (!Settings::aiTranslateReady()) return;
+            guard->m_openAi->hide();
+            guard->m_setupNext = SetupNext::Continue;
+        }
+        guard->raise();
+        guard->activateWindow();
+        guard->m_question->setFocus(Qt::OtherFocusReason);
+    };
+    apply();
+    QTimer::singleShot(0, this, apply);
+}
+
+void ResultDialog::showAiSettingsButton(SetupNext next)
+{
+    m_setupNext = next;
+    if (!m_openAi) return;
+    m_openAi->setEnabled(true);
+    m_openAi->show();
+}
+
+void ResultDialog::showAiSetupNeeded(SetupNext next, const QString& status)
+{
+    setStatus(status.isEmpty() ? aiNeedText() : status, true);
+    showAiSettingsButton(next);
+    if (m_openAi && !m_busy) m_openAi->setFocus(Qt::OtherFocusReason);
+}
+
+void ResultDialog::noteSettingsReturned()
+{
+    if (!isActiveWindow() || !m_openAi || !m_openAi->isVisible()) return;
+    if (!Settings::aiTranslateReady()) return;
+    m_openAi->hide();
+    if (m_busy) return;
+    const SetupNext next = m_setupNext;
+    m_setupNext = SetupNext::Continue;
+    if (next == SetupNext::Ask && m_wantAssist) {
+        setStatus(QCoreApplication::translate("QingYing", "在下方输入问题，按 Enter 提问。"));
+        focusQuestion();
+        return;
+    }
+    if (next == SetupNext::Rewrite)
+        setStatus(QCoreApplication::translate("QingYing", "AI 已就绪，点一个改写方式即可。"));
+    else
+        setStatus(QCoreApplication::translate("QingYing", "AI 已就绪，可以继续。"));
 }
 
 QString ResultDialog::sourceForAssist() const
@@ -228,12 +389,11 @@ void ResultDialog::syncAssistButtons()
 {
     const bool hasEditor = !m_edit->toPlainText().trimmed().isEmpty();
     const bool hasSource = !sourceForAssist().trimmed().isEmpty();
-    const bool askReady = hasSource && m_question && !m_question->text().trimmed().isEmpty();
     if (m_auto) m_auto->setEnabled(!m_busy && hasEditor);
     if (m_toZh) m_toZh->setEnabled(!m_busy && hasEditor);
     if (m_toEn) m_toEn->setEnabled(!m_busy && hasEditor);
-    if (m_ask) m_ask->setEnabled(!m_busy && askReady);
-    if (m_rewrite) m_rewrite->setEnabled(!m_busy && hasSource);
+    if (m_ask) m_ask->setEnabled(!m_busy && hasSource);
+    for (QPushButton* chip : m_rewriteChips) chip->setEnabled(!m_busy && hasSource);
     if (m_question) m_question->setEnabled(!m_busy);
 }
 
@@ -248,11 +408,17 @@ void ResultDialog::startAssist(AskText::Mode mode)
                   true);
         return;
     }
+    if (!Settings::aiTranslateReady()) {
+        showAiSetupNeeded(mode == AskText::Mode::Ask ? SetupNext::Ask : SetupNext::Rewrite);
+        return;
+    }
     if (mode == AskText::Mode::Ask && question.trimmed().isEmpty()) {
         setStatus(QCoreApplication::translate("QingYing", "请先输入问题"), true);
         focusQuestion();
         return;
     }
+    if (m_openAi) m_openAi->hide();
+    m_setupNext = SetupNext::Continue;
     if (!m_restore->isVisible()) m_original = src;
     const int gen = ++m_translateGen;
     setBusy(true);
@@ -304,6 +470,7 @@ void ResultDialog::setBusy(bool busy)
     m_restore->setEnabled(!busy && !m_original.isEmpty());
     m_copy->setEnabled(!busy && !m_edit->toPlainText().isEmpty());
     m_open->setEnabled(!busy && !m_url.isEmpty());
+    if (m_openAi) m_openAi->setEnabled(true);
 }
 
 void ResultDialog::translateSuggested()
@@ -333,6 +500,11 @@ void ResultDialog::startTranslate(bool toChinese)
         setStatus(QCoreApplication::translate("QingYing", "已在设置中关闭联网翻译"), true);
         return;
     }
+    if (Settings::aiTranslateEnabled() && !Settings::aiTranslateReady() && !Settings::memoryFallback()) {
+        showAiSetupNeeded(SetupNext::Continue, QCoreApplication::translate("QingYing", "请在设置中填写 AI 翻译的接口地址、密钥和模型，或打开 MyMemory 兜底"));
+        return;
+    }
+    if (m_openAi) m_openAi->hide();
     if (m_original.isEmpty()) m_original = src;
     const int gen = ++m_translateGen;
     setBusy(true);
@@ -344,6 +516,12 @@ void ResultDialog::startTranslate(bool toChinese)
         if (!guard || gen != guard->m_translateGen) return;
         guard->setBusy(false);
         if (!r.ok) {
+            const bool missingAi = r.error == aiNeedText()
+                || r.error == QCoreApplication::translate("QingYing", "请在设置中填写 AI 翻译的接口地址、密钥和模型，或打开 MyMemory 兜底");
+            if (missingAi) {
+                guard->showAiSetupNeeded(SetupNext::Continue, r.error);
+                return;
+            }
             guard->setStatus(QCoreApplication::translate("QingYing", "翻译失败：%1").arg(r.error), true);
             return;
         }

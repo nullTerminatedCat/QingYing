@@ -20,6 +20,8 @@ using Cache = QList<Slot>;
 
 QList<Mode> rewriteModes();
 QString modeTitle(Mode mode);
+// 结果面板上的快捷键提示，与界面文案一样写死 Ctrl（Windows）。提问是 Ctrl+Enter，改写按 rewriteModes 顺序为 Ctrl+1 起。
+QString shortcutHint(Mode mode);
 // 发给模型的系统提示。truncated 时补一句「只处理截断后的部分」。不随界面语言改变。
 QString systemPrompt(Mode mode, bool truncated = false);
 // 用户消息。提问会附上「来自截图」的说明；改写只发送正文。过长时截断并置 truncated。

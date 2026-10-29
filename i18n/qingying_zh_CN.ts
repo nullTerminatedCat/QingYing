@@ -1691,5 +1691,37 @@
         <source>0xFF6B4F（Windows BGR）</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>改文案：在按钮旁选择更礼貌、更短、更正式或润色</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>在下方输入问题，按 Enter 提问。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter 发送。正在编辑正文时，用 Ctrl+Enter 提问。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Esc 关闭</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>打开设置</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>改文案 · %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>AI 已就绪，点一个改写方式即可。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>AI 已就绪，可以继续。</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 </TS>

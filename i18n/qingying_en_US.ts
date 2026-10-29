@@ -2091,8 +2091,8 @@ Press the capture hotkey or click the tray icon to take one</translation>
         <translation>Rewrite</translation>
     </message>
     <message>
-        <source>改文案：更礼貌、更短、更正式、润色</source>
-        <translation>Rewrite: more polite, shorter, more formal, or polish</translation>
+        <source>改文案：在按钮旁选择更礼貌、更短、更正式或润色</source>
+        <translation>Rewrite: choose more polite, shorter, more formal, or polish beside the button</translation>
     </message>
     <message>
         <source>更礼貌</source>
@@ -2171,8 +2171,32 @@ Press the capture hotkey or click the tray icon to take one</translation>
         <translation> AI was not called.</translation>
     </message>
     <message>
-        <source> 在下方输入问题后点「提问」。</source>
-        <translation> Type a question below, then choose Ask.</translation>
+        <source>在下方输入问题，按 Enter 提问。</source>
+        <translation>Type a question below and press Enter.</translation>
+    </message>
+    <message>
+        <source>Enter 发送。正在编辑正文时，用 Ctrl+Enter 提问。</source>
+        <translation>Enter sends. While editing the text, press Ctrl+Enter to ask.</translation>
+    </message>
+    <message>
+        <source>Esc 关闭</source>
+        <translation>Esc to close</translation>
+    </message>
+    <message>
+        <source>打开设置</source>
+        <translation>Open Settings</translation>
+    </message>
+    <message>
+        <source>改文案 · %1</source>
+        <translation>Rewrite · %1</translation>
+    </message>
+    <message>
+        <source>AI 已就绪，点一个改写方式即可。</source>
+        <translation>AI is ready. Pick a rewrite.</translation>
+    </message>
+    <message>
+        <source>AI 已就绪，可以继续。</source>
+        <translation>AI is ready. You can continue.</translation>
     </message>
     <message>
         <source>截图秒答热键冲突</source>

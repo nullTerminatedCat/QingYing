@@ -3,6 +3,7 @@
 
 #include <QColor>
 #include <QList>
+#include <QRect>
 #include <QWidget>
 
 // 悬浮圆角工具条（绘制自带阴影边距 Margin）
@@ -15,6 +16,8 @@ public:
     void setActive(int id);
     void setUndoRedo(bool canUndo, bool canRedo);
     QSize visualSize() const { return size() - QSize(2 * Margin, 2 * Margin); }
+    // 工具栏坐标。找不到时为空。
+    QRect buttonRect(int id) const;
 
 signals:
     void triggered(int id);

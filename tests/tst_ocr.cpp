@@ -287,6 +287,11 @@ private slots:
         QStringList titles;
         for (Mode mode : modes) titles << modeTitle(mode);
         QCOMPARE(titles, QStringList({QStringLiteral("更礼貌"), QStringLiteral("更短"), QStringLiteral("更正式"), QStringLiteral("润色")}));
+        QCOMPARE(shortcutHint(Mode::Ask), QStringLiteral("Ctrl+Enter"));
+        QCOMPARE(shortcutHint(Mode::Polite), QStringLiteral("Ctrl+1"));
+        QCOMPARE(shortcutHint(Mode::Shorter), QStringLiteral("Ctrl+2"));
+        QCOMPARE(shortcutHint(Mode::Formal), QStringLiteral("Ctrl+3"));
+        QCOMPARE(shortcutHint(Mode::Polish), QStringLiteral("Ctrl+4"));
     }
 };
 

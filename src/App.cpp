@@ -7,6 +7,7 @@
 #include "Recognize.h"
 #include "Diagnostics.h"
 #include "EditRequest.h"
+#include "SettingsRequest.h"
 #include "CaptureOverlay.h"
 #include "History.h"
 #include "HistoryWindow.h"
@@ -77,6 +78,10 @@ App::App()
     connect(m_menu, &QMenu::aboutToShow, this, &App::updateMenu);
 
     EditRequest::setHandler([this](const QImage& img, const QPoint& pos, bool hasPos, QWidget* src) { editImage(img, pos, hasPos, src); });
+    SettingsRequest::setHandler([this] {
+        openSettings();
+        if (m_settings) m_settings->showAiSection();
+    });
 
     m_tray = new QSystemTrayIcon(appIcon(), this);
     m_tray->setContextMenu(m_menu);

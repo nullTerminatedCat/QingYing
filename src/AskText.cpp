@@ -57,6 +57,15 @@ QString modeTitle(Mode mode)
     return {};
 }
 
+QString shortcutHint(Mode mode)
+{
+    if (mode == Mode::Ask) return QStringLiteral("Ctrl+Enter");
+    const QList<Mode> modes = rewriteModes();
+    for (int i = 0; i < modes.size(); ++i)
+        if (modes.at(i) == mode) return QStringLiteral("Ctrl+%1").arg(i + 1);
+    return {};
+}
+
 QString systemPrompt(Mode mode, bool truncated)
 {
     QString text = basePrompt(mode);

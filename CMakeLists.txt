@@ -72,6 +72,7 @@ qt_add_executable(QingYing WIN32
     src/CursorBlend.cpp src/CursorBlend.h
     src/Diagnostics.cpp src/Diagnostics.h
     src/EditRequest.cpp src/EditRequest.h
+    src/SettingsRequest.cpp src/SettingsRequest.h
     resources/QingYing.rc
 )
 # 界面翻译：源码为简体中文，en_US 编译为 .qm 嵌入资源 :/i18n

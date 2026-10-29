@@ -2,6 +2,7 @@
 #include "Ocr.h"
 #include "QrDecoder.h"
 #include "ResultDialog.h"
+#include "Settings.h"
 
 #include <QCoreApplication>
 #include <QGuiApplication>
@@ -19,7 +20,7 @@ void placeBeside(QWidget* w, const QRect& anchor)
     if (!screen) screen = QGuiApplication::primaryScreen();
     if (!screen) return;
     const QRect avail = screen->availableGeometry();
-    const QSize sz = w->size().expandedTo(QSize(560, 460));
+    const QSize sz = w->size().expandedTo(QSize(640, 520));
     int x = anchor.right() + 16;
     int y = anchor.top();
     if (x + sz.width() > avail.right() - 8) x = anchor.left() - 16 - sz.width();
@@ -42,7 +43,9 @@ void showOcr(const QImage& image, bool autoTranslate, bool focusAsk, bool rewrit
     dlg->setAssistEnabled(true);
     dlg->setWorking(true);
     dlg->setStatus(QCoreApplication::translate("QingYing", "正在识别，请稍候…"));
-    dlg->resize(560, 460);
+    if ((focusAsk || rewrite) && !Settings::aiTranslateReady())
+        dlg->showAiSettingsButton(focusAsk ? ResultDialog::SetupNext::Ask : ResultDialog::SetupNext::Rewrite);
+    dlg->resize(640, 520);
     placeBeside(dlg, anchor);
     dlg->show();
     dlg->raise();
@@ -74,11 +77,22 @@ void showOcr(const QImage& image, bool autoTranslate, bool focusAsk, bool rewrit
                 base += QCoreApplication::translate("QingYing", " 未请求 AI。");
             guard->setStatus(base);
             // 空结果不翻译、不提问、不改写。自动翻译走 ResultDialog::translateSuggested，跳过与缓存同样生效。
-            if (empty) return;
-            if (rewrite) guard->startAssist(mode);
-            else if (focusAsk) {
-                guard->setStatus(base + QCoreApplication::translate("QingYing", " 在下方输入问题后点「提问」。"));
-                guard->focusQuestion();
+            if (empty) {
+                if ((focusAsk || rewrite) && !Settings::aiTranslateReady())
+                    guard->showAiSettingsButton(focusAsk ? ResultDialog::SetupNext::Ask : ResultDialog::SetupNext::Rewrite);
+                return;
+            }
+            if (rewrite) {
+                if (!Settings::aiTranslateReady()) guard->showAiSetupNeeded(ResultDialog::SetupNext::Rewrite);
+                else guard->startAssist(mode);
+            } else if (focusAsk) {
+                if (!Settings::aiTranslateReady())
+                    guard->showAiSetupNeeded(ResultDialog::SetupNext::Ask);
+                else {
+                    guard->setStatus(base + QStringLiteral(" · ")
+                                     + QCoreApplication::translate("QingYing", "在下方输入问题，按 Enter 提问。"));
+                    guard->focusQuestion();
+                }
             } else if (autoTranslate)
                 guard->translateSuggested();
         }, Qt::QueuedConnection);

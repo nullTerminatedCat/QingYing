@@ -410,6 +410,30 @@ int SettingsDialog::page() const { return m_nav->currentRow(); }
 void SettingsDialog::setPage(int i) { m_nav->setCurrentRow(qBound(0, i, m_nav->count() - 1)); }
 int SettingsDialog::pageCount() const { return m_nav->count(); }
 
+void SettingsDialog::showAiSection()
+{
+    for (int i = 0; i < m_stack->count(); ++i) {
+        auto* sa = qobject_cast<QScrollArea*>(m_stack->widget(i));
+        if (!sa || !sa->widget() || sa->widget()->objectName() != QLatin1String("pageCapture")) continue;
+        setPage(i);
+        raise();
+        activateWindow();
+        QPointer<SettingsDialog> guard(this);
+        QTimer::singleShot(0, this, [guard] {
+            if (!guard) return;
+            QWidget* target = guard->m_translateCard;
+            if (guard->m_aiBody && guard->m_aiBody->isVisible())
+                target = guard->m_aiUrl ? static_cast<QWidget*>(guard->m_aiUrl) : guard->m_aiBody;
+            if (!target) return;
+            if (auto* area = qobject_cast<QScrollArea*>(guard->m_stack->currentWidget()))
+                area->ensureWidgetVisible(target, 24, 72);
+            if (guard->m_aiBody && guard->m_aiBody->isVisible() && guard->m_aiUrl)
+                guard->m_aiUrl->setFocus(Qt::OtherFocusReason);
+        });
+        return;
+    }
+}
+
 QWidget* SettingsDialog::makePage(const QString& title, const QString& subtitle, QVBoxLayout*& body)
 {
     auto* w = new QWidget;
@@ -623,6 +647,7 @@ QWidget* SettingsDialog::buildCapture()
 {
     QVBoxLayout* b;
     QWidget* w = makePage(QCoreApplication::translate("QingYing", "截图"), QCoreApplication::translate("QingYing", "保存位置、完成动作、文字识别与翻译"), b);
+    w->setObjectName(QStringLiteral("pageCapture"));
     Card c = addCard(b, QCoreApplication::translate("QingYing", "保存"));
     m_dir = new QLineEdit(QDir::toNativeSeparators(Settings::saveDir()));
     auto* browse = new QPushButton(QCoreApplication::translate("QingYing", "浏览…"));
@@ -736,6 +761,7 @@ QWidget* SettingsDialog::buildCapture()
     refreshOcrHint();
 
     c = addCard(b, QCoreApplication::translate("QingYing", "翻译"));
+    m_translateCard = c.frame;
     addRow(c, QCoreApplication::translate("QingYing", "联网翻译"),
            QCoreApplication::translate("QingYing", "识别面板可译成中文或英文。未启用 AI 时使用 MyMemory，无需密钥。"),
            toggle(Settings::translateEnabled(), [this](bool on) {
