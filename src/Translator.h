@@ -1,4 +1,5 @@
 #pragma once
+#include "AskText.h"
 #include "TranslateText.h"
 
 #include <QString>
@@ -15,6 +16,7 @@ struct Result {
     QString pair; // MyMemory 的 langpair，如 en|zh-CN；AI 时为空
     QString engine; // "ai"、"mymemory" 或 "local"（未联网）
     bool fellBack = false; // AI 失败或未配置后改用了 MyMemory
+    bool fromCache = false; // 秒答 / 改文案命中短时缓存，未再请求
     TranslateText::ReuseKind local = TranslateText::ReuseKind::None;
 };
 
@@ -30,4 +32,9 @@ void forgetRecall();
 bool textIsCachedTranslation(const QString& text);
 // 断开并中止进行中的请求，不再发后续分块。已送到服务端的单次调用可能仍会计费。
 void cancelInFlight();
+
+// 截图秒答 / 改文案。共用翻译里的接口地址、密钥和模型，不走 MyMemory。
+// 没有正文、提问时问题为空、或两分钟内相同提示与正文，同步回调且不访问网络。
+// question 仅 Mode::Ask 使用。
+void assist(AskText::Mode mode, const QString& text, const QString& question, std::function<void(Result)> done);
 }

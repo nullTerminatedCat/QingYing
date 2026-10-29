@@ -19,6 +19,7 @@ public:
     explicit SettingsDialog(std::function<bool(const QKeySequence&)> applyCapture,
                             std::function<bool(const QKeySequence&)> applyRecord,
                             std::function<bool(const QKeySequence&)> applyOcrTranslate,
+                            std::function<bool(const QKeySequence&)> applyAsk,
                             QWidget* parent = nullptr);
     ~SettingsDialog() override;
     void setCheckUpdate(std::function<void()> f) { m_checkUpdate = std::move(f); }
@@ -51,6 +52,7 @@ private:
     std::function<bool(const QKeySequence&)> m_applyCapture;
     std::function<bool(const QKeySequence&)> m_applyRecord;
     std::function<bool(const QKeySequence&)> m_applyOcrTranslate;
+    std::function<bool(const QKeySequence&)> m_applyAsk;
     std::function<void()> m_checkUpdate;
     std::function<void(bool)> m_suspend;
     class QTimer* m_upTimer = nullptr;
@@ -62,6 +64,8 @@ private:
     QLabel* m_recordHotkeyHint = nullptr;
     HotkeyEdit* m_ocrTrHotkey = nullptr;
     QLabel* m_ocrTrHotkeyHint = nullptr;
+    HotkeyEdit* m_askHotkey = nullptr;
+    QLabel* m_askHotkeyHint = nullptr;
     QLineEdit* m_dir = nullptr;
     QLabel* m_dirHint = nullptr;
     QLineEdit* m_pattern = nullptr;

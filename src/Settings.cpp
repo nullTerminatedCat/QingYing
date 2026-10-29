@@ -55,6 +55,16 @@ QKeySequence ocrTranslateHotkey()
 }
 void setOcrTranslateHotkey(const QKeySequence& seq) { store().setValue("ocrTranslateHotkey", seq.toString()); }
 
+QKeySequence defaultAskHotkey() { return QKeySequence(QStringLiteral("Ctrl+Alt+D")); }
+
+QKeySequence askHotkey()
+{
+    const QString s = store().value("askHotkey", defaultAskHotkey().toString()).toString();
+    QKeySequence k(s);
+    return k.isEmpty() ? defaultAskHotkey() : k;
+}
+void setAskHotkey(const QKeySequence& seq) { store().setValue("askHotkey", seq.toString()); }
+
 QString saveDir()
 {
     const QString def = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation) + QStringLiteral("/QingYing");

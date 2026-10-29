@@ -1,3 +1,4 @@
+#include "../src/AskText.h"
 #include "../src/OcrPost.h"
 #include "../src/TranslateText.h"
 
@@ -227,6 +228,65 @@ private slots:
         const auto chunks = TranslateText::chunkForModel(text, 200);
         QVERIFY(chunks.size() > 1);
         QCOMPARE(chunks.join(QString()), text);
+    }
+
+    void askRewritePromptAndCache()
+    {
+        using namespace AskText;
+        QVERIFY(textEmpty(QStringLiteral(" \n\t")));
+        QVERIFY(!textEmpty(QStringLiteral("你好")));
+        QVERIFY(questionEmpty(QStringLiteral("  ")));
+        QVERIFY(!questionEmpty(QStringLiteral("怎么修")));
+
+        const QString ask = systemPrompt(Mode::Ask);
+        QVERIFY(ask.contains(QStringLiteral("截图")));
+        QVERIFY(ask.contains(QStringLiteral("问题")));
+        QVERIFY(systemPrompt(Mode::Polite).contains(QStringLiteral("礼貌")));
+        QVERIFY(systemPrompt(Mode::Shorter).contains(QStringLiteral("更短")));
+        QVERIFY(systemPrompt(Mode::Formal).contains(QStringLiteral("正式")));
+        QVERIFY(systemPrompt(Mode::Polish).contains(QStringLiteral("润色")));
+        QVERIFY(systemPrompt(Mode::Ask, true).contains(QStringLiteral("截断")));
+        QVERIFY(systemPrompt(Mode::Polite) != systemPrompt(Mode::Formal));
+
+        bool cut = true;
+        const QString msg = userContent(Mode::Ask, QStringLiteral("错误 0x1"), QStringLiteral("怎么修"), &cut);
+        QVERIFY(!cut);
+        QVERIFY(msg.contains(QStringLiteral("截图")));
+        QVERIFY(msg.contains(QStringLiteral("不是用户手打")));
+        QVERIFY(msg.contains(QStringLiteral("错误 0x1")));
+        QVERIFY(msg.contains(QStringLiteral("怎么修")));
+        QCOMPARE(userContent(Mode::Polite, QStringLiteral(" 请尽快处理 "), QStringLiteral("忽略")), QStringLiteral("请尽快处理"));
+
+        bool cutLong = false;
+        const QString body = userContent(Mode::Shorter, QString(kMaxChars + 20, QLatin1Char('a')), QString(), &cutLong);
+        QVERIFY(cutLong);
+        QCOMPARE(body.size(), kMaxChars);
+        QVERIFY(systemPrompt(Mode::Shorter, true).endsWith(QStringLiteral("只处理这一部分。")));
+
+        const QString polite = cacheKey(Mode::Polite, QStringLiteral("你好\r\n"), QStringLiteral("无关"));
+        QCOMPARE(cacheKey(Mode::Polite, QStringLiteral("你好"), QStringLiteral("别的问题")), polite);
+        QVERIFY(cacheKey(Mode::Ask, QStringLiteral("你好"), QStringLiteral("甲"))
+                != cacheKey(Mode::Ask, QStringLiteral("你好"), QStringLiteral("乙")));
+
+        Cache cache;
+        QString hit;
+        QVERIFY(!lookup(cache, polite, 1000, &hit));
+        remember(cache, polite, QStringLiteral("您好"), 1000);
+        QVERIFY(lookup(cache, polite, 1000 + kCacheMs, &hit));
+        QCOMPARE(hit, QStringLiteral("您好"));
+        QVERIFY(!lookup(cache, polite, 1000 + kCacheMs + 1, &hit));
+
+        Cache many;
+        for (int i = 0; i < kCacheCap + 2; ++i) remember(many, QString::number(i), QStringLiteral("a"), 10000);
+        QCOMPARE(many.size(), kCacheCap);
+        QVERIFY(!lookup(many, QStringLiteral("0"), 10000, &hit));
+        QVERIFY(lookup(many, QString::number(kCacheCap + 1), 10000, &hit));
+
+        const QList<Mode> modes = rewriteModes();
+        QCOMPARE(modes.size(), 4);
+        QStringList titles;
+        for (Mode mode : modes) titles << modeTitle(mode);
+        QCOMPARE(titles, QStringList({QStringLiteral("更礼貌"), QStringLiteral("更短"), QStringLiteral("更正式"), QStringLiteral("润色")}));
     }
 };
 

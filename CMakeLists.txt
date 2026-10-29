@@ -50,6 +50,7 @@ qt_add_executable(QingYing WIN32
     src/ResultDialog.cpp src/ResultDialog.h
     src/Translator.cpp src/Translator.h
     src/TranslateText.cpp src/TranslateText.h
+    src/AskText.cpp src/AskText.h
     src/Ocr.cpp src/Ocr.h
     src/OcrWin.cpp src/OcrWin.h
     src/OcrPost.cpp src/OcrPost.h
@@ -158,7 +159,7 @@ if(QINGYING_BUILD_TESTS)
     endif()
     add_test(NAME logic COMMAND qingying_tests)
     set_tests_properties(logic PROPERTIES ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:${_qtbin}")
-    qt_add_executable(qingying_ocr_tests tests/tst_ocr.cpp src/OcrPost.cpp src/OcrPost.h src/TranslateText.cpp src/TranslateText.h)
+    qt_add_executable(qingying_ocr_tests tests/tst_ocr.cpp src/OcrPost.cpp src/OcrPost.h src/TranslateText.cpp src/TranslateText.h src/AskText.cpp src/AskText.h)
     set_target_properties(qingying_ocr_tests PROPERTIES WIN32_EXECUTABLE OFF)
     target_link_libraries(qingying_ocr_tests PRIVATE Qt6::Gui Qt6::Test)
     if(MSVC)
