@@ -195,6 +195,12 @@ i18n/                 Qt Linguist 翻译（源文为简体中文，en_US 为英�
 docs/design/          UI 设计稿与规范
 ```
 
+## 赞助
+
+青影免费开源。如果觉得好用，扫码请我喝杯咖啡就行。
+
+<p align="center"><img src="docs/sponsor/wechat-pay.jpg" alt="微信支付收款码" width="220"></p>
+
 ## 许可证
 
 [MIT](LICENSE)。第三方组件见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
@@ -238,5 +244,11 @@ powershell -ExecutionPolicy Bypass -File scripts/build.ps1 -QtDir C:/Qt/6.9.1/ms
 **Translations:** the source strings are Simplified Chinese. English lives in `i18n/qingying_en_US.ts`. After changing strings, run the `update_translations` target and edit the file with Qt Linguist.
 
 **Diagnostics:** logs and crash minidumps are written to `%LOCALAPPDATA%\QingYing\QingYing\logs`.
+
+## Sponsor
+
+QingYing is free and open source. If it helped you, a coffee via WeChat Pay is welcome.
+
+<p align="center"><img src="docs/sponsor/wechat-pay.jpg" alt="WeChat Pay QR" width="220"></p>
 
 License: [MIT](LICENSE).
